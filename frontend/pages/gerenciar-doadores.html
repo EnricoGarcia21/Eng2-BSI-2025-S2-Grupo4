@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Gerenciar Doadores</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">DOARC</a>
+            <div class="user-menu">
+                <span class="user-name" id="userName">Voluntário</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active">Gerenciar</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Doações</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Estoque</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="relatorios.html" class="nav-link">Relatórios</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+            <div class="breadcrumb-item">Gerenciar</div>
+            <div class="breadcrumb-item active">Doadores</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Gerenciar Doadores</h1>
+                <p class="card-subtitle">Cadastre, edite e consulte informações de doadores</p>
+            </div>
+            <div class="card-body">
+                <!-- Search and Actions -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <input
+                        type="text"
+                        id="searchInput"
+                        class="form-control"
+                        placeholder="Buscar por nome, CPF ou e-mail..."
+                        style="max-width: 400px;"
+                    >
+                    <button class="btn btn-primary" onclick="openModal('modalDoador')">
+                        ➕ Novo Doador
+                    </button>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF/CNPJ</th>
+                                <th>E-mail</th>
+                                <th>Telefone</th>
+                                <th>Total Doado</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaDoadores">
+                            <tr>
+                                <td>João da Silva</td>
+                                <td>123.456.789-00</td>
+                                <td>joao@email.com</td>
+                                <td>(18) 99999-9999</td>
+                                <td>R$ 500,00</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editarDoador(1)">✏️ Editar</button>
+                                    <button class="btn btn-sm btn-danger" onclick="excluirDoador(1)">🗑️ Excluir</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Maria Santos</td>
+                                <td>987.654.321-00</td>
+                                <td>maria@email.com</td>
+                                <td>(18) 98888-8888</td>
+                                <td>R$ 1.200,00</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editarDoador(2)">✏️ Editar</button>
+                                    <button class="btn btn-sm btn-danger" onclick="excluirDoador(2)">🗑️ Excluir</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Cadastro/Edição -->
+    <div id="modalDoador" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Novo Doador</h2>
+                <button class="modal-close" onclick="closeModal('modalDoador')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formDoador">
+                    <input type="hidden" id="doadorId">
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nome" class="form-label required">Nome/Razão Social</label>
+                            <input type="text" id="nome" class="form-control" required>
+                            <div class="form-error">Nome é obrigatório</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cpfCnpj" class="form-label required">CPF/CNPJ</label>
+                            <input type="text" id="cpfCnpj" class="form-control" data-mask="cpf" required>
+                            <div class="form-error">CPF/CNPJ inválido</div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email" class="form-label required">E-mail</label>
+                            <input type="email" id="email" class="form-control" required>
+                            <div class="form-error">E-mail inválido</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="telefone" class="form-label required">Telefone</label>
+                            <input type="tel" id="telefone" class="form-control" data-mask="phone" required>
+                            <div class="form-error">Telefone inválido</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endereco" class="form-label">Endereço Completo</label>
+                        <input type="text" id="endereco" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea id="observacoes" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalDoador')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarDoador()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app.js"></script>
+    <script>
+        // Busca em tempo real
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaDoadores tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        function openModal(modalId) {
+            document.getElementById('formDoador').reset();
+            document.getElementById('doadorId').value = '';
+            document.getElementById('modalTitle').textContent = 'Novo Doador';
+            UI.openModal(modalId);
+        }
+
+        function closeModal(modalId) {
+            UI.closeModal(modalId);
+        }
+
+        function editarDoador(id) {
+            // TODO: Carregar dados do doador da API
+            document.getElementById('doadorId').value = id;
+            document.getElementById('modalTitle').textContent = 'Editar Doador';
+            document.getElementById('nome').value = 'João da Silva';
+            document.getElementById('cpfCnpj').value = '123.456.789-00';
+            document.getElementById('email').value = 'joao@email.com';
+            document.getElementById('telefone').value = '(18) 99999-9999';
+
+            UI.openModal('modalDoador');
+        }
+
+        function excluirDoador(id) {
+            UI.confirm('Tem certeza que deseja excluir este doador?', async function() {
+                try {
+                    // TODO: Integrar com API
+                    // await API.delete(`/doadores/${id}`);
+                    UI.showAlert('Doador excluído com sucesso!', 'success');
+                    // Recarregar tabela
+                } catch (error) {
+                    console.error('Erro ao excluir doador:', error);
+                }
+            });
+        }
+
+        async function salvarDoador() {
+            const form = document.getElementById('formDoador');
+            const nome = document.getElementById('nome');
+            const cpfCnpj = document.getElementById('cpfCnpj');
+            const email = document.getElementById('email');
+            const telefone = document.getElementById('telefone');
+
+            // Limpa erros
+            Validator.clearAllErrors(form);
+
+            // Validações
+            let isValid = true;
+
+            if (Validator.isEmpty(nome.value)) {
+                Validator.showError(nome, 'Nome é obrigatório');
+                isValid = false;
+            }
+
+            if (Validator.isEmpty(cpfCnpj.value)) {
+                Validator.showError(cpfCnpj, 'CPF/CNPJ é obrigatório');
+                isValid = false;
+            } else if (!Validator.isValidCPF(cpfCnpj.value)) {
+                Validator.showError(cpfCnpj, 'CPF/CNPJ inválido');
+                isValid = false;
+            }
+
+            if (Validator.isEmpty(email.value)) {
+                Validator.showError(email, 'E-mail é obrigatório');
+                isValid = false;
+            } else if (!Validator.isValidEmail(email.value)) {
+                Validator.showError(email, 'E-mail inválido');
+                isValid = false;
+            }
+
+            if (Validator.isEmpty(telefone.value)) {
+                Validator.showError(telefone, 'Telefone é obrigatório');
+                isValid = false;
+            } else if (!Validator.isValidPhone(telefone.value)) {
+                Validator.showError(telefone, 'Telefone inválido');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                const doadorId = document.getElementById('doadorId').value;
+                const data = {
+                    nome: nome.value,
+                    cpfCnpj: cpfCnpj.value.replace(/[^\d]/g, ''),
+                    email: email.value,
+                    telefone: telefone.value.replace(/[^\d]/g, ''),
+                    endereco: document.getElementById('endereco').value,
+                    observacoes: document.getElementById('observacoes').value
+                };
+
+                if (doadorId) {
+                    // TODO: Atualizar
+                    // await API.put(`/doadores/${doadorId}`, data);
+                    UI.showAlert('Doador atualizado com sucesso!', 'success');
+                } else {
+                    // TODO: Criar
+                    // await API.post('/doadores', data);
+                    UI.showAlert('Doador cadastrado com sucesso!', 'success');
+                }
+
+                closeModal('modalDoador');
+                // Recarregar tabela
+            } catch (error) {
+                console.error('Erro ao salvar doador:', error);
+            }
+        }
+    </script>
+</body>
+</html>

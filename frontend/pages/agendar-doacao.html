@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Agendar Doação</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">DOARC</a>
+            <div class="user-menu">
+                <span class="user-name" id="userName">Voluntário</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Gerenciar</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active">Doações</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Estoque</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="relatorios.html" class="nav-link">Relatórios</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+            <div class="breadcrumb-item">Doações</div>
+            <div class="breadcrumb-item active">Agendar Doação</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Agendar Doação</h1>
+                <p class="card-subtitle">Agende entregas ou retiradas de doações</p>
+            </div>
+            <div class="card-body">
+                <form id="formAgendarDoacao">
+                    <!-- Tipo de Agendamento -->
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Tipo de Agendamento</h3>
+
+                    <div class="form-group">
+                        <label for="tipoAgendamento" class="form-label required">Tipo</label>
+                        <select id="tipoAgendamento" class="form-control form-select" required onchange="toggleTipoAgendamento()">
+                            <option value="">Selecione o tipo</option>
+                            <option value="entrega">Entrega (levar para o donatário)</option>
+                            <option value="retirada">Retirada (buscar do doador)</option>
+                        </select>
+                        <div class="form-error">Selecione o tipo de agendamento</div>
+                    </div>
+
+                    <!-- Informações de Data e Hora -->
+                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Data e Horário</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataAgendamento" class="form-label required">Data</label>
+                            <input type="date" id="dataAgendamento" class="form-control" required>
+                            <div class="form-error">Data é obrigatória</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="horaAgendamento" class="form-label required">Horário</label>
+                            <input type="time" id="horaAgendamento" class="form-control" required>
+                            <div class="form-error">Horário é obrigatório</div>
+                        </div>
+                    </div>
+
+                    <!-- Seção Entrega -->
+                    <div id="secaoEntrega" style="display: none;">
+                        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações da Entrega</h3>
+
+                        <div class="form-group">
+                            <label for="donatarioEntrega" class="form-label required">Donatário</label>
+                            <select id="donatarioEntrega" class="form-control form-select">
+                                <option value="">Selecione um donatário</option>
+                                <option value="1">Ana Paula Silva - 111.222.333-44</option>
+                                <option value="2">Carlos Oliveira - 555.666.777-88</option>
+                                <option value="3">Família Santos - 999.888.777-66</option>
+                            </select>
+                            <div class="form-error">Selecione um donatário</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="enderecoEntrega" class="form-label required">Endereço de Entrega</label>
+                            <textarea id="enderecoEntrega" class="form-control" rows="2" placeholder="Rua, número, bairro, cidade..."></textarea>
+                            <div class="form-error">Endereço é obrigatório</div>
+                        </div>
+                    </div>
+
+                    <!-- Seção Retirada -->
+                    <div id="secaoRetirada" style="display: none;">
+                        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações da Retirada</h3>
+
+                        <div class="form-group">
+                            <label for="doadorRetirada" class="form-label required">Doador</label>
+                            <select id="doadorRetirada" class="form-control form-select">
+                                <option value="">Selecione um doador</option>
+                                <option value="1">João da Silva - 123.456.789-00</option>
+                                <option value="2">Maria Santos - 987.654.321-00</option>
+                                <option value="3">Empresa ABC - 12.345.678/0001-90</option>
+                            </select>
+                            <div class="form-error">Selecione um doador</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="enderecoRetirada" class="form-label required">Local de Retirada</label>
+                            <textarea id="enderecoRetirada" class="form-control" rows="2" placeholder="Rua, número, bairro, cidade..."></textarea>
+                            <div class="form-error">Local é obrigatório</div>
+                        </div>
+                    </div>
+
+                    <!-- Voluntário Responsável -->
+                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Responsável</h3>
+
+                    <div class="form-group">
+                        <label for="voluntarioResponsavel" class="form-label required">Voluntário Responsável</label>
+                        <select id="voluntarioResponsavel" class="form-control form-select" required>
+                            <option value="">Selecione um voluntário</option>
+                            <option value="1">João Silva</option>
+                            <option value="2">Maria Santos</option>
+                            <option value="3">Pedro Oliveira</option>
+                            <option value="4">Ana Costa</option>
+                        </select>
+                        <div class="form-error">Selecione um voluntário</div>
+                    </div>
+
+                    <!-- Produtos (Pré-seleção Opcional) -->
+                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Produtos (Opcional)</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="categoriaAgendamento" class="form-label">Categoria</label>
+                            <select id="categoriaAgendamento" class="form-control form-select" onchange="carregarProdutosAgendamento()">
+                                <option value="">Selecione uma categoria</option>
+                                <option value="1">Alimentos</option>
+                                <option value="2">Roupas</option>
+                                <option value="3">Higiene</option>
+                                <option value="4">Móveis</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="produtoAgendamento" class="form-label">Produto</label>
+                            <select id="produtoAgendamento" class="form-control form-select">
+                                <option value="">Selecione um produto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-secondary" onclick="adicionarProdutoAgendamento()">
+                        ➕ Adicionar Produto
+                    </button>
+
+                    <!-- Lista de Produtos Selecionados -->
+                    <div id="listaProdutosAgendamento" style="margin-top: 1.5rem; display: none;">
+                        <h4>Produtos Selecionados:</h4>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Produto</th>
+                                        <th>Categoria</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaProdutosAgendamento"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Observações -->
+                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações Adicionais</h3>
+
+                    <div class="form-group">
+                        <label for="observacoesAgendamento" class="form-label">Observações</label>
+                        <textarea id="observacoesAgendamento" class="form-control" rows="3" placeholder="Informações importantes sobre o agendamento..."></textarea>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline" onclick="window.location.href='dashboard.html'">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                ✓ Confirmar Agendamento
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Lista de Agendamentos -->
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h2 class="card-title">Agendamentos Recentes</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                                <th>Pessoa</th>
+                                <th>Responsável</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAgendamentos">
+                            <tr>
+                                <td>15/10/2025 14:00</td>
+                                <td><span class="badge badge-info">Entrega</span></td>
+                                <td>Ana Paula Silva</td>
+                                <td>João Silva</td>
+                                <td><span class="badge badge-warning">Agendado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verDetalhes(1)">👁️</button>
+                                    <button class="btn btn-sm btn-success" onclick="concluir(1)">✓</button>
+                                    <button class="btn btn-sm btn-danger" onclick="cancelar(1)">✗</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>16/10/2025 10:00</td>
+                                <td><span class="badge badge-secondary">Retirada</span></td>
+                                <td>Empresa ABC</td>
+                                <td>Maria Santos</td>
+                                <td><span class="badge badge-warning">Agendado</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verDetalhes(2)">👁️</button>
+                                    <button class="btn btn-sm btn-success" onclick="concluir(2)">✓</button>
+                                    <button class="btn btn-sm btn-danger" onclick="cancelar(2)">✗</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/app.js"></script>
+    <script>
+        // Definir data mínima como hoje
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dataAgendamento').min = hoje;
+        document.getElementById('dataAgendamento').value = hoje;
+
+        // Array para produtos selecionados
+        let produtosSelecionados = [];
+
+        function toggleTipoAgendamento() {
+            const tipo = document.getElementById('tipoAgendamento').value;
+            const secaoEntrega = document.getElementById('secaoEntrega');
+            const secaoRetirada = document.getElementById('secaoRetirada');
+
+            secaoEntrega.style.display = tipo === 'entrega' ? 'block' : 'none';
+            secaoRetirada.style.display = tipo === 'retirada' ? 'block' : 'none';
+        }
+
+        function carregarProdutosAgendamento() {
+            const categoriaId = document.getElementById('categoriaAgendamento').value;
+            const selectProduto = document.getElementById('produtoAgendamento');
+
+            selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
+
+            if (!categoriaId) return;
+
+            // TODO: Carregar produtos da API
+            const produtos = {
+                '1': ['Arroz', 'Feijão', 'Macarrão', 'Óleo', 'Açúcar'],
+                '2': ['Camiseta', 'Calça', 'Agasalho', 'Sapatos'],
+                '3': ['Sabonete', 'Shampoo', 'Pasta de Dente', 'Desodorante'],
+                '4': ['Mesa', 'Cadeira', 'Cama', 'Guarda-roupa']
+            };
+
+            if (produtos[categoriaId]) {
+                produtos[categoriaId].forEach((produto, index) => {
+                    const option = document.createElement('option');
+                    option.value = `${categoriaId}_${index}`;
+                    option.textContent = produto;
+                    selectProduto.appendChild(option);
+                });
+            }
+        }
+
+        function adicionarProdutoAgendamento() {
+            const categoria = document.getElementById('categoriaAgendamento');
+            const produto = document.getElementById('produtoAgendamento');
+
+            if (!produto.value) {
+                UI.showAlert('Selecione um produto', 'warning');
+                return;
+            }
+
+            const categoriaTexto = categoria.options[categoria.selectedIndex].text;
+            const produtoTexto = produto.options[produto.selectedIndex].text;
+
+            // Verificar se já foi adicionado
+            if (produtosSelecionados.some(p => p.produtoId === produto.value)) {
+                UI.showAlert('Produto já foi adicionado', 'warning');
+                return;
+            }
+
+            produtosSelecionados.push({
+                produtoId: produto.value,
+                produto: produtoTexto,
+                categoria: categoriaTexto
+            });
+
+            atualizarTabelaProdutosAgendamento();
+
+            // Limpar seleção
+            categoria.value = '';
+            produto.value = '';
+        }
+
+        function atualizarTabelaProdutosAgendamento() {
+            const tbody = document.getElementById('tabelaProdutosAgendamento');
+            const lista = document.getElementById('listaProdutosAgendamento');
+
+            if (produtosSelecionados.length === 0) {
+                lista.style.display = 'none';
+                return;
+            }
+
+            lista.style.display = 'block';
+            tbody.innerHTML = produtosSelecionados.map((item, index) => `
+                <tr>
+                    <td>${item.produto}</td>
+                    <td>${item.categoria}</td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" onclick="removerProdutoAgendamento(${index})">
+                            🗑️ Remover
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function removerProdutoAgendamento(index) {
+            produtosSelecionados.splice(index, 1);
+            atualizarTabelaProdutosAgendamento();
+        }
+
+        function verDetalhes(id) {
+            UI.showAlert('Funcionalidade em desenvolvimento', 'info');
+        }
+
+        function concluir(id) {
+            UI.confirm('Marcar este agendamento como concluído?', async function() {
+                // TODO: await API.put(`/agendamentos/${id}/concluir`);
+                UI.showAlert('Agendamento concluído!', 'success');
+            });
+        }
+
+        function cancelar(id) {
+            UI.confirm('Cancelar este agendamento?', async function() {
+                // TODO: await API.put(`/agendamentos/${id}/cancelar`);
+                UI.showAlert('Agendamento cancelado!', 'success');
+            });
+        }
+
+        // Submissão do formulário
+        document.getElementById('formAgendarDoacao').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const tipoAgendamento = document.getElementById('tipoAgendamento');
+            const dataAgendamento = document.getElementById('dataAgendamento');
+            const horaAgendamento = document.getElementById('horaAgendamento');
+            const voluntarioResponsavel = document.getElementById('voluntarioResponsavel');
+
+            Validator.clearAllErrors(this);
+            let isValid = true;
+
+            if (!tipoAgendamento.value) {
+                Validator.showError(tipoAgendamento, 'Selecione o tipo');
+                isValid = false;
+            }
+
+            if (!dataAgendamento.value) {
+                Validator.showError(dataAgendamento, 'Informe a data');
+                isValid = false;
+            }
+
+            if (!horaAgendamento.value) {
+                Validator.showError(horaAgendamento, 'Informe o horário');
+                isValid = false;
+            }
+
+            if (!voluntarioResponsavel.value) {
+                Validator.showError(voluntarioResponsavel, 'Selecione um voluntário');
+                isValid = false;
+            }
+
+            // Validações específicas por tipo
+            if (tipoAgendamento.value === 'entrega') {
+                const donatario = document.getElementById('donatarioEntrega');
+                const endereco = document.getElementById('enderecoEntrega');
+
+                if (!donatario.value) {
+                    Validator.showError(donatario, 'Selecione um donatário');
+                    isValid = false;
+                }
+
+                if (!endereco.value) {
+                    Validator.showError(endereco, 'Informe o endereço');
+                    isValid = false;
+                }
+            } else if (tipoAgendamento.value === 'retirada') {
+                const doador = document.getElementById('doadorRetirada');
+                const local = document.getElementById('enderecoRetirada');
+
+                if (!doador.value) {
+                    Validator.showError(doador, 'Selecione um doador');
+                    isValid = false;
+                }
+
+                if (!local.value) {
+                    Validator.showError(local, 'Informe o local');
+                    isValid = false;
+                }
+            }
+
+            if (!isValid) return;
+
+            try {
+                const data = {
+                    tipo: tipoAgendamento.value,
+                    data: dataAgendamento.value,
+                    hora: horaAgendamento.value,
+                    voluntarioId: voluntarioResponsavel.value,
+                    donatarioId: document.getElementById('donatarioEntrega').value,
+                    doadorId: document.getElementById('doadorRetirada').value,
+                    endereco: tipoAgendamento.value === 'entrega'
+                        ? document.getElementById('enderecoEntrega').value
+                        : document.getElementById('enderecoRetirada').value,
+                    produtos: produtosSelecionados,
+                    observacoes: document.getElementById('observacoesAgendamento').value
+                };
+
+                // TODO: Integrar com API
+                // await API.post('/agendamentos', data);
+
+                UI.showAlert('Agendamento criado com sucesso! Notificação enviada.', 'success');
+
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+
+            } catch (error) {
+                console.error('Erro ao criar agendamento:', error);
+            }
+        });
+    </script>
+</body>
+</html>

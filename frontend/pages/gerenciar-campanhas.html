@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Gerenciar Campanhas</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">DOARC</a>
+            <div class="user-menu">
+                <span class="user-name" id="userName">Voluntário</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active">Gerenciar</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Doações</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Estoque</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+                </ul>
+            </li>
+            <li class="nav-item"><a href="relatorios.html" class="nav-link">Relatórios</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+            <div class="breadcrumb-item">Gerenciar</div>
+            <div class="breadcrumb-item active">Campanhas</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Gerenciar Campanhas</h1>
+                <p class="card-subtitle">Crie e gerencie campanhas de arrecadação</p>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar campanha..." style="max-width: 300px;">
+                        <select id="filtroStatus" class="form-control form-select" style="max-width: 150px;" onchange="filtrarPorStatus()">
+                            <option value="">Todos Status</option>
+                            <option value="ativa">Ativa</option>
+                            <option value="encerrada">Encerrada</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modalCampanha')">➕ Nova Campanha</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>Período</th>
+                                <th>Responsável</th>
+                                <th>Meta</th>
+                                <th>Progresso</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCampanhas">
+                            <tr>
+                                <td>Campanha de Natal 2025</td>
+                                <td>01/12/2025 - 25/12/2025</td>
+                                <td>João Silva</td>
+                                <td>R$ 10.000,00</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div style="flex: 1; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 65%; height: 100%; background: var(--success-color);"></div>
+                                        </div>
+                                        <span style="font-size: 0.875rem;">65%</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-success">Ativa</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editarCampanha(1)">✏️</button>
+                                    <button class="btn btn-sm btn-warning" onclick="gerenciarVoluntarios(1)">👥</button>
+                                    <button class="btn btn-sm btn-danger" onclick="encerrarCampanha(1)">🔒</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Páscoa Solidária 2025</td>
+                                <td>15/03/2025 - 31/03/2025</td>
+                                <td>Maria Santos</td>
+                                <td>R$ 5.000,00</td>
+                                <td>
+                                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <div style="flex: 1; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden;">
+                                            <div style="width: 100%; height: 100%; background: var(--success-color);"></div>
+                                        </div>
+                                        <span style="font-size: 0.875rem;">100%</span>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-secondary">Encerrada</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verDetalhes(2)">👁️</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalCampanha" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Nova Campanha</h2>
+                <button class="modal-close" onclick="closeModal('modalCampanha')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formCampanha">
+                    <input type="hidden" id="campanhaId">
+                    <div class="form-group">
+                        <label for="nome" class="form-label required">Nome da Campanha</label>
+                        <input type="text" id="nome" class="form-control" required>
+                        <div class="form-error">Nome é obrigatório</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="descricao" class="form-label required">Descrição</label>
+                        <textarea id="descricao" class="form-control" rows="3" required></textarea>
+                        <div class="form-error">Descrição é obrigatória</div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataInicio" class="form-label required">Data Início</label>
+                            <input type="date" id="dataInicio" class="form-control" required>
+                            <div class="form-error">Data é obrigatória</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="dataFim" class="form-label required">Data Fim</label>
+                            <input type="date" id="dataFim" class="form-control" required>
+                            <div class="form-error">Data é obrigatória</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="meta" class="form-label">Meta (R$)</label>
+                            <input type="number" id="meta" class="form-control" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="responsavel" class="form-label required">Responsável</label>
+                            <select id="responsavel" class="form-control form-select" required>
+                                <option value="">Selecione</option>
+                                <option value="1">João Silva</option>
+                                <option value="2">Maria Santos</option>
+                                <option value="3">Pedro Lima</option>
+                            </select>
+                            <div class="form-error">Responsável é obrigatório</div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea id="observacoes" class="form-control" rows="2"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalCampanha')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarCampanha()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalVoluntarios" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Gerenciar Voluntários da Campanha</h2>
+                <button class="modal-close" onclick="closeModal('modalVoluntarios')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="addVoluntario" class="form-label">Adicionar Voluntário</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <select id="addVoluntario" class="form-control form-select" style="flex: 1;">
+                            <option value="">Selecione um voluntário</option>
+                            <option value="1">João Silva</option>
+                            <option value="2">Maria Santos</option>
+                            <option value="3">Pedro Lima</option>
+                        </select>
+                        <button class="btn btn-success" onclick="adicionarVoluntario()">➕ Adicionar</button>
+                    </div>
+                </div>
+                <h4 style="margin-top: 1.5rem; margin-bottom: 1rem;">Voluntários Vinculados</h4>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaVoluntariosCampanha">
+                            <tr>
+                                <td>João Silva</td>
+                                <td>joao@email.com</td>
+                                <td><button class="btn btn-sm btn-danger" onclick="removerVoluntario(1)">🗑️ Remover</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalVoluntarios')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app.js"></script>
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaCampanhas tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        function filtrarPorStatus() {
+            const status = document.getElementById('filtroStatus').value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaCampanhas tr');
+            rows.forEach(row => {
+                if (!status || row.textContent.toLowerCase().includes(status)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function openModal(modalId) {
+            if (modalId === 'modalCampanha') {
+                document.getElementById('formCampanha').reset();
+                document.getElementById('campanhaId').value = '';
+                document.getElementById('modalTitle').textContent = 'Nova Campanha';
+            }
+            UI.openModal(modalId);
+        }
+
+        function closeModal(modalId) { UI.closeModal(modalId); }
+
+        function editarCampanha(id) {
+            document.getElementById('campanhaId').value = id;
+            document.getElementById('modalTitle').textContent = 'Editar Campanha';
+            document.getElementById('nome').value = 'Campanha de Natal 2025';
+            document.getElementById('descricao').value = 'Arrecadação para distribuição de presentes';
+            UI.openModal('modalCampanha');
+        }
+
+        function gerenciarVoluntarios(id) {
+            // TODO: Carregar voluntários da campanha
+            UI.openModal('modalVoluntarios');
+        }
+
+        function adicionarVoluntario() {
+            const select = document.getElementById('addVoluntario');
+            if (!select.value) {
+                UI.showAlert('Selecione um voluntário', 'warning');
+                return;
+            }
+            // TODO: Adicionar voluntário à campanha
+            UI.showAlert('Voluntário adicionado!', 'success');
+            select.value = '';
+        }
+
+        function removerVoluntario(id) {
+            UI.confirm('Remover voluntário desta campanha?', function() {
+                // TODO: Remover voluntário
+                UI.showAlert('Voluntário removido!', 'success');
+            });
+        }
+
+        function encerrarCampanha(id) {
+            UI.confirm('Deseja encerrar esta campanha?', async function() {
+                try {
+                    // await API.put(`/campanhas/${id}/encerrar`);
+                    UI.showAlert('Campanha encerrada!', 'success');
+                } catch (error) {
+                    console.error('Erro:', error);
+                }
+            });
+        }
+
+        function verDetalhes(id) {
+            window.location.href = `relatorios.html?campanha=${id}`;
+        }
+
+        async function salvarCampanha() {
+            const form = document.getElementById('formCampanha');
+            const nome = document.getElementById('nome');
+            const descricao = document.getElementById('descricao');
+            const dataInicio = document.getElementById('dataInicio');
+            const dataFim = document.getElementById('dataFim');
+            const responsavel = document.getElementById('responsavel');
+
+            Validator.clearAllErrors(form);
+            let isValid = true;
+
+            if (Validator.isEmpty(nome.value)) {
+                Validator.showError(nome, 'Nome é obrigatório');
+                isValid = false;
+            }
+            if (Validator.isEmpty(descricao.value)) {
+                Validator.showError(descricao, 'Descrição é obrigatória');
+                isValid = false;
+            }
+            if (Validator.isEmpty(dataInicio.value)) {
+                Validator.showError(dataInicio, 'Data é obrigatória');
+                isValid = false;
+            }
+            if (Validator.isEmpty(dataFim.value)) {
+                Validator.showError(dataFim, 'Data é obrigatória');
+                isValid = false;
+            }
+            if (Validator.isEmpty(responsavel.value)) {
+                Validator.showError(responsavel, 'Responsável é obrigatório');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                const campanhaId = document.getElementById('campanhaId').value;
+                const data = {
+                    nome: nome.value,
+                    descricao: descricao.value,
+                    dataInicio: dataInicio.value,
+                    dataFim: dataFim.value,
+                    meta: document.getElementById('meta').value,
+                    responsavelId: responsavel.value,
+                    observacoes: document.getElementById('observacoes').value
+                };
+
+                if (campanhaId) {
+                    // await API.put(`/campanhas/${campanhaId}`, data);
+                    UI.showAlert('Campanha atualizada!', 'success');
+                } else {
+                    // await API.post('/campanhas', data);
+                    UI.showAlert('Campanha cadastrada!', 'success');
+                }
+                closeModal('modalCampanha');
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+    </script>
+</body>
+</html>

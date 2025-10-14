@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1 class="login-title">DOARC</h1>
+                <p class="login-subtitle">Doações, Organização e Apoio para a Rede Ceifeiros</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="email" class="form-label required">E-mail</label>
+                    <input
+                        type="email"
+                        id="email"
+                        class="form-control"
+                        placeholder="seu@email.com"
+                        required
+                    >
+                    <div class="form-error">E-mail inválido</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label required">Senha</label>
+                    <input
+                        type="password"
+                        id="password"
+                        class="form-control"
+                        placeholder="Digite sua senha"
+                        required
+                    >
+                    <div class="form-error">Senha é obrigatória</div>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Entrar
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <p style="margin-top: 1rem; color: var(--text-light);">
+                        Não tem uma conta?
+                        <a href="register.html" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+                            Cadastre-se aqui
+                        </a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email');
+            const password = document.getElementById('password');
+
+            // Limpa erros anteriores
+            Validator.clearAllErrors(this);
+
+            // Validações
+            let isValid = true;
+
+            if (Validator.isEmpty(email.value)) {
+                Validator.showError(email, 'E-mail é obrigatório');
+                isValid = false;
+            } else if (!Validator.isValidEmail(email.value)) {
+                Validator.showError(email, 'E-mail inválido');
+                isValid = false;
+            }
+
+            if (Validator.isEmpty(password.value)) {
+                Validator.showError(password, 'Senha é obrigatória');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                // TODO: Integrar com API real
+                // const response = await API.post('/auth/login', {
+                //     email: email.value,
+                //     password: password.value
+                // });
+
+                // Simulação de login para desenvolvimento
+                const userData = {
+                    id: 1,
+                    nome: 'Voluntário Teste',
+                    email: email.value,
+                    tipo: 'voluntario'
+                };
+
+                Auth.setUser(userData);
+                window.location.href = 'pages/dashboard.html';
+
+            } catch (error) {
+                UI.showAlert('Erro ao fazer login. Verifique suas credenciais.', 'danger');
+            }
+        });
+    </script>
+</body>
+</html>

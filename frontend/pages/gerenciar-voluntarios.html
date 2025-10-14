@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Gerenciar Voluntários</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">DOARC</a>
+            <div class="user-menu">
+                <span class="user-name" id="userName">Voluntário</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item"><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active">Gerenciar</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Doações</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Estoque</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+                </ul>
+            </li>
+            <li class="nav-item"><a href="relatorios.html" class="nav-link">Relatórios</a></li>
+        </ul>
+    </nav>
+
+    <main class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+            <div class="breadcrumb-item">Gerenciar</div>
+            <div class="breadcrumb-item active">Voluntários</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Gerenciar Voluntários</h1>
+                <p class="card-subtitle">Cadastre e gerencie os voluntários da organização</p>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar voluntário..." style="max-width: 300px;">
+                        <select id="filtroStatus" class="form-control form-select" style="max-width: 150px;" onchange="filtrarPorStatus()">
+                            <option value="">Todos Status</option>
+                            <option value="ativo">Ativo</option>
+                            <option value="inativo">Inativo</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('modalVoluntario')">➕ Novo Voluntário</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nome</th>
+                                <th>CPF</th>
+                                <th>E-mail</th>
+                                <th>Telefone</th>
+                                <th>Data Cadastro</th>
+                                <th>Doações Realizadas</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaVoluntarios">
+                            <tr>
+                                <td>João Silva</td>
+                                <td>123.456.789-00</td>
+                                <td>joao@email.com</td>
+                                <td>(18) 99999-9999</td>
+                                <td>10/01/2023</td>
+                                <td>45</td>
+                                <td><span class="badge badge-success">Ativo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(1)">✏️</button>
+                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(1)">📋</button>
+                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(1)">🔒</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Maria Santos</td>
+                                <td>987.654.321-00</td>
+                                <td>maria@email.com</td>
+                                <td>(18) 98888-8888</td>
+                                <td>15/03/2022</td>
+                                <td>68</td>
+                                <td><span class="badge badge-success">Ativo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(2)">✏️</button>
+                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(2)">📋</button>
+                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(2)">🔒</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalVoluntario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Novo Voluntário</h2>
+                <button class="modal-close" onclick="closeModal('modalVoluntario')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formVoluntario">
+                    <input type="hidden" id="voluntarioId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nome" class="form-label required">Nome Completo</label>
+                            <input type="text" id="nome" class="form-control" required>
+                            <div class="form-error">Nome é obrigatório</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cpf" class="form-label required">CPF</label>
+                            <input type="text" id="cpf" class="form-control" data-mask="cpf" required>
+                            <div class="form-error">CPF inválido</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email" class="form-label required">E-mail</label>
+                            <input type="email" id="email" class="form-control" required>
+                            <div class="form-error">E-mail inválido</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="telefone" class="form-label required">Telefone</label>
+                            <input type="tel" id="telefone" class="form-control" data-mask="phone" required>
+                            <div class="form-error">Telefone inválido</div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataNascimento" class="form-label required">Data de Nascimento</label>
+                            <input type="date" id="dataNascimento" class="form-control" required>
+                            <div class="form-error">Data é obrigatória</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="statusVoluntario" class="form-label required">Status</label>
+                            <select id="statusVoluntario" class="form-control form-select" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="endereco" class="form-label">Endereço</label>
+                        <input type="text" id="endereco" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea id="observacoes" class="form-control" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalVoluntario')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarVoluntario()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalHistorico" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Histórico de Doações</h2>
+                <button class="modal-close" onclick="closeModal('modalHistorico')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaHistorico">
+                            <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalHistorico')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app.js"></script>
+    <script>
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        function filtrarPorStatus() {
+            const status = document.getElementById('filtroStatus').value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+            rows.forEach(row => {
+                if (!status || row.textContent.toLowerCase().includes(status)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function openModal(modalId) {
+            if (modalId === 'modalVoluntario') {
+                document.getElementById('formVoluntario').reset();
+                document.getElementById('voluntarioId').value = '';
+                document.getElementById('modalTitle').textContent = 'Novo Voluntário';
+            }
+            UI.openModal(modalId);
+        }
+
+        function closeModal(modalId) { UI.closeModal(modalId); }
+
+        function editarVoluntario(id) {
+            document.getElementById('voluntarioId').value = id;
+            document.getElementById('modalTitle').textContent = 'Editar Voluntário';
+            document.getElementById('nome').value = 'João Silva';
+            document.getElementById('cpf').value = '123.456.789-00';
+            document.getElementById('email').value = 'joao@email.com';
+            document.getElementById('telefone').value = '(18) 99999-9999';
+            UI.openModal('modalVoluntario');
+        }
+
+        function verHistorico(id) {
+            // TODO: Carregar histórico da API
+            document.getElementById('tabelaHistorico').innerHTML = `
+                <tr>
+                    <td>10/10/2025</td>
+                    <td>Recebimento</td>
+                    <td>Recebeu 50kg de arroz</td>
+                    <td><span class="badge badge-success">Concluído</span></td>
+                </tr>
+                <tr>
+                    <td>05/10/2025</td>
+                    <td>Distribuição</td>
+                    <td>Distribuiu 10 cestas básicas</td>
+                    <td><span class="badge badge-success">Concluído</span></td>
+                </tr>
+            `;
+            UI.openModal('modalHistorico');
+        }
+
+        function toggleStatus(id) {
+            UI.confirm('Deseja alterar o status deste voluntário?', async function() {
+                try {
+                    // await API.put(`/voluntarios/${id}/toggle-status`);
+                    UI.showAlert('Status atualizado!', 'success');
+                } catch (error) {
+                    console.error('Erro:', error);
+                }
+            });
+        }
+
+        async function salvarVoluntario() {
+            const form = document.getElementById('formVoluntario');
+            const nome = document.getElementById('nome');
+            const cpf = document.getElementById('cpf');
+            const email = document.getElementById('email');
+            const telefone = document.getElementById('telefone');
+            const dataNascimento = document.getElementById('dataNascimento');
+
+            Validator.clearAllErrors(form);
+            let isValid = true;
+
+            if (Validator.isEmpty(nome.value)) {
+                Validator.showError(nome, 'Nome é obrigatório');
+                isValid = false;
+            }
+            if (Validator.isEmpty(cpf.value) || !Validator.isValidCPF(cpf.value)) {
+                Validator.showError(cpf, 'CPF inválido');
+                isValid = false;
+            }
+            if (Validator.isEmpty(email.value) || !Validator.isValidEmail(email.value)) {
+                Validator.showError(email, 'E-mail inválido');
+                isValid = false;
+            }
+            if (Validator.isEmpty(telefone.value) || !Validator.isValidPhone(telefone.value)) {
+                Validator.showError(telefone, 'Telefone inválido');
+                isValid = false;
+            }
+            if (Validator.isEmpty(dataNascimento.value)) {
+                Validator.showError(dataNascimento, 'Data é obrigatória');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            try {
+                const voluntarioId = document.getElementById('voluntarioId').value;
+                const data = {
+                    nome: nome.value,
+                    cpf: cpf.value.replace(/[^\d]/g, ''),
+                    email: email.value,
+                    telefone: telefone.value.replace(/[^\d]/g, ''),
+                    dataNascimento: dataNascimento.value,
+                    endereco: document.getElementById('endereco').value,
+                    status: document.getElementById('statusVoluntario').value,
+                    observacoes: document.getElementById('observacoes').value
+                };
+
+                if (voluntarioId) {
+                    // await API.put(`/voluntarios/${voluntarioId}`, data);
+                    UI.showAlert('Voluntário atualizado!', 'success');
+                } else {
+                    // await API.post('/voluntarios', data);
+                    UI.showAlert('Voluntário cadastrado!', 'success');
+                }
+                closeModal('modalVoluntario');
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        }
+    </script>
+</body>
+</html>

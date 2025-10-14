@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Dashboard</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">DOARC</a>
+            <div class="user-menu">
+                <span class="user-name" id="userName">Voluntário</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link active">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Gerenciar</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Doações</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Estoque</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="relatorios.html" class="nav-link">Relatórios</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item active">Dashboard</div>
+        </div>
+
+        <h1 style="margin-bottom: 2rem; color: var(--primary-color);">Dashboard</h1>
+
+        <!-- Statistics Cards -->
+        <div class="dashboard-grid">
+            <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                <div class="stat-icon">📦</div>
+                <div class="stat-value" id="totalProdutos">0</div>
+                <div class="stat-label">Produtos no Estoque</div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                <div class="stat-icon">⬇️</div>
+                <div class="stat-value" id="doacoesRecebidas">0</div>
+                <div class="stat-label">Doações Recebidas (Mês)</div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                <div class="stat-icon">⬆️</div>
+                <div class="stat-value" id="doacoesEfetuadas">0</div>
+                <div class="stat-label">Doações Efetuadas (Mês)</div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #d68910);">
+                <div class="stat-icon">🤝</div>
+                <div class="stat-value" id="voluntariosAtivos">0</div>
+                <div class="stat-label">Voluntários Ativos</div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value" id="campanhasAtivas">0</div>
+                <div class="stat-label">Campanhas Ativas</div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #1abc9c, #16a085);">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="donatariosAtivos">0</div>
+                <div class="stat-label">Donatários Ativos</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h2 class="card-title">Ações Rápidas</h2>
+            </div>
+            <div class="card-body">
+                <div class="btn-group">
+                    <a href="receber-doacoes.html" class="btn btn-success">
+                        ⬇️ Receber Doação
+                    </a>
+                    <a href="efetuar-doacoes.html" class="btn btn-danger">
+                        ⬆️ Efetuar Doação
+                    </a>
+                    <a href="agendar-doacao.html" class="btn btn-info">
+                        📅 Agendar Doação
+                    </a>
+                    <a href="visualizar-estoque.html" class="btn btn-primary">
+                        📦 Ver Estoque
+                    </a>
+                    <a href="relatorios.html" class="btn btn-warning">
+                        📊 Relatórios
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h2 class="card-title">Atividades Recentes</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Voluntário</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="atividadesRecentes">
+                            <tr>
+                                <td colspan="5" class="text-center" style="padding: 2rem; color: var(--text-light);">
+                                    Nenhuma atividade recente
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Schedules -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h2 class="card-title">Agendamentos Pendentes</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Data/Hora</th>
+                                <th>Tipo</th>
+                                <th>Pessoa</th>
+                                <th>Responsável</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="agendamentosPendentes">
+                            <tr>
+                                <td colspan="5" class="text-center" style="padding: 2rem; color: var(--text-light);">
+                                    Nenhum agendamento pendente
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/app.js"></script>
+    <script>
+        // Carrega dados do dashboard
+        async function loadDashboardData() {
+            try {
+                // TODO: Integrar com API real
+                // const stats = await API.get('/dashboard/stats');
+
+                // Dados simulados para desenvolvimento
+                document.getElementById('totalProdutos').textContent = '150';
+                document.getElementById('doacoesRecebidas').textContent = '45';
+                document.getElementById('doacoesEfetuadas').textContent = '32';
+                document.getElementById('voluntariosAtivos').textContent = '12';
+                document.getElementById('campanhasAtivas').textContent = '3';
+                document.getElementById('donatariosAtivos').textContent = '78';
+
+                // Simula atividades recentes
+                const atividades = [
+                    {
+                        data: '14/10/2025',
+                        tipo: 'Doação Recebida',
+                        descricao: 'Recebimento de 50kg de alimentos',
+                        voluntario: 'João Silva',
+                        status: 'Concluído'
+                    },
+                    {
+                        data: '13/10/2025',
+                        tipo: 'Doação Efetuada',
+                        descricao: 'Distribuição de cestas básicas',
+                        voluntario: 'Maria Santos',
+                        status: 'Concluído'
+                    }
+                ];
+
+                const tbody = document.getElementById('atividadesRecentes');
+                if (atividades.length > 0) {
+                    tbody.innerHTML = atividades.map(ativ => `
+                        <tr>
+                            <td>${ativ.data}</td>
+                            <td>${ativ.tipo}</td>
+                            <td>${ativ.descricao}</td>
+                            <td>${ativ.voluntario}</td>
+                            <td><span class="badge badge-success">${ativ.status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+            } catch (error) {
+                console.error('Erro ao carregar dados do dashboard:', error);
+            }
+        }
+
+        // Carrega dados ao inicializar
+        loadDashboardData();
+    </script>
+</body>
+</html>

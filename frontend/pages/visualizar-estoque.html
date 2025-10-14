@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Visualizar Estoque</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">DOARC</a>
+            <div class="user-menu">
+                <span class="user-name" id="userName">Voluntário</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Gerenciar</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Doações</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link active">Estoque</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="relatorios.html" class="nav-link">Relatórios</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+            <div class="breadcrumb-item">Estoque</div>
+            <div class="breadcrumb-item active">Visualizar Estoque</div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                <div class="stat-icon">📦</div>
+                <div class="stat-value" id="totalProdutos">45</div>
+                <div class="stat-label">Produtos Cadastrados</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="totalItens">1.250</div>
+                <div class="stat-label">Itens em Estoque</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #e67e22);">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-value" id="estoqueBaixo">8</div>
+                <div class="stat-label">Estoque Baixo</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                <div class="stat-icon">🚫</div>
+                <div class="stat-value" id="produtosVencidos">3</div>
+                <div class="stat-label">Produtos Vencidos</div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <div class="card-header">
+                <h1 class="card-title">Visualizar Estoque</h1>
+                <p class="card-subtitle">Acompanhe a disponibilidade de produtos no estoque</p>
+            </div>
+            <div class="card-body">
+                <!-- Filters -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar produto..." style="max-width: 300px;">
+                        <select id="filtroCategoria" class="form-control form-select" style="max-width: 200px;" onchange="filtrarPorCategoria()">
+                            <option value="">Todas Categorias</option>
+                            <option value="Alimentos">Alimentos</option>
+                            <option value="Roupas">Roupas</option>
+                            <option value="Higiene">Higiene</option>
+                            <option value="Móveis">Móveis</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <button class="btn btn-sm btn-warning" onclick="filtrarEstoqueBaixo()">
+                            ⚠️ Estoque Baixo
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="filtrarVencendo()">
+                            📅 Vencendo em 30 dias
+                        </button>
+                        <button class="btn btn-sm btn-outline" onclick="limparFiltros()">
+                            🔄 Limpar Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stock Table -->
+                <div class="table-container">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Categoria</th>
+                                <th>Quantidade</th>
+                                <th>Unidade</th>
+                                <th>Validade</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaEstoque">
+                            <tr data-categoria="Alimentos">
+                                <td>Arroz Tipo 1</td>
+                                <td><span class="badge badge-info">Alimentos</span></td>
+                                <td>50</td>
+                                <td>kg</td>
+                                <td>15/12/2025</td>
+                                <td><span class="badge badge-success">Disponível</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(1)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(1)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Alimentos">
+                                <td>Feijão Preto</td>
+                                <td><span class="badge badge-info">Alimentos</span></td>
+                                <td>8</td>
+                                <td>kg</td>
+                                <td>20/01/2026</td>
+                                <td><span class="badge badge-warning">Estoque Baixo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(2)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(2)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Alimentos">
+                                <td>Óleo de Soja</td>
+                                <td><span class="badge badge-info">Alimentos</span></td>
+                                <td>0</td>
+                                <td>l</td>
+                                <td>-</td>
+                                <td><span class="badge badge-danger">Sem Estoque</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(3)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(3)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Alimentos">
+                                <td>Leite em Pó</td>
+                                <td><span class="badge badge-info">Alimentos</span></td>
+                                <td>15</td>
+                                <td>kg</td>
+                                <td>25/10/2025</td>
+                                <td><span class="badge badge-danger">Vencendo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(4)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(4)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Roupas">
+                                <td>Camisetas Tamanho M</td>
+                                <td><span class="badge badge-primary">Roupas</span></td>
+                                <td>40</td>
+                                <td>un</td>
+                                <td>-</td>
+                                <td><span class="badge badge-success">Disponível</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(5)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(5)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Roupas">
+                                <td>Calças Jeans Tamanho 40</td>
+                                <td><span class="badge badge-primary">Roupas</span></td>
+                                <td>5</td>
+                                <td>un</td>
+                                <td>-</td>
+                                <td><span class="badge badge-warning">Estoque Baixo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(6)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(6)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Higiene">
+                                <td>Sabonete</td>
+                                <td><span class="badge badge-secondary">Higiene</span></td>
+                                <td>60</td>
+                                <td>un</td>
+                                <td>30/06/2026</td>
+                                <td><span class="badge badge-success">Disponível</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(7)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(7)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Higiene">
+                                <td>Pasta de Dente</td>
+                                <td><span class="badge badge-secondary">Higiene</span></td>
+                                <td>7</td>
+                                <td>un</td>
+                                <td>15/11/2025</td>
+                                <td><span class="badge badge-warning">Estoque Baixo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(8)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(8)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Móveis">
+                                <td>Mesa de Jantar</td>
+                                <td><span class="badge badge-dark">Móveis</span></td>
+                                <td>5</td>
+                                <td>un</td>
+                                <td>-</td>
+                                <td><span class="badge badge-success">Disponível</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(9)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(9)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                            <tr data-categoria="Móveis">
+                                <td>Cadeiras</td>
+                                <td><span class="badge badge-dark">Móveis</span></td>
+                                <td>18</td>
+                                <td>un</td>
+                                <td>-</td>
+                                <td><span class="badge badge-success">Disponível</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="verHistorico(10)" title="Ver histórico">📋</button>
+                                    <button class="btn btn-sm btn-secondary" onclick="verDetalhes(10)" title="Ver detalhes">👁️</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card-footer">
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="window.location.href='lancar-compra.html'">
+                            ➕ Lançar Entrada
+                        </button>
+                        <button class="btn btn-secondary" onclick="window.location.href='registrar-acerto.html'">
+                            🔧 Acerto de Estoque
+                        </button>
+                        <button class="btn btn-outline" onclick="exportarEstoque()">
+                            📄 Exportar para Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal de Histórico -->
+    <div id="modalHistorico" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Histórico de Movimentação</h2>
+                <button class="modal-close" onclick="closeModal('modalHistorico')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h3 id="nomeProdutoHistorico" style="color: var(--primary-color); margin-bottom: 1rem;"></h3>
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Quantidade</th>
+                                <th>Responsável</th>
+                                <th>Observação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaHistorico">
+                            <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalHistorico')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div id="modalDetalhes" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Detalhes do Produto</h2>
+                <button class="modal-close" onclick="closeModal('modalDetalhes')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="detalhesProduto">
+                    <p><strong>Produto:</strong> <span id="detalhesNome"></span></p>
+                    <p><strong>Categoria:</strong> <span id="detalhesCategoria"></span></p>
+                    <p><strong>Quantidade:</strong> <span id="detalhesQuantidade"></span></p>
+                    <p><strong>Unidade:</strong> <span id="detalhesUnidade"></span></p>
+                    <p><strong>Validade:</strong> <span id="detalhesValidade"></span></p>
+                    <p><strong>Estoque Mínimo:</strong> <span id="detalhesMinimo">10</span></p>
+                    <p><strong>Última Entrada:</strong> <span id="detalhesUltimaEntrada">10/10/2025</span></p>
+                    <p><strong>Última Saída:</strong> <span id="detalhesUltimaSaida">12/10/2025</span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modalDetalhes')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/app.js"></script>
+    <script>
+        let filtroAtivo = null;
+
+        // Busca em tempo real
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#tabelaEstoque tr');
+            rows.forEach(row => {
+                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        function filtrarPorCategoria() {
+            const categoria = document.getElementById('filtroCategoria').value;
+            const rows = document.querySelectorAll('#tabelaEstoque tr');
+
+            filtroAtivo = null;
+
+            rows.forEach(row => {
+                if (!categoria || row.getAttribute('data-categoria') === categoria) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filtrarEstoqueBaixo() {
+            filtroAtivo = 'baixo';
+            const rows = document.querySelectorAll('#tabelaEstoque tr');
+            rows.forEach(row => {
+                const status = row.textContent.toLowerCase();
+                if (status.includes('estoque baixo') || status.includes('sem estoque')) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function filtrarVencendo() {
+            filtroAtivo = 'vencendo';
+            const rows = document.querySelectorAll('#tabelaEstoque tr');
+            const hoje = new Date();
+            const trintaDias = new Date(hoje.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+            rows.forEach(row => {
+                const status = row.textContent.toLowerCase();
+                if (status.includes('vencendo') || status.includes('vencido')) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        function limparFiltros() {
+            filtroAtivo = null;
+            document.getElementById('filtroCategoria').value = '';
+            document.getElementById('searchInput').value = '';
+            const rows = document.querySelectorAll('#tabelaEstoque tr');
+            rows.forEach(row => row.style.display = '');
+        }
+
+        function verHistorico(id) {
+            // TODO: Carregar histórico da API
+            document.getElementById('nomeProdutoHistorico').textContent = 'Arroz Tipo 1';
+            document.getElementById('tabelaHistorico').innerHTML = `
+                <tr>
+                    <td>12/10/2025</td>
+                    <td><span class="badge badge-danger">Saída</span></td>
+                    <td>-10 kg</td>
+                    <td>João Silva</td>
+                    <td>Doação para família Santos</td>
+                </tr>
+                <tr>
+                    <td>10/10/2025</td>
+                    <td><span class="badge badge-success">Entrada</span></td>
+                    <td>+50 kg</td>
+                    <td>Maria Santos</td>
+                    <td>Recebimento de doação</td>
+                </tr>
+                <tr>
+                    <td>05/10/2025</td>
+                    <td><span class="badge badge-danger">Saída</span></td>
+                    <td>-20 kg</td>
+                    <td>Pedro Costa</td>
+                    <td>Distribuição campanha Natal</td>
+                </tr>
+                <tr>
+                    <td>01/10/2025</td>
+                    <td><span class="badge badge-warning">Acerto</span></td>
+                    <td>+5 kg</td>
+                    <td>Ana Silva</td>
+                    <td>Acerto de inventário</td>
+                </tr>
+            `;
+            UI.openModal('modalHistorico');
+        }
+
+        function verDetalhes(id) {
+            // TODO: Carregar detalhes da API
+            document.getElementById('detalhesNome').textContent = 'Arroz Tipo 1';
+            document.getElementById('detalhesCategoria').textContent = 'Alimentos';
+            document.getElementById('detalhesQuantidade').textContent = '50';
+            document.getElementById('detalhesUnidade').textContent = 'kg';
+            document.getElementById('detalhesValidade').textContent = '15/12/2025';
+            UI.openModal('modalDetalhes');
+        }
+
+        function closeModal(modalId) {
+            UI.closeModal(modalId);
+        }
+
+        function exportarEstoque() {
+            UI.showAlert('Exportação em desenvolvimento. Em breve você poderá exportar para Excel.', 'info');
+            // TODO: Implementar exportação para Excel
+            // await API.get('/estoque/exportar');
+        }
+    </script>
+</body>
+</html>

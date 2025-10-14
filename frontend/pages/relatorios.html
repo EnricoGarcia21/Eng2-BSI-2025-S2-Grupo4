@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOARC - Relatórios</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="dashboard.html" class="logo">DOARC</a>
+            <div class="user-menu">
+                <span class="user-name" id="userName">Voluntário</span>
+                <button class="btn-logout" id="logoutBtn">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav">
+        <ul class="nav-list">
+            <li class="nav-item">
+                <a href="dashboard.html" class="nav-link">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Gerenciar</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Doações</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">Estoque</a>
+                <ul class="submenu">
+                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="relatorios.html" class="nav-link active">Relatórios</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <div class="breadcrumb">
+            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+            <div class="breadcrumb-item active">Relatórios</div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h1 class="card-title">Relatórios</h1>
+                <p class="card-subtitle">Gere relatórios detalhados sobre doações, produtos e voluntários</p>
+            </div>
+            <div class="card-body">
+                <!-- Seleção de Tipo de Relatório -->
+                <div class="form-group">
+                    <label for="tipoRelatorio" class="form-label required">Tipo de Relatório</label>
+                    <select id="tipoRelatorio" class="form-control form-select" onchange="atualizarFiltros()">
+                        <option value="">Selecione o tipo de relatório</option>
+                        <option value="doacoes">Relatório de Doações</option>
+                        <option value="produtos">Relatório de Produtos</option>
+                        <option value="voluntarios">Relatório de Voluntários</option>
+                        <option value="campanhas">Relatório de Campanhas</option>
+                        <option value="doadores">Relatório de Doadores</option>
+                        <option value="donatarios">Relatório de Donatários</option>
+                    </select>
+                </div>
+
+                <!-- Filtros Gerais -->
+                <div id="filtrosGerais" style="display: none;">
+                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Filtros</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="dataInicio" class="form-label">Data Início</label>
+                            <input type="date" id="dataInicio" class="form-control">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dataFim" class="form-label">Data Fim</label>
+                            <input type="date" id="dataFim" class="form-control">
+                        </div>
+                    </div>
+
+                    <!-- Filtros Específicos de Doações -->
+                    <div id="filtrosDoacoes" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="tipoDoacao" class="form-label">Tipo de Doação</label>
+                                <select id="tipoDoacao" class="form-control form-select">
+                                    <option value="">Todos</option>
+                                    <option value="recebida">Doações Recebidas</option>
+                                    <option value="efetuada">Doações Efetuadas</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroVoluntario" class="form-label">Voluntário</label>
+                                <select id="filtroVoluntario" class="form-control form-select">
+                                    <option value="">Todos</option>
+                                    <option value="1">João Silva</option>
+                                    <option value="2">Maria Santos</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroProduto" class="form-label">Produto</label>
+                                <select id="filtroProduto" class="form-control form-select">
+                                    <option value="">Todos</option>
+                                    <option value="1">Arroz</option>
+                                    <option value="2">Feijão</option>
+                                    <option value="3">Óleo</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Específicos de Produtos -->
+                    <div id="filtrosProdutos" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="filtroCategoria" class="form-label">Categoria</label>
+                                <select id="filtroCategoria" class="form-control form-select">
+                                    <option value="">Todas</option>
+                                    <option value="1">Alimentos</option>
+                                    <option value="2">Roupas</option>
+                                    <option value="3">Higiene</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroEstoque" class="form-label">Situação do Estoque</label>
+                                <select id="filtroEstoque" class="form-control form-select">
+                                    <option value="">Todos</option>
+                                    <option value="baixo">Estoque Baixo</option>
+                                    <option value="normal">Estoque Normal</option>
+                                    <option value="alto">Estoque Alto</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroValidade" class="form-label">Validade</label>
+                                <select id="filtroValidade" class="form-control form-select">
+                                    <option value="">Todos</option>
+                                    <option value="vencidos">Vencidos</option>
+                                    <option value="proximo_vencimento">Próximo ao Vencimento</option>
+                                    <option value="validos">Válidos</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros Específicos de Voluntários -->
+                    <div id="filtrosVoluntarios" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="filtroIdadeMin" class="form-label">Idade Mínima</label>
+                                <input type="number" id="filtroIdadeMin" class="form-control" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroIdadeMax" class="form-label">Idade Máxima</label>
+                                <input type="number" id="filtroIdadeMax" class="form-control" min="0">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="filtroAnosParceria" class="form-label">Anos de Parceria</label>
+                                <input type="number" id="filtroAnosParceria" class="form-control" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="form-group mt-3">
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="gerarRelatorio()">
+                                📊 Gerar Relatório
+                            </button>
+                            <button class="btn btn-success" onclick="exportarPDF()">
+                                📄 Exportar PDF
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportarExcel()">
+                                📑 Exportar Excel
+                            </button>
+                            <button class="btn btn-outline" onclick="limparFiltros()">
+                                🔄 Limpar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Área de Resultados -->
+                <div id="resultadosRelatorio" style="display: none; margin-top: 2rem;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Resultados</h3>
+
+                    <!-- Estatísticas Resumidas -->
+                    <div id="estatisticasResumo" class="dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                        <!-- Estatísticas serão inseridas dinamicamente -->
+                    </div>
+
+                    <!-- Tabela de Dados -->
+                    <div class="table-container mt-3">
+                        <table class="table table-striped">
+                            <thead id="tabelaCabecalho">
+                                <!-- Cabeçalho será inserido dinamicamente -->
+                            </thead>
+                            <tbody id="tabelaDados">
+                                <!-- Dados serão inseridos dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../js/app.js"></script>
+    <script>
+        function atualizarFiltros() {
+            const tipo = document.getElementById('tipoRelatorio').value;
+            const filtrosGerais = document.getElementById('filtrosGerais');
+            const filtrosDoacoes = document.getElementById('filtrosDoacoes');
+            const filtrosProdutos = document.getElementById('filtrosProdutos');
+            const filtrosVoluntarios = document.getElementById('filtrosVoluntarios');
+
+            // Esconde todos os filtros
+            filtrosGerais.style.display = 'none';
+            filtrosDoacoes.style.display = 'none';
+            filtrosProdutos.style.display = 'none';
+            filtrosVoluntarios.style.display = 'none';
+
+            if (tipo) {
+                filtrosGerais.style.display = 'block';
+
+                // Mostra filtros específicos
+                if (tipo === 'doacoes') {
+                    filtrosDoacoes.style.display = 'block';
+                } else if (tipo === 'produtos') {
+                    filtrosProdutos.style.display = 'block';
+                } else if (tipo === 'voluntarios') {
+                    filtrosVoluntarios.style.display = 'block';
+                }
+            }
+
+            // Esconde resultados
+            document.getElementById('resultadosRelatorio').style.display = 'none';
+        }
+
+        function gerarRelatorio() {
+            const tipo = document.getElementById('tipoRelatorio').value;
+
+            if (!tipo) {
+                UI.showAlert('Selecione um tipo de relatório', 'warning');
+                return;
+            }
+
+            UI.showLoading();
+
+            // TODO: Integrar com API real
+            // Simulação de geração de relatório
+            setTimeout(() => {
+                UI.hideLoading();
+
+                const resultados = document.getElementById('resultadosRelatorio');
+                const estatisticas = document.getElementById('estatisticasResumo');
+                const cabecalho = document.getElementById('tabelaCabecalho');
+                const dados = document.getElementById('tabelaDados');
+
+                resultados.style.display = 'block';
+
+                // Dados de exemplo baseados no tipo
+                if (tipo === 'doacoes') {
+                    estatisticas.innerHTML = `
+                        <div class="stat-card" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                            <div class="stat-value">125</div>
+                            <div class="stat-label">Total de Doações</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                            <div class="stat-value">R$ 15.250</div>
+                            <div class="stat-label">Valor Total</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #d68910);">
+                            <div class="stat-value">3.500</div>
+                            <div class="stat-label">Itens Doados</div>
+                        </div>
+                    `;
+
+                    cabecalho.innerHTML = `
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Doador/Donatário</th>
+                            <th>Produto/Valor</th>
+                            <th>Quantidade</th>
+                            <th>Voluntário</th>
+                        </tr>
+                    `;
+
+                    dados.innerHTML = `
+                        <tr>
+                            <td>10/10/2025</td>
+                            <td><span class="badge badge-success">Recebida</span></td>
+                            <td>João Silva</td>
+                            <td>Arroz</td>
+                            <td>50 kg</td>
+                            <td>Maria Santos</td>
+                        </tr>
+                        <tr>
+                            <td>09/10/2025</td>
+                            <td><span class="badge badge-danger">Efetuada</span></td>
+                            <td>Família Costa</td>
+                            <td>Cesta Básica</td>
+                            <td>5 un</td>
+                            <td>Pedro Lima</td>
+                        </tr>
+                        <tr>
+                            <td>08/10/2025</td>
+                            <td><span class="badge badge-success">Recebida</span></td>
+                            <td>Empresa ABC</td>
+                            <td>R$ 1.000,00</td>
+                            <td>-</td>
+                            <td>Ana Paula</td>
+                        </tr>
+                    `;
+                } else if (tipo === 'produtos') {
+                    estatisticas.innerHTML = `
+                        <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                            <div class="stat-value">150</div>
+                            <div class="stat-label">Produtos Cadastrados</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
+                            <div class="stat-value">2.500</div>
+                            <div class="stat-label">Itens em Estoque</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Próximos ao Vencimento</div>
+                        </div>
+                    `;
+
+                    cabecalho.innerHTML = `
+                        <tr>
+                            <th>Produto</th>
+                            <th>Categoria</th>
+                            <th>Quantidade</th>
+                            <th>Validade</th>
+                            <th>Status</th>
+                        </tr>
+                    `;
+
+                    dados.innerHTML = `
+                        <tr>
+                            <td>Arroz 5kg</td>
+                            <td>Alimentos</td>
+                            <td>150 un</td>
+                            <td>15/12/2025</td>
+                            <td><span class="badge badge-success">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>Feijão 1kg</td>
+                            <td>Alimentos</td>
+                            <td>80 un</td>
+                            <td>20/11/2025</td>
+                            <td><span class="badge badge-success">Normal</span></td>
+                        </tr>
+                        <tr>
+                            <td>Óleo 900ml</td>
+                            <td>Alimentos</td>
+                            <td>25 un</td>
+                            <td>30/10/2025</td>
+                            <td><span class="badge badge-warning">Próximo ao Vencimento</span></td>
+                        </tr>
+                    `;
+                } else if (tipo === 'voluntarios') {
+                    estatisticas.innerHTML = `
+                        <div class="stat-card" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                            <div class="stat-value">25</div>
+                            <div class="stat-label">Voluntários Ativos</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #d68910);">
+                            <div class="stat-value">150</div>
+                            <div class="stat-label">Doações Realizadas</div>
+                        </div>
+                        <div class="stat-card" style="background: linear-gradient(135deg, #1abc9c, #16a085);">
+                            <div class="stat-value">3.5</div>
+                            <div class="stat-label">Anos Médios de Parceria</div>
+                        </div>
+                    `;
+
+                    cabecalho.innerHTML = `
+                        <tr>
+                            <th>Nome</th>
+                            <th>Idade</th>
+                            <th>Cadastro</th>
+                            <th>Doações</th>
+                            <th>Status</th>
+                        </tr>
+                    `;
+
+                    dados.innerHTML = `
+                        <tr>
+                            <td>João Silva</td>
+                            <td>35 anos</td>
+                            <td>10/01/2020</td>
+                            <td>45</td>
+                            <td><span class="badge badge-success">Ativo</span></td>
+                        </tr>
+                        <tr>
+                            <td>Maria Santos</td>
+                            <td>42 anos</td>
+                            <td>15/03/2019</td>
+                            <td>68</td>
+                            <td><span class="badge badge-success">Ativo</span></td>
+                        </tr>
+                        <tr>
+                            <td>Pedro Lima</td>
+                            <td>28 anos</td>
+                            <td>20/06/2023</td>
+                            <td>22</td>
+                            <td><span class="badge badge-success">Ativo</span></td>
+                        </tr>
+                    `;
+                }
+
+                UI.showAlert('Relatório gerado com sucesso!', 'success');
+            }, 1000);
+        }
+
+        function exportarPDF() {
+            const tipo = document.getElementById('tipoRelatorio').value;
+
+            if (!tipo) {
+                UI.showAlert('Gere um relatório antes de exportar', 'warning');
+                return;
+            }
+
+            // TODO: Implementar exportação real para PDF
+            UI.showAlert('Exportando relatório para PDF...', 'info');
+
+            setTimeout(() => {
+                UI.showAlert('Relatório exportado com sucesso!', 'success');
+            }, 1500);
+        }
+
+        function exportarExcel() {
+            const tipo = document.getElementById('tipoRelatorio').value;
+
+            if (!tipo) {
+                UI.showAlert('Gere um relatório antes de exportar', 'warning');
+                return;
+            }
+
+            // TODO: Implementar exportação real para Excel
+            UI.showAlert('Exportando relatório para Excel...', 'info');
+
+            setTimeout(() => {
+                UI.showAlert('Relatório exportado com sucesso!', 'success');
+            }, 1500);
+        }
+
+        function limparFiltros() {
+            document.getElementById('dataInicio').value = '';
+            document.getElementById('dataFim').value = '';
+            document.getElementById('tipoDoacao').value = '';
+            document.getElementById('filtroVoluntario').value = '';
+            document.getElementById('filtroProduto').value = '';
+            document.getElementById('filtroCategoria').value = '';
+            document.getElementById('filtroEstoque').value = '';
+            document.getElementById('filtroValidade').value = '';
+            document.getElementById('filtroIdadeMin').value = '';
+            document.getElementById('filtroIdadeMax').value = '';
+            document.getElementById('filtroAnosParceria').value = '';
+            document.getElementById('resultadosRelatorio').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
