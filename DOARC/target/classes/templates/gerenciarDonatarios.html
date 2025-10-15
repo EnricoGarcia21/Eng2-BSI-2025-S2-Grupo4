@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consulta de Donatários</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="header">
+    <nav>
+        <a href="menu.html" class="nav-link">Voltar para o Menu Principal</a>
+    </nav>
+</header>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Consulta de Donatários</h1>
+        <div style="display: flex; gap: 10px;">
+            <a href="cadastroDonatario.html">
+                <button id="btn-novo" class="edit-btn" style="background-color: #17A2B8;">Novo Donatário</button>
+            </a>
+            <a href="menu.html">
+                <button class="edit-btn" style="background-color: #6C757D;">Menu</button>
+            </a>
+        </div>
+    </div>
+
+    <div class="filtro-container">
+        <input type="text" id="filtro-input" class="form-control" placeholder="Digite nome ou email..." />
+
+        <button class="edit-btn" id="filtrar-nome" style="background-color: #6C757D;">Filtrar por Nome</button>
+        <button class="edit-btn" id="filtrar-email" style="background-color: #6C757D;">Filtrar por Email</button>
+
+        <p id="filtro-status" style="margin-left: 10px; font-style: italic; color: #999;"></p>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nome</th>
+            <th>Data Nasc.</th>
+            <th>Telefone</th>
+            <th>Email</th>
+            <th>Cidade</th>
+            <th>UF</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody id="tabela-donatarios">
+        <tr><td colspan="8">Carregando donatários...</td></tr>
+        </tbody>
+    </table>
+
+    <div id="message-consulta"></div>
+</div>
+
+<script src="gerenciarDonatarios.js"></script>
+</body>
+</html>
