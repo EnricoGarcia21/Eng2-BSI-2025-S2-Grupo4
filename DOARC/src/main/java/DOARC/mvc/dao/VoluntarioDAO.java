@@ -19,7 +19,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     @Override
     public Voluntario gravar(Voluntario entidade) {
-        String sql = "INSERT INTO voluntario (vol_nome, vol_data_nasc, vol_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING vol_id";
+        String sql = "INSERT INTO voluntario (vol_nome, vol_datanasc, von_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING vol_id";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entidade.getVolNome());
             pst.setString(2, entidade.getVolDataNasc());
@@ -31,6 +31,8 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
             pst.setString(8, entidade.getVolUf());
             pst.setString(9, entidade.getVolEmail());
             pst.setString(10, entidade.getVolSexo());
+            pst.setString(11, entidade.getVolNumero());
+            pst.setString(12, entidade.getVolCpf());
 
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
@@ -45,7 +47,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     @Override
     public Voluntario alterar(Voluntario entidade) {
-        String sql = "UPDATE voluntario SET vol_nome=?, vol_data_nasc=?, vol_rua=?, vol_bairro=?, vol_cidade=?, vol_telefone=?, vol_cep=?, vol_uf=?, vol_email=?, vol_sexo=? WHERE vol_id=?";
+        String sql = "UPDATE voluntario SET vol_nome=?, vol_datanasc=?, von_rua=?, vol_bairro=?, vol_cidade=?, vol_telefone=?, vol_cep=?, vol_uf=?, vol_email=?, vol_sexo=?, vol_numero=?, vol_cpf=? WHERE vol_id=?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entidade.getVolNome());
             pst.setString(2, entidade.getVolDataNasc());
@@ -57,7 +59,9 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
             pst.setString(8, entidade.getVolUf());
             pst.setString(9, entidade.getVolEmail());
             pst.setString(10, entidade.getVolSexo());
-            pst.setInt(11, entidade.getVolId());
+            pst.setString(11, entidade.getVolNumero());
+            pst.setString(12, entidade.getVolCpf());
+            pst.setInt(13, entidade.getVolId());
 
             int updated = pst.executeUpdate();
             return (updated > 0) ? entidade : null;
@@ -115,8 +119,8 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         Voluntario v = new Voluntario();
         v.setVolId(rs.getInt("vol_id"));
         v.setVolNome(rs.getString("vol_nome"));
-        v.setVolDataNasc(rs.getString("vol_data_nasc"));
-        v.setVolRua(rs.getString("vol_rua"));
+        v.setVolDataNasc(rs.getString("vol_datanasc"));
+        v.setVolRua(rs.getString("von_rua"));
         v.setVolBairro(rs.getString("vol_bairro"));
         v.setVolCidade(rs.getString("vol_cidade"));
         v.setVolTelefone(rs.getString("vol_telefone"));
@@ -124,6 +128,8 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         v.setVolUf(rs.getString("vol_uf"));
         v.setVolEmail(rs.getString("vol_email"));
         v.setVolSexo(rs.getString("vol_sexo"));
+        v.setVolNumero(rs.getString("vol_numero"));
+        v.setVolCpf(rs.getString("vol_cpf"));
         return v;
     }
 }

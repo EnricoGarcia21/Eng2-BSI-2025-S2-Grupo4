@@ -17,48 +17,67 @@ public class DonatarioView {
 
     @Autowired
     private DonatarioController donatarioController;
-
     @PostMapping
-    public ResponseEntity<Object> addDonatario(@RequestParam String don_nome,
-                                               @RequestParam String don_data_nasc,
-                                               @RequestParam String don_rua,
-                                               @RequestParam String don_bairro,
-                                               @RequestParam String don_cidade,
-                                               @RequestParam String don_telefone,
-                                               @RequestParam String don_cep,
-                                               @RequestParam String don_uf,
-                                               @RequestParam String don_email,
-                                               @RequestParam String don_sexo) {
+    public ResponseEntity<Object> addDonatario(@RequestBody Map<String, Object> body) {
+        // Aceita JSON com chaves como: nome, dataNasc, rua, bairro, cidade, telefone, cep, uf, email, sexo
+        String nome = getString(body, "nome", "don_nome", "donNome");
+        String dataNasc = getString(body, "dataNasc", "don_data_nasc", "donDataNasc");
+        String rua = getString(body, "rua", "don_rua", "donRua");
+        String bairro = getString(body, "bairro", "don_bairro", "donBairro");
+        String cidade = getString(body, "cidade", "don_cidade", "donCidade");
+        String telefone = getString(body, "telefone", "don_telefone", "donTelefone");
+        String cep = getString(body, "cep", "don_cep", "donCep");
+        String uf = getString(body, "uf", "don_uf", "donUf");
+        String email = getString(body, "email", "don_email", "donEmail");
+        String sexo = getString(body, "sexo", "don_sexo", "donSexo");
 
-        Map<String, Object> json = donatarioController.addDonatario(don_nome, don_data_nasc, don_rua, don_bairro,
-                don_cidade, don_telefone, don_cep, don_uf,
-                don_email, don_sexo);
+        Map<String, Object> json = donatarioController.addDonatario(nome, dataNasc, rua, bairro,
+                cidade, telefone, cep, uf, email, sexo);
 
         return json.get("erro") == null
                 ? ResponseEntity.ok(new Mensagem("Donatário cadastrado com sucesso!"))
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
-    @PutMapping
-    public ResponseEntity<Object> updtDonatario(@RequestParam int don_id,
-                                                @RequestParam String don_nome,
-                                                @RequestParam String don_data_nasc,
-                                                @RequestParam String don_rua,
-                                                @RequestParam String don_bairro,
-                                                @RequestParam String don_cidade,
-                                                @RequestParam String don_telefone,
-                                                @RequestParam String don_cep,
-                                                @RequestParam String don_uf,
-                                                @RequestParam String don_email,
-                                                @RequestParam String don_sexo) {
+        @PutMapping
+        public ResponseEntity<Object> updtDonatario(@RequestBody Map<String, Object> body) {
+                // aceita JSON com 'id' ou 'don_id' e demais campos como no POST
+                Integer id = null;
+                Object idObj = body.get("id");
+                if (idObj == null) idObj = body.get("don_id");
+                if (idObj instanceof Number) id = ((Number) idObj).intValue();
+                else if (idObj instanceof String) {
+                        try { id = Integer.parseInt((String) idObj); } catch (NumberFormatException ignored) {}
+                }
+                if (id == null) return ResponseEntity.badRequest().body(new Mensagem("Campo 'id' é obrigatório."));
 
-        Map<String, Object> json = donatarioController.updtDonatario(don_id, don_nome, don_data_nasc, don_rua, don_bairro,
-                don_cidade, don_telefone, don_cep, don_uf, don_email, don_sexo);
+                String nome = getString(body, "nome", "don_nome", "donNome");
+                String dataNasc = getString(body, "dataNasc", "don_data_nasc", "donDataNasc");
+                String rua = getString(body, "rua", "don_rua", "donRua");
+                String bairro = getString(body, "bairro", "don_bairro", "donBairro");
+                String cidade = getString(body, "cidade", "don_cidade", "donCidade");
+                String telefone = getString(body, "telefone", "don_telefone", "donTelefone");
+                String cep = getString(body, "cep", "don_cep", "donCep");
+                String uf = getString(body, "uf", "don_uf", "donUf");
+                String email = getString(body, "email", "don_email", "donEmail");
+                String sexo = getString(body, "sexo", "don_sexo", "donSexo");
 
-        return json.get("erro") == null
-                ? ResponseEntity.ok(new Mensagem("Donatário alterado com sucesso!"))
-                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
-    }
+                Map<String, Object> json = donatarioController.updtDonatario(id, nome, dataNasc, rua, bairro,
+                                cidade, telefone, cep, uf, email, sexo);
+
+                return json.get("erro") == null
+                                ? ResponseEntity.ok(new Mensagem("Donatário alterado com sucesso!"))
+                                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
+        }
+
+        // Helper para extrair o primeiro valor não-nulo entre várias chaves possíveis
+        private String getString(Map<String, Object> body, String... keys) {
+                for (String k : keys) {
+                        Object o = body.get(k);
+                        if (o != null) return o.toString();
+                }
+                return null;
+        }
 
     @GetMapping
     public ResponseEntity<Object> getAll() {
