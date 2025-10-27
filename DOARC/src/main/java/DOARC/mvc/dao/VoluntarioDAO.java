@@ -19,7 +19,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     @Override
     public Voluntario gravar(Voluntario entidade) {
-        String sql = "INSERT INTO voluntario (vol_nome, vol_datanasc, von_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING vol_id";
+        String sql = "INSERT INTO voluntario (vol_nome, vol_datanasc, vol_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING vol_id";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entidade.getVolNome());
             pst.setString(2, entidade.getVolDataNasc());
@@ -47,7 +47,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     @Override
     public Voluntario alterar(Voluntario entidade) {
-        String sql = "UPDATE voluntario SET vol_nome=?, vol_datanasc=?, von_rua=?, vol_bairro=?, vol_cidade=?, vol_telefone=?, vol_cep=?, vol_uf=?, vol_email=?, vol_sexo=?, vol_numero=?, vol_cpf=? WHERE vol_id=?";
+        String sql = "UPDATE voluntario SET vol_nome=?, vol_datanasc=?, vol_rua=?, vol_bairro=?, vol_cidade=?, vol_telefone=?, vol_cep=?, vol_uf=?, vol_email=?, vol_sexo=?, vol_numero=?, vol_cpf=? WHERE vol_id=?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entidade.getVolNome());
             pst.setString(2, entidade.getVolDataNasc());
@@ -120,7 +120,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         v.setVolId(rs.getInt("vol_id"));
         v.setVolNome(rs.getString("vol_nome"));
         v.setVolDataNasc(rs.getString("vol_datanasc"));
-        v.setVolRua(rs.getString("von_rua"));
+        v.setVolRua(rs.getString("vol_rua"));
         v.setVolBairro(rs.getString("vol_bairro"));
         v.setVolCidade(rs.getString("vol_cidade"));
         v.setVolTelefone(rs.getString("vol_telefone"));

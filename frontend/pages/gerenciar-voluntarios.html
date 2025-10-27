@@ -5,6 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOARC - Gerenciar Voluntários</title>
     <link rel="stylesheet" href="../css/style.css">
+    <script src="https://unpkg.com/vanilla-masker@1.2.0/lib/vanilla-masker.js"></script>
+    <style>
+        /* Estilos básicos para garantir funcionamento */
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 0; border-radius: 8px; width: 90%; max-width: 600px; }
+        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid #dee2e6; display: flex; justify-content: between; align-items: center; }
+        .modal-body { padding: 1.5rem; max-height: 70vh; overflow-y: auto; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; gap: 0.5rem; }
+        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
+        .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .form-group { flex: 1; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-control { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; }
+        .form-select { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; background-color: white; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-outline { background-color: transparent; border: 1px solid #ddd; color: #333; }
+        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
+        .btn-info { background-color: #17a2b8; color: white; }
+        .btn-warning { background-color: #ffc107; color: black; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 0.75rem; border-bottom: 1px solid #dee2e6; text-align: left; }
+        .table-striped tbody tr:nth-child(odd) { background-color: #f8f9fa; }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
+        .badge-success { background-color: #28a745; color: white; }
+        .text-center { text-align: center; }
+        .required::after { content: " *"; color: red; }
+        .form-error { color: red; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -69,7 +99,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <input type="text" id="searchInput" class="form-control" placeholder="Buscar voluntário..." style="max-width: 300px;">
-                        <select id="filtroStatus" class="form-control form-select" style="max-width: 150px;" onchange="filtrarPorStatus()">
+                        <select id="filtroStatus" class="form-control form-select" style="max-width: 150px;">
                             <option value="">Todos Status</option>
                             <option value="ativo">Ativo</option>
                             <option value="inativo">Inativo</option>
@@ -93,34 +123,7 @@
                             </tr>
                         </thead>
                         <tbody id="tabelaVoluntarios">
-                            <tr>
-                                <td>João Silva</td>
-                                <td>123.456.789-00</td>
-                                <td>joao@email.com</td>
-                                <td>(18) 99999-9999</td>
-                                <td>10/01/2023</td>
-                                <td>45</td>
-                                <td><span class="badge badge-success">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(1)">✏️</button>
-                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(1)">📋</button>
-                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(1)">🔒</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Maria Santos</td>
-                                <td>987.654.321-00</td>
-                                <td>maria@email.com</td>
-                                <td>(18) 98888-8888</td>
-                                <td>15/03/2022</td>
-                                <td>68</td>
-                                <td><span class="badge badge-success">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(2)">✏️</button>
-                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(2)">📋</button>
-                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(2)">🔒</button>
-                                </td>
-                            </tr>
+                            <!-- Os dados serão carregados via JavaScript -->
                         </tbody>
                     </table>
                 </div>
@@ -128,6 +131,7 @@
         </div>
     </main>
 
+    <!-- Modal para Cadastro/Edição de Voluntários -->
     <div id="modalVoluntario" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -137,51 +141,116 @@
             <div class="modal-body">
                 <form id="formVoluntario">
                     <input type="hidden" id="voluntarioId">
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="nome" class="form-label required">Nome Completo</label>
-                            <input type="text" id="nome" class="form-control" required>
+                            <label for="vol_nome" class="form-label required">Nome Completo</label>
+                            <input type="text" id="vol_nome" class="form-control" required>
                             <div class="form-error">Nome é obrigatório</div>
                         </div>
                         <div class="form-group">
-                            <label for="cpf" class="form-label required">CPF</label>
-                            <input type="text" id="cpf" class="form-control" data-mask="cpf" required>
+                            <label for="vol_cpf" class="form-label required">CPF</label>
+                            <input type="text" id="vol_cpf" class="form-control" required>
                             <div class="form-error">CPF inválido</div>
                         </div>
                     </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="email" class="form-label required">E-mail</label>
-                            <input type="email" id="email" class="form-control" required>
+                            <label for="vol_email" class="form-label required">E-mail</label>
+                            <input type="email" id="vol_email" class="form-control" required>
                             <div class="form-error">E-mail inválido</div>
                         </div>
                         <div class="form-group">
-                            <label for="telefone" class="form-label required">Telefone</label>
-                            <input type="tel" id="telefone" class="form-control" data-mask="phone" required>
+                            <label for="vol_telefone" class="form-label required">Telefone</label>
+                            <input type="tel" id="vol_telefone" class="form-control" required>
                             <div class="form-error">Telefone inválido</div>
                         </div>
                     </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="dataNascimento" class="form-label required">Data de Nascimento</label>
-                            <input type="date" id="dataNascimento" class="form-control" required>
+                            <label for="vol_dataNasc" class="form-label required">Data de Nascimento</label>
+                            <input type="date" id="vol_dataNasc" class="form-control" required>
                             <div class="form-error">Data é obrigatória</div>
                         </div>
                         <div class="form-group">
-                            <label for="statusVoluntario" class="form-label required">Status</label>
-                            <select id="statusVoluntario" class="form-control form-select" required>
-                                <option value="ativo">Ativo</option>
-                                <option value="inativo">Inativo</option>
+                            <label for="vol_sexo" class="form-label required">Sexo</label>
+                            <select id="vol_sexo" class="form-control form-select" required>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="endereco" class="form-label">Endereço</label>
-                        <input type="text" id="endereco" class="form-control">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vol_rua" class="form-label required">Rua</label>
+                            <input type="text" id="vol_rua" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vol_numero" class="form-label required">Número</label>
+                            <input type="text" id="vol_numero" class="form-control" required>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="observacoes" class="form-label">Observações</label>
-                        <textarea id="observacoes" class="form-control" rows="3"></textarea>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vol_bairro" class="form-label required">Bairro</label>
+                            <input type="text" id="vol_bairro" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vol_cidade" class="form-label required">Cidade</label>
+                            <input type="text" id="vol_cidade" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vol_cep" class="form-label required">CEP</label>
+                            <input type="text" id="vol_cep" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="vol_uf" class="form-label required">UF</label>
+                            <select id="vol_uf" class="form-control form-select" required>
+                                <option value="">Selecione um estado</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
+                                <option value="MG">Minas Gerais</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
+                                <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
+                                <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
+                                <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="vol_observacoes" class="form-label">Observações</label>
+                            <textarea id="vol_observacoes" class="form-control" rows="3" 
+                                    placeholder="Digite aqui observações relevantes sobre o voluntário..."></textarea>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -192,6 +261,7 @@
         </div>
     </div>
 
+    <!-- Modal para Histórico -->
     <div id="modalHistorico" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -221,28 +291,74 @@
         </div>
     </div>
 
-    <script src="../js/app.js"></script>
     <script>
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#tabelaVoluntarios tr');
-            rows.forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
-            });
+        // Inicialização das máscaras de input
+        document.addEventListener('DOMContentLoaded', function() {
+            // Máscara para CEP
+            VMasker(document.querySelector("#vol_cep")).maskPattern("99999-999");
+
+            // Máscara para telefone (aceita 8 ou 9 dígitos para o número)
+            const phoneInput = document.querySelector("#vol_telefone");
+            if (phoneInput) {
+                VMasker(phoneInput).maskPattern("(99) 9999-99999");
+                phoneInput.addEventListener('input', function(e) {
+                    let value = e.target.value.replace(/\D/g, '');
+                    if (value.length > 10) {
+                        VMasker(phoneInput).maskPattern("(99) 99999-9999");
+                    } else {
+                        VMasker(phoneInput).maskPattern("(99) 9999-99999");
+                    }
+                });
+            }
         });
 
-        function filtrarPorStatus() {
-            const status = document.getElementById('filtroStatus').value.toLowerCase();
-            const rows = document.querySelectorAll('#tabelaVoluntarios tr');
-            rows.forEach(row => {
-                if (!status || row.textContent.toLowerCase().includes(status)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+        // Simulação das funções UI que devem estar no app.js
+        const UI = {
+            openModal: (modalId) => {
+                document.getElementById(modalId).style.display = 'block';
+            },
+            closeModal: (modalId) => {
+                document.getElementById(modalId).style.display = 'none';
+            },
+            showAlert: (message, type) => {
+                alert(`${type.toUpperCase()}: ${message}`);
+            },
+            confirm: (message, callback) => {
+                if (confirm(message)) {
+                    callback();
                 }
-            });
-        }
+            }
+        };
 
+        // Simulação do Validator que deve estar no app.js
+        const Validator = {
+            isEmpty: (value) => !value || value.trim() === '',
+            isValidCPF: (cpf) => {
+                const cleanCPF = cpf.replace(/[^\d]/g, '');
+                return cleanCPF.length === 11;
+            },
+            isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+            isValidPhone: (phone) => {
+                const cleanPhone = phone.replace(/[^\d]/g, '');
+                return cleanPhone.length >= 10 && cleanPhone.length <= 11;
+            },
+            showError: (input, message) => {
+                const errorElement = input.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('form-error')) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                    input.style.borderColor = 'red';
+                }
+            },
+            clearAllErrors: (form) => {
+                const errors = form.querySelectorAll('.form-error');
+                const inputs = form.querySelectorAll('.form-control');
+                errors.forEach(error => error.style.display = 'none');
+                inputs.forEach(input => input.style.borderColor = '');
+            }
+        };
+
+        // FUNÇÕES GLOBAIS (acessíveis pelo HTML)
         function openModal(modalId) {
             if (modalId === 'modalVoluntario') {
                 document.getElementById('formVoluntario').reset();
@@ -252,20 +368,39 @@
             UI.openModal(modalId);
         }
 
-        function closeModal(modalId) { UI.closeModal(modalId); }
+        function closeModal(modalId) { 
+            UI.closeModal(modalId); 
+        }
 
         function editarVoluntario(id) {
-            document.getElementById('voluntarioId').value = id;
-            document.getElementById('modalTitle').textContent = 'Editar Voluntário';
-            document.getElementById('nome').value = 'João Silva';
-            document.getElementById('cpf').value = '123.456.789-00';
-            document.getElementById('email').value = 'joao@email.com';
-            document.getElementById('telefone').value = '(18) 99999-9999';
-            UI.openModal('modalVoluntario');
+            // Buscar dados do voluntário para edição
+            fetch(`http://localhost:8080/apis/voluntario/${id}`)
+                .then(response => response.json())
+                .then(vol => {
+                    document.getElementById('voluntarioId').value = vol.id;
+                    document.getElementById('modalTitle').textContent = 'Editar Voluntário';
+                    document.getElementById('vol_nome').value = vol.nome || '';
+                    document.getElementById('vol_cpf').value = vol.cpf || '';
+                    document.getElementById('vol_email').value = vol.email || '';
+                    document.getElementById('vol_telefone').value = vol.telefone || '';
+                    document.getElementById('vol_dataNasc').value = vol.dataNasc || '';
+                    document.getElementById('vol_sexo').value = vol.sexo || 'M';
+                    document.getElementById('vol_rua').value = vol.rua || '';
+                    document.getElementById('vol_numero').value = vol.numero || '';
+                    document.getElementById('vol_bairro').value = vol.bairro || '';
+                    document.getElementById('vol_cidade').value = vol.cidade || '';
+                    document.getElementById('vol_cep').value = vol.cep || '';
+                    document.getElementById('vol_uf').value = vol.uf || 'SP';
+                    
+                    openModal('modalVoluntario');
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar voluntário:', error);
+                    UI.showAlert('Erro ao carregar dados do voluntário', 'error');
+                });
         }
 
         function verHistorico(id) {
-            // TODO: Carregar histórico da API
             document.getElementById('tabelaHistorico').innerHTML = `
                 <tr>
                     <td>10/10/2025</td>
@@ -280,49 +415,135 @@
                     <td><span class="badge badge-success">Concluído</span></td>
                 </tr>
             `;
-            UI.openModal('modalHistorico');
+            openModal('modalHistorico');
         }
 
         function toggleStatus(id) {
             UI.confirm('Deseja alterar o status deste voluntário?', async function() {
                 try {
-                    // await API.put(`/voluntarios/${id}/toggle-status`);
+                    // Simulação de alteração de status
                     UI.showAlert('Status atualizado!', 'success');
                 } catch (error) {
                     console.error('Erro:', error);
+                    UI.showAlert('Erro ao atualizar status', 'error');
                 }
             });
         }
 
+        async function carregarVoluntarios() {
+            try {
+                console.log('Iniciando carregamento de voluntários...');
+                const response = await fetch('http://localhost:8080/apis/voluntario', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                console.log('Resposta do servidor:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries())
+                });
+                
+                // Lê a resposta como texto primeiro
+                const responseText = await response.text();
+                console.log('Resposta como texto:', responseText);
+                
+                // Tenta converter para JSON
+                let responseData;
+                try {
+                    responseData = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('Erro ao converter resposta para JSON:', e);
+                    throw new Error('Resposta do servidor não é um JSON válido');
+                }
+
+                // Se temos uma mensagem de "nenhum voluntário encontrado", mostramos a tabela vazia
+                if (response.status === 400 && responseData.mensagem === "Nenhum voluntário encontrado.") {
+                    const tbody = document.getElementById('tabelaVoluntarios');
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum voluntário cadastrado</td></tr>';
+                    return;
+                }
+
+                // Se há outro erro, lançamos exceção
+                if (!response.ok) {
+                    console.error('Erro na requisição GET:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        body: responseText
+                    });
+                    throw new Error(`Erro ao carregar voluntários: ${responseText}`);
+                }
+
+                // Se chegou aqui, temos dados de voluntários
+                const voluntarios = Array.isArray(responseData) ? responseData : 
+                                  responseData.data ? responseData.data : [];
+
+                console.log('Voluntários carregados:', voluntarios);
+                const tbody = document.getElementById('tabelaVoluntarios');
+                console.log('Elemento tbody encontrado:', tbody !== null);
+                tbody.innerHTML = '';
+                
+                if (voluntarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum voluntário cadastrado</td></tr>';
+                    return;
+                }
+                
+                voluntarios.forEach(vol => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${vol.nome || 'N/A'}</td>
+                        <td>${vol.cpf || 'N/A'}</td>
+                        <td>${vol.email || 'N/A'}</td>
+                        <td>${vol.telefone || 'N/A'}</td>
+                        <td>${new Date().toLocaleDateString('pt-BR')}</td>
+                        <td>0</td>
+                        <td><span class="badge badge-success">Ativo</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="editarVoluntario(${vol.id})">✏️</button>
+                            <button class="btn btn-sm btn-warning" onclick="verHistorico(${vol.id})">📋</button>
+                            <button class="btn btn-sm btn-danger" onclick="toggleStatus(${vol.id})">🔒</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar voluntários:', error);
+                document.getElementById('tabelaVoluntarios').innerHTML = 
+                    '<tr><td colspan="8" class="text-center">Erro ao carregar dados</td></tr>';
+            }
+        }
+
         async function salvarVoluntario() {
             const form = document.getElementById('formVoluntario');
-            const nome = document.getElementById('nome');
-            const cpf = document.getElementById('cpf');
-            const email = document.getElementById('email');
-            const telefone = document.getElementById('telefone');
-            const dataNascimento = document.getElementById('dataNascimento');
+            const vol_nome = document.getElementById('vol_nome');
+            const vol_cpf = document.getElementById('vol_cpf');
+            const vol_email = document.getElementById('vol_email');
+            const vol_telefone = document.getElementById('vol_telefone');
+            const vol_dataNasc = document.getElementById('vol_dataNasc');
 
             Validator.clearAllErrors(form);
             let isValid = true;
 
-            if (Validator.isEmpty(nome.value)) {
-                Validator.showError(nome, 'Nome é obrigatório');
+            // Validações
+            if (Validator.isEmpty(vol_nome.value)) {
+                Validator.showError(vol_nome, 'Nome é obrigatório');
                 isValid = false;
             }
-            if (Validator.isEmpty(cpf.value) || !Validator.isValidCPF(cpf.value)) {
-                Validator.showError(cpf, 'CPF inválido');
+            if (Validator.isEmpty(vol_cpf.value) || !Validator.isValidCPF(vol_cpf.value)) {
+                Validator.showError(vol_cpf, 'CPF inválido');
                 isValid = false;
             }
-            if (Validator.isEmpty(email.value) || !Validator.isValidEmail(email.value)) {
-                Validator.showError(email, 'E-mail inválido');
+            if (Validator.isEmpty(vol_email.value) || !Validator.isValidEmail(vol_email.value)) {
+                Validator.showError(vol_email, 'E-mail inválido');
                 isValid = false;
             }
-            if (Validator.isEmpty(telefone.value) || !Validator.isValidPhone(telefone.value)) {
-                Validator.showError(telefone, 'Telefone inválido');
+            if (Validator.isEmpty(vol_telefone.value) || !Validator.isValidPhone(vol_telefone.value)) {
+                Validator.showError(vol_telefone, 'Telefone inválido');
                 isValid = false;
             }
-            if (Validator.isEmpty(dataNascimento.value)) {
-                Validator.showError(dataNascimento, 'Data é obrigatória');
+            if (Validator.isEmpty(vol_dataNasc.value)) {
+                Validator.showError(vol_dataNasc, 'Data é obrigatória');
                 isValid = false;
             }
 
@@ -330,29 +551,126 @@
 
             try {
                 const voluntarioId = document.getElementById('voluntarioId').value;
-                const data = {
-                    nome: nome.value,
-                    cpf: cpf.value.replace(/[^\d]/g, ''),
-                    email: email.value,
-                    telefone: telefone.value.replace(/[^\d]/g, ''),
-                    dataNascimento: dataNascimento.value,
-                    endereco: document.getElementById('endereco').value,
-                    status: document.getElementById('statusVoluntario').value,
-                    observacoes: document.getElementById('observacoes').value
-                };
+                
+                // Cria FormData para enviar como @RequestParam
+                const formData = new FormData();
+                formData.append('vol_nome', vol_nome.value);
+                formData.append('vol_cpf', vol_cpf.value.replace(/[^\d]/g, ''));
+                formData.append('vol_email', vol_email.value);
+                formData.append('vol_telefone', vol_telefone.value.replace(/[^\d]/g, ''));
+                formData.append('vol_dataNasc', vol_dataNasc.value);
+                formData.append('vol_sexo', document.getElementById('vol_sexo').value);
+                formData.append('vol_rua', document.getElementById('vol_rua').value);
+                formData.append('vol_numero', document.getElementById('vol_numero').value);
+                formData.append('vol_bairro', document.getElementById('vol_bairro').value);
+                formData.append('vol_cidade', document.getElementById('vol_cidade').value);
+                formData.append('vol_cep', document.getElementById('vol_cep').value.replace(/[^\d]/g, ''));
+                formData.append('vol_uf', document.getElementById('vol_uf').value);
 
-                if (voluntarioId) {
-                    // await API.put(`/voluntarios/${voluntarioId}`, data);
-                    UI.showAlert('Voluntário atualizado!', 'success');
-                } else {
-                    // await API.post('/voluntarios', data);
-                    UI.showAlert('Voluntário cadastrado!', 'success');
+                // Log dos dados que serão enviados
+                console.log('Enviando dados para o servidor...');
+                for (let [key, value] of formData.entries()) {
+                    console.log(`${key}: ${value}`);
                 }
-                closeModal('modalVoluntario');
+
+                let response;
+                if (voluntarioId) {
+                    // Edição - adiciona o ID e usa PUT
+                    formData.append('vol_id', voluntarioId);
+                    response = await fetch('http://localhost:8080/apis/voluntario', {
+                        method: 'PUT',
+                        body: formData
+                    });
+                } else {
+                    // Cadastro - usa POST
+                    console.log('Iniciando POST para cadastro de voluntário');
+                    try {
+                        response = await fetch('http://localhost:8080/apis/voluntario', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            console.error('Erro na resposta do servidor:', response.status, errorText);
+                            throw new Error(`Erro do servidor: ${response.status} - ${errorText}`);
+                        }
+                    } catch (error) {
+                        console.error('Erro detalhado do POST:', error);
+                        throw error;
+                    }
+                }
+
+                console.log('Resposta bruta do servidor:', response);
+                
+                // Tenta ler a resposta como texto primeiro
+                const responseText = await response.text();
+                console.log('Resposta do servidor como texto:', responseText);
+                
+                let result;
+                try {
+                    // Tenta converter para JSON se possível
+                    result = responseText ? JSON.parse(responseText) : {};
+                    console.log('Resposta convertida para JSON:', result);
+                } catch (e) {
+                    console.log('Resposta não é JSON válido:', responseText);
+                    result = { mensagem: responseText };
+                }
+
+                if (response.ok) {
+                    console.log('Salvamento bem-sucedido, resultado:', result);
+                    UI.showAlert(voluntarioId ? 'Voluntário atualizado!' : 'Voluntário cadastrado!', 'success');
+                    closeModal('modalVoluntario');
+                    
+                    // Pequena pausa antes de recarregar
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    await carregarVoluntarios();
+                } else {
+                    console.error('Erro na requisição:', {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: Object.fromEntries(response.headers.entries()),
+                        body: responseText
+                    });
+                    const errorMessage = result.mensagem || responseText || 'Erro desconhecido';
+                    UI.showAlert('Erro no servidor: ' + errorMessage, 'error');
+                }
+                
             } catch (error) {
-                console.error('Erro:', error);
+                console.error('Erro completo:', {
+                    message: error.message,
+                    stack: error.stack,
+                    error: error
+                });
+                UI.showAlert('Erro ao salvar voluntário: ' + (error.message || 'Erro desconhecido'), 'error');
             }
         }
+
+        // EVENT LISTENERS (dentro do DOMContentLoaded)
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('searchInput').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+                rows.forEach(row => {
+                    row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+                });
+            });
+
+            document.getElementById('filtroStatus').addEventListener('change', function() {
+                const status = this.value.toLowerCase();
+                const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+                rows.forEach(row => {
+                    if (!status || row.textContent.toLowerCase().includes(status)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+
+            // Carrega os voluntários quando a página abre
+            carregarVoluntarios();
+        });
     </script>
 </body>
 </html>
