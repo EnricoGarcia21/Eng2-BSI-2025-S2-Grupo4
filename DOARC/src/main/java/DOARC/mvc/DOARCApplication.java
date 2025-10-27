@@ -12,6 +12,14 @@ public class DOARCApplication {
             System.out.println("Nao foi possivel conectar");
         }
         SpringApplication.run(DOARCApplication.class, args);
+        PasswordEncoder encoder = new PasswordEncoder();
+        String senha = "minhaSenha123";
+        String hash = encoder.encode(senha);
+        
+        System.out.println("Senha: " + senha);
+        System.out.println("Hash: " + hash);
+        System.out.println("Match: " + encoder.matches(senha, hash));
+        System.out.println("Wrong Match: " + encoder.matches("senhaErrada", hash));
     }
 
 }
