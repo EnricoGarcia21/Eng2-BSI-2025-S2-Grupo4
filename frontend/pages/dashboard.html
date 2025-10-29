@@ -5,8 +5,101 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOARC - Dashboard</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        /* Estilos para debug */
+        .debug-alert {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            font-size: 14px;
+        }
+    </style>
 </head>
 <body>
+    <!-- Sistema de Autenticação -->
+    <script>
+        console.log('🚀 Dashboard iniciando...');
+        
+        // Sistema de autenticação
+        const Auth = {
+            isLoggedIn: () => {
+                try {
+                    const loggedIn = localStorage.getItem('loggedIn') === 'true';
+                    const token = localStorage.getItem('token');
+                    const loginTime = localStorage.getItem('loginTime');
+                    const currentTime = new Date().getTime();
+
+                    console.log('🔍 Verificando autenticação:', {
+                        loggedIn,
+                        token: token ? 'EXISTE' : 'NÃO EXISTE',
+                        loginTime
+                    });
+
+                    // Verificações críticas
+                    if (!loggedIn || !token || token === 'undefined' || token === 'null' || token.trim() === '') {
+                        console.log('❌ Token inválido ou não existe');
+                        return false;
+                    }
+
+                    // Verificar expiração (24 horas)
+                    if (loginTime) {
+                        const hoursSinceLogin = (currentTime - parseInt(loginTime)) / (1000 * 60 * 60);
+                        console.log(`⏰ Horas desde login: ${hoursSinceLogin.toFixed(2)}`);
+                        if (hoursSinceLogin > 24) {
+                            console.log('❌ Login expirado');
+                            return false;
+                        }
+                    }
+
+                    console.log('✅ Autenticação válida');
+                    return true;
+                } catch (error) {
+                    console.error('💥 Erro na verificação:', error);
+                    return false;
+                }
+            },
+
+            getUser: () => {
+                const user = localStorage.getItem('user');
+                return user ? JSON.parse(user) : null;
+            },
+
+            logout: () => {
+                console.log('🚪 Fazendo logout...');
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                localStorage.removeItem('loggedIn');
+                localStorage.removeItem('loginTime');
+                window.location.href = '../index.html?logout=true';
+            },
+
+            // Verificar e redirecionar se não estiver logado
+            checkAndRedirect: () => {
+                if (!Auth.isLoggedIn()) {
+                    console.log('🔄 Redirecionando para login...');
+                    window.location.href = '../index.html';
+                    return false;
+                }
+                return true;
+            }
+        };
+
+        // Verificação IMEDIATA ao carregar a página
+        console.log('🛡️ Verificando autenticação IMEDIATAMENTE...');
+        if (!Auth.checkAndRedirect()) {
+            // Para completamente a execução se não estiver autenticado
+            throw new Error('Usuário não autenticado');
+        }
+
+        console.log('✅ Dashboard carregado para usuário autenticado');
+    </script>
+
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -191,11 +284,48 @@
         </div>
     </main>
 
-    <script src="../js/app.js"></script>
     <script>
+        // Sistema de gerenciamento de usuário
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM carregado - inicializando dashboard...');
+            
+            // Verificar novamente (segunda camada de segurança)
+            if (!Auth.isLoggedIn()) {
+                console.log('❌ Segunda verificação falhou - redirecionando...');
+                window.location.href = '../index.html';
+                return;
+            }
+
+            // Carregar dados do usuário
+            const user = Auth.getUser();
+            if (user && user.nome) {
+                document.getElementById('userName').textContent = user.nome;
+            }
+
+            // Configurar logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('Deseja realmente sair?')) {
+                    Auth.logout();
+                }
+            });
+
+            // Carregar dados do dashboard
+            loadDashboardData();
+
+            // Verificação periódica a cada 30 segundos
+            setInterval(() => {
+                if (!Auth.isLoggedIn()) {
+                    alert('Sua sessão expirou. Faça login novamente.');
+                    window.location.href = '../index.html';
+                }
+            }, 30000);
+        });
+
         // Carrega dados do dashboard
         async function loadDashboardData() {
             try {
+                console.log('📊 Carregando dados do dashboard...');
+                
                 // TODO: Integrar com API real
                 // const stats = await API.get('/dashboard/stats');
 
@@ -238,13 +368,12 @@
                     `).join('');
                 }
 
+                console.log('✅ Dados do dashboard carregados com sucesso');
+
             } catch (error) {
                 console.error('Erro ao carregar dados do dashboard:', error);
             }
         }
-
-        // Carrega dados ao inicializar
-        loadDashboardData();
     </script>
 </body>
 </html>

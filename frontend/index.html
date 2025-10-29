@@ -5,6 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOARC - Login</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Estilos básicos para garantir funcionamento - MANTENDO CORES ORIGINAIS */
+        .login-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); /* FUNDO AZUL GRADIENTE */
+            padding: 1rem; 
+        }
+        .login-card { 
+            background: white; 
+            padding: 2rem; 
+            border-radius: 12px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 400px; 
+        }
+        .login-header { text-align: center; margin-bottom: 2rem; }
+        .login-title { margin: 0; color: var(--primary-color); font-size: 2rem; font-weight: 600; }
+        .login-subtitle { margin: 0.5rem 0 0 0; color: var(--text-light); line-height: 1.4; }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-dark); }
+        .required::after { content: " *"; color: var(--error-color); }
+        .form-control { 
+            width: 100%; 
+            padding: 0.75rem; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 1rem; 
+            transition: all 0.3s ease;
+        }
+        .form-control:focus { 
+            border-color: var(--primary-color); 
+            outline: none; 
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); 
+            transform: translateY(-1px);
+        }
+        .form-error { color: var(--error-color); font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+        .btn { 
+            padding: 0.75rem 1.5rem; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 1rem; 
+            width: 100%; 
+            font-weight: 500; 
+            transition: all 0.3s ease; 
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); }
+        .btn:disabled { background-color: var(--disabled-color); cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn:disabled:hover { transform: none; box-shadow: none; }
+        .text-center { text-align: center; }
+        .loading { opacity: 0.7; pointer-events: none; }
+
+        /* Variáveis de cores para manter consistência */
+        :root {
+            --primary-color: #007bff;
+            --primary-dark: #0056b3;
+            --background-color: #f8f9fa;
+            --text-dark: #333;
+            --text-light: #666;
+            --border-color: #ddd;
+            --error-color: #dc3545;
+            --disabled-color: #6c757d;
+            --success-color: #28a745;
+        }
+
+        /* Alerta personalizado */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .alert-success { background-color: var(--success-color); }
+        .alert-error { background-color: var(--error-color); }
+        .alert-info { background-color: var(--primary-color); }
+    </style>
 </head>
 <body>
     <div class="login-container">
@@ -16,10 +110,10 @@
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="email" class="form-label required">E-mail</label>
+                    <label for="login" class="form-label required">E-mail</label>
                     <input
                         type="email"
-                        id="email"
+                        id="login"
                         class="form-control"
                         placeholder="seu@email.com"
                         required
@@ -28,10 +122,10 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="form-label required">Senha</label>
+                    <label for="senha" class="form-label required">Senha</label>
                     <input
                         type="password"
-                        id="password"
+                        id="senha"
                         class="form-control"
                         placeholder="Digite sua senha"
                         required
@@ -40,7 +134,7 @@
                 </div>
 
                 <div class="form-group">
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <button type="submit" class="btn btn-primary" id="loginButton">
                         Entrar
                     </button>
                 </div>
@@ -56,58 +150,230 @@
             </form>
         </div>
     </div>
+<script>
+    // Sistema de autenticação melhorado
+    // Sistema de autenticação melhorado - CORRIGIDO
+const Auth = {
+    setUser: (userData, token) => {
+        localStorage.setItem('user', JSON.stringify(userData));
+        localStorage.setItem('token', token);
+        localStorage.setItem('loggedIn', 'true');
+        localStorage.setItem('loginTime', new Date().getTime());
+    },
 
-    <script src="js/app.js"></script>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    getUser: () => {
+        const user = localStorage.getItem('user');
+        return user ? JSON.parse(user) : null;
+    },
 
-            const email = document.getElementById('email');
-            const password = document.getElementById('password');
+    getToken: () => {
+        return localStorage.getItem('token');
+    },
 
-            // Limpa erros anteriores
-            Validator.clearAllErrors(this);
+    isLoggedIn: () => {
+        try {
+            const loggedIn = localStorage.getItem('loggedIn') === 'true';
+            const token = localStorage.getItem('token');
+            const loginTime = localStorage.getItem('loginTime');
+            const currentTime = new Date().getTime();
 
-            // Validações
-            let isValid = true;
-
-            if (Validator.isEmpty(email.value)) {
-                Validator.showError(email, 'E-mail é obrigatório');
-                isValid = false;
-            } else if (!Validator.isValidEmail(email.value)) {
-                Validator.showError(email, 'E-mail inválido');
-                isValid = false;
+            // Verificações de segurança
+            if (!loggedIn || !token || token === 'undefined' || token === 'null') {
+                return false;
             }
 
-            if (Validator.isEmpty(password.value)) {
-                Validator.showError(password, 'Senha é obrigatória');
-                isValid = false;
+            // Verificar expiração (24 horas)
+            if (loginTime) {
+                const hoursSinceLogin = (currentTime - parseInt(loginTime)) / (1000 * 60 * 60);
+                if (hoursSinceLogin > 24) {
+                    this.logout();
+                    return false;
+                }
             }
 
-            if (!isValid) return;
+            return true;
+        } catch (error) {
+            console.error('Erro ao verificar login:', error);
+            return false;
+        }
+    },
 
-            try {
-                // TODO: Integrar com API real
-                // const response = await API.post('/auth/login', {
-                //     email: email.value,
-                //     password: password.value
-                // });
+    logout: () => {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('loggedIn');
+        localStorage.removeItem('loginTime');
+    },
 
-                // Simulação de login para desenvolvimento
-                const userData = {
-                    id: 1,
-                    nome: 'Voluntário Teste',
-                    email: email.value,
-                    tipo: 'voluntario'
-                };
+    // Verifica logout
+    handleLogoutRedirect: () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('logout')) {
+            this.logout();
+            UI.showAlert('Logout realizado com sucesso!', 'success');
+        }
+    }
+};
 
-                Auth.setUser(userData);
+// UI melhorada
+const UI = {
+    showAlert: (message, type) => {
+        const existingAlerts = document.querySelectorAll('.custom-alert');
+        existingAlerts.forEach(alert => alert.remove());
+
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `custom-alert alert-${type}`;
+        alertDiv.textContent = message;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 4000);
+    },
+
+    showLoading: (show) => {
+        const loginButton = document.getElementById('loginButton');
+        const loginForm = document.getElementById('loginForm');
+        
+        if (show) {
+            loginButton.disabled = true;
+            loginButton.textContent = 'Entrando...';
+            loginForm.classList.add('loading');
+        } else {
+            loginButton.disabled = false;
+            loginButton.textContent = 'Entrar';
+            loginForm.classList.remove('loading');
+        }
+    }
+};
+
+// Validator
+const Validator = {
+    isEmpty: (value) => !value || value.trim() === '',
+    isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    showError: (input, message) => {
+        let errorElement = input.nextElementSibling;
+        if (!errorElement || !errorElement.classList.contains('form-error')) {
+            errorElement = document.createElement('div');
+            errorElement.className = 'form-error';
+            input.parentNode.insertBefore(errorElement, input.nextSibling);
+        }
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        input.style.borderColor = 'var(--error-color)';
+    },
+    clearAllErrors: (form) => {
+        const errors = form.querySelectorAll('.form-error');
+        const inputs = form.querySelectorAll('input');
+        errors.forEach(error => error.style.display = 'none');
+        inputs.forEach(input => input.style.borderColor = 'var(--border-color)');
+    }
+};
+
+// Sistema de login - CORRIGIDO
+const LoginSystem = {
+    isRedirecting: false,
+
+    handleLogin: async function(login, senha) {
+        if (this.isRedirecting) {
+            console.log('Redirecionamento já em andamento...');
+            return;
+        }
+
+        try {
+            UI.showLoading(true);
+
+            const response = await fetch('http://localhost:8080/api/acesso/logar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ login, senha })
+            });
+
+            const resultado = await response.json();
+
+            if (response.ok && resultado.token) {
+                UI.showAlert('Login realizado com sucesso!', 'success');
+                
+                // Aguardar um pouco para mostrar a mensagem
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                Auth.setUser(resultado.usuario, resultado.token);
+                this.isRedirecting = true;
+
+                // REDIRECIONAMENTO CORRIGIDO - verificar se a pasta pages existe
+                console.log('Redirecionando para dashboard...');
                 window.location.href = 'pages/dashboard.html';
-
-            } catch (error) {
-                UI.showAlert('Erro ao fazer login. Verifique suas credenciais.', 'danger');
+                
+            } else {
+                UI.showAlert(resultado.mensagem || 'Erro ao fazer login', 'error');
+                UI.showLoading(false);
+                this.isRedirecting = false;
             }
-        });
-    </script>
+
+        } catch (error) {
+            console.error('Erro:', error);
+            UI.showAlert('Erro de conexão. Tente novamente.', 'error');
+            UI.showLoading(false);
+            this.isRedirecting = false;
+        }
+    },
+
+    // Verificar se já está logado
+    checkExistingAuth: function() {
+        if (Auth.isLoggedIn()) {
+            console.log('Usuário já logado, redirecionando...');
+            window.location.href = 'pages/dashboard.html';
+        }
+    }
+};
+
+// Formulário de login - CORRIGIDO
+document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const loginInput = document.getElementById('login');
+    const senhaInput = document.getElementById('senha');
+
+    Validator.clearAllErrors(this);
+
+    let isValid = true;
+
+    if (Validator.isEmpty(loginInput.value)) {
+        Validator.showError(loginInput, 'E-mail é obrigatório');
+        isValid = false;
+    } else if (!Validator.isValidEmail(loginInput.value)) {
+        Validator.showError(loginInput, 'E-mail inválido');
+        isValid = false;
+    }
+
+    if (Validator.isEmpty(senhaInput.value)) {
+        Validator.showError(senhaInput, 'Senha é obrigatória');
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    await LoginSystem.handleLogin(loginInput.value, senhaInput.value);
+});
+
+// Enter key submit
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        const loginForm = document.getElementById('loginForm');
+        loginForm.dispatchEvent(new Event('submit'));
+    }
+});
+
+// Verificar autenticação existente ao carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+    Auth.handleLogoutRedirect();
+    LoginSystem.checkExistingAuth();
+});
+</script>
+
 </body>
 </html>

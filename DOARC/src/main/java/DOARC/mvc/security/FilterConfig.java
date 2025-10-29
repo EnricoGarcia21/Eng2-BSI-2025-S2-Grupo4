@@ -1,4 +1,6 @@
-package DOARC.mvc.config;
+package DOARC.mvc.security;
+
+
 
 import DOARC.mvc.security.AccessFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;

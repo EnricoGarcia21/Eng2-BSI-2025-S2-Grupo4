@@ -8,15 +8,15 @@ import java.sql.*;
 
 @Repository
 public class LoginDAO {
-    
+
     private Connection conn;
-    
+
     public LoginDAO() {
         conn = SingletonDB.getConexao().getConnect();
     }
-    
+
     public Login buscarPorLogin(String login) {
-        String sql = "SELECT * FROM login WHERE login = ? AND status = 'ATIVO'";
+        String sql = "SELECT * FROM login WHERE login = ? AND status = 'A'"; // 'A' para ATIVO
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, login);
             ResultSet rs = pst.executeQuery();
@@ -28,7 +28,7 @@ public class LoginDAO {
         }
         return null;
     }
-    
+
     public Login buscarPorVoluntarioId(int voluntarioId) {
         String sql = "SELECT * FROM login WHERE voluntario_vol_id = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -42,16 +42,16 @@ public class LoginDAO {
         }
         return null;
     }
-    
+
     public boolean criarLogin(Login login) {
         String sql = "INSERT INTO login (voluntario_vol_id, login, senha, nive_acesso, status) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, login.getVoluntarioId());
             pst.setString(2, login.getLogin());
             pst.setString(3, login.getSenha());
-            pst.setString(4, login.getNivelAcesso());
-            pst.setString(5, login.getStatus());
-            
+            pst.setString(4, login.getNive_acesso()); // ✅ CORRIGIDO: getNive_acesso()
+            pst.setString(5, String.valueOf(login.getStatus())); // ✅ CORRIGIDO: char para String
+
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -62,7 +62,7 @@ public class LoginDAO {
         }
         return false;
     }
-    
+
     public boolean atualizarSenha(int voluntarioId, String novaSenha) {
         String sql = "UPDATE login SET senha = ? WHERE voluntario_vol_id = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -74,11 +74,11 @@ public class LoginDAO {
         }
         return false;
     }
-    
-    public boolean alterarStatus(int voluntarioId, String status) {
+
+    public boolean alterarStatus(int voluntarioId, char status) { // ✅ CORRIGIDO: char como parâmetro
         String sql = "UPDATE login SET status = ? WHERE voluntario_vol_id = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, status);
+            pst.setString(1, String.valueOf(status)); // ✅ CORRIGIDO: char para String
             pst.setInt(2, voluntarioId);
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -86,7 +86,7 @@ public class LoginDAO {
         }
         return false;
     }
-    
+
     public boolean excluirLogin(int voluntarioId) {
         String sql = "DELETE FROM login WHERE voluntario_vol_id = ?";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
@@ -97,14 +97,20 @@ public class LoginDAO {
         }
         return false;
     }
-    
+
     private Login mapLogin(ResultSet rs) throws SQLException {
         Login login = new Login();
         login.setVoluntarioId(rs.getInt("voluntario_vol_id"));
         login.setLogin(rs.getString("login"));
         login.setSenha(rs.getString("senha"));
-        login.setNivelAcesso(rs.getString("nive_acesso"));
-        login.setStatus(rs.getString("status"));
+        login.setNive_acesso(rs.getString("nive_acesso")); // ✅ CORRIGIDO: setNive_acesso()
+
+        // ✅ CORRIGIDO: Converte String do banco para char
+        String statusStr = rs.getString("status");
+        if (statusStr != null && !statusStr.isEmpty()) {
+            login.setStatus(statusStr.charAt(0));
+        }
+
         return login;
     }
 }

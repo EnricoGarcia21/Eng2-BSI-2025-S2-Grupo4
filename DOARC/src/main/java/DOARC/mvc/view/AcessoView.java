@@ -1,6 +1,6 @@
 package DOARC.mvc.view;
 
-import DOARC.mvc.controller.AuthController;
+import DOARC.mvc.controller.AcessoController;
 import DOARC.mvc.controller.VoluntarioController;
 import DOARC.mvc.security.JWTTokenProvider;
 import DOARC.mvc.util.Mensagem;
@@ -13,10 +13,10 @@ import java.util.Map;
 @CrossOrigin
 @RestController
 @RequestMapping("/api/acesso")
-public class AcessoRestController {
+public class AcessoView{
     
     @Autowired
-    private AuthController authController;
+    private AcessoController acessoController;
 
     @Autowired
     private VoluntarioController voluntarioController;
@@ -30,7 +30,7 @@ public class AcessoRestController {
             return ResponseEntity.badRequest().body(new Mensagem("Login e senha são obrigatórios"));
         }
         
-        Map<String, Object> resultado = authController.autenticar(login, senha);
+        Map<String, Object> resultado = acessoController.autenticar(login, senha);
         
         boolean sucesso = (boolean) resultado.get("sucesso");
         
@@ -84,7 +84,7 @@ public class AcessoRestController {
             Integer voluntarioId = (Integer) resultadoVoluntario.get("id");
             
             // Cria as credenciais de login
-            Map<String, Object> resultadoCredenciais = authController.criarCredenciais(
+            Map<String, Object> resultadoCredenciais = acessoController.criarCredenciais(
                 voluntarioId, // ← AGORA É A PK DA TABELA LOGIN
                 dados.get("email"),
                 dados.get("senha"),
