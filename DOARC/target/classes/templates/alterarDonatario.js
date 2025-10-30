@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
         donRua: { id: 'don_rua', required: true, validate: validarCampoTexto }
     };
 
-    function validarNome(valor) { return /^[a-zA-Z\s]{3,}$/.test(valor.trim()); }
+    // ---------------- VALIDADORES ----------------
+    function validarNome(valor) { return /^[a-zA-ZÀ-ÿ\s]{3,}$/.test(valor.trim()); }
     function validarDataNascimento(valor) {
         if (!valor) return false;
         const data = new Date(valor);
@@ -34,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function validarSelecao(valor) { return valor !== '' && valor !== null && valor !== 'N/A'; }
     function validarCampoTexto(valor) { return valor.trim().length > 0; }
 
+    // ---------------- FEEDBACK VISUAL ----------------
     function adicionarFeedbackObrigatorio(labelElement) {
         if (!labelElement) return;
         if (!labelElement.querySelector('.required-indicator')) {
@@ -75,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ---------------- MÁSCARAS ----------------
     function aplicarMascara(id) {
         const input = document.getElementById(id);
         if (!input) return;
@@ -96,30 +99,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ---------------- CARREGAR DADOS DO DONATÁRIO ----------------
     async function carregarDadosDonatario(id) {
         try {
             const response = await fetch(`http://localhost:8080/apis/donatario/${id}`);
             const data = await response.json();
 
+            console.log('📦 Dados recebidos da API:', data);
+
             if (!response.ok) throw new Error(data.mensagem || 'Erro ao carregar os dados do Donatário.');
 
+            // Preenche cada campo com o valor retornado
             for (const key in CAMPOS_MAP) {
                 const campo = CAMPOS_MAP[key];
-                if (campo.element && data[key]) {
-                    campo.element.value = data[key];
-                    if (campo.id === 'don_data_nasc') campo.element.value = data[key].substring(0, 10);
+                const el = document.getElementById(campo.id);
+                if (!el) continue;
+
+                // Verifica se o backend retornou um campo com o mesmo nome
+                const valor = data[campo.id] || data[key] || data[campo.id.replace('don_', '')] || '';
+
+                if (valor) {
+                    el.value = valor;
+                    if (campo.id === 'don_data_nasc' && valor.length >= 10) {
+                        el.value = valor.substring(0, 10);
+                    }
                     aplicarMascara(campo.id);
-                    atualizarFeedback(campo.element, campo.validate(campo.element.value));
+                    atualizarFeedback(el, campo.validate(el.value));
                 }
             }
         } catch (error) {
             const container = document.querySelector('.form-container');
             if (container) container.innerHTML = `<h1>Erro: ${error.message}</h1>`;
-            console.error('Erro ao carregar dados:', error);
+            console.error('❌ Erro ao carregar dados:', error);
             if (form) form.style.display = 'none';
         }
     }
 
+    // ---------------- INICIALIZAR CAMPOS ----------------
     function inicializarCampos() {
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
@@ -139,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ---------------- FLUXO PRINCIPAL ----------------
     if (!form) { console.error('Form #donatarioForm não encontrado.'); return; }
     if (!donId) {
         document.querySelector('.form-container').innerHTML = '<h1>Erro: ID do Donatário não encontrado na URL.</h1>';
@@ -153,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     inicializarCampos();
     carregarDadosDonatario(donId);
 
+    // ---------------- SUBMIT DO FORM ----------------
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         let formIsValid = true;
@@ -166,18 +184,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let valor = campo.element.value.trim();
 
-            switch(campo.id){
-                case 'don_uf': valor = valor.substring(0,2).toUpperCase(); break;
-                case 'don_cep': valor = valor.replace(/\D/g,'').substring(0,8); break;
-                case 'don_telefone': valor = valor.replace(/\D/g,'').substring(0,11); break;
+            switch (campo.id) {
+                case 'don_uf': valor = valor.substring(0, 2).toUpperCase(); break;
+                case 'don_cep': valor = valor.replace(/\D/g, '').substring(0, 8); break;
+                case 'don_telefone': valor = valor.replace(/\D/g, '').substring(0, 11); break;
             }
 
             if (!campo.validate(valor) && campo.required) formIsValid = false;
             atualizarFeedback(campo.element, campo.validate(valor));
 
-            // Mapeando para os nomes que o backend espera
-            const paramName = campo.id;
-            formData.append(paramName, valor);
+            formData.append(campo.id, valor);
         }
 
         if (!formIsValid) {
