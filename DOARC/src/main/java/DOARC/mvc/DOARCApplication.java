@@ -9,7 +9,7 @@ public class DOARCApplication {
 
     public static void main(String[] args) {
         if(!SingletonDB.conectar()){
-            System.out.println("Nao foi possivel conectar");
+            System.out.println("Nao foi possivel conectar no banco");
         }
         SpringApplication.run(DOARCApplication.class, args);
     }
