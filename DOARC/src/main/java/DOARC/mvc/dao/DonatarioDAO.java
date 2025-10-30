@@ -14,7 +14,7 @@ public class DonatarioDAO implements IDAO<Donatario> {
     private Connection conn;
 
     public DonatarioDAO() {
-        conn = SingletonDB.getConexao().getConnect();
+        conn = SingletonDB.getConexao().getConnect(); // na control
     }
 
     @Override
