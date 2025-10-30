@@ -8,12 +8,12 @@
         <version>3.4.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>casoft.mvc</groupId>
-    <artifactId>casoftWebSpring</artifactId>
+    <groupId>DOARC.mvc</groupId>
+    <artifactId>DOARC</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>casoftWebSpring</name>
-    <description>casoftWebSpring</description>
+    <name>DOARC</name>
+    <description>DOARC</description>
     <url/>
     <licenses>
         <license/>

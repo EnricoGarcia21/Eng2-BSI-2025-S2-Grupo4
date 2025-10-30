@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Empresa - DOARC</title>
+
+    <!-- Bootstrap CSS para base -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts para tipografia -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Cores principais */
+            --primary-color: #2c5f8d;
+            --secondary-color: #4a8fc7;
+            --accent-color: #f39c12;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+
+            /* Cores neutras */
+            --bg-light: #f5f7fa;
+            --bg-white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --border-color: #dce4ec;
+
+            /* Sombras */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+            /* Transições */
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .bg-light {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding-top: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .sidebar h4 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            transition: var(--transition);
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+        .content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .page-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .badge {
+            border-radius: 20px;
+            font-size: 1rem;
+            background: var(--bg-white) !important;
+            color: var(--primary-color) !important;
+        }
+
+        .form-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            background: var(--bg-white);
+        }
+
+        .card-section {
+            padding: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .custom-input, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            transition: var(--transition);
+        }
+
+        .custom-input:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(44, 95, 141, 0.3);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .required::after {
+            content: ' *';
+            color: var(--danger-color);
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        .form-error {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .logo-preview-container {
+            text-align: center;
+        }
+
+        .logo-preview {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .form-actions {
+            padding: 30px;
+            background: var(--bg-light);
+        }
+
+        .btn-custom {
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #234a6d;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            border: none;
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            border: none;
+            color: white;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<!-- Overlay escuro -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Sidebar -->
+
+<!-- Conteúdo principal -->
+<div class="content" id="content">
+
+    <!-- Header da Página -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="page-title"><i class="fas fa-plus-circle me-3"></i>Cadastro de Empresa</h1>
+                    <p class="page-subtitle">Configure os dados da sua organização</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="badge bg-white text-primary p-3">
+                        <i class="fas fa-building me-2"></i>Sistema DOARC
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-9">
+                <div class="card form-card">
+                    <div class="card-body p-0">
+                        <form method="POST" id="formEmpresa" enctype="multipart/form-data" onsubmit="return enviarFormulario(event)">
+
+                            <!-- Dados da Empresa -->
+                            <div class="card-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-building me-2"></i>Dados da Empresa
+                                </h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="razaoSocial" class="form-label required">Razão Social</label>
+                                        <input type="text" id="razaoSocial" name="razaoSocial" class="form-control custom-input" placeholder="Digite a razão social" required>
+                                        <div class="form-help">Nome jurídico completo da empresa</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="nomeFantasia" class="form-label required">Nome Fantasia</label>
+                                        <input type="text" id="nomeFantasia" name="nomeFantasia" class="form-control custom-input" placeholder="Digite o nome fantasia" required>
+                                        <div class="form-help">Nome comercial da empresa</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="cnpj" class="form-label required">CNPJ</label>
+                                        <input type="text" id="cnpj" name="cnpj" class="form-control custom-input" placeholder="00.000.000/0000-00" required>
+                                        <div id="cnpjFeedback" class="form-error"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Endereço Completo -->
+                            <div class="card-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Endereço Completo
+                                </h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label for="rua" class="form-label required">Rua</label>
+                                        <input type="text" id="rua" name="rua" class="form-control custom-input" placeholder="Digite o nome da rua" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="numero" class="form-label required">Número</label>
+                                        <input type="text" id="numero" name="numero" class="form-control custom-input" placeholder="Nº" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="bairro" class="form-label required">Bairro</label>
+                                        <input type="text" id="bairro" name="bairro" class="form-control custom-input" placeholder="Digite o bairro" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="cidade" class="form-label required">Cidade</label>
+                                        <input type="text" id="cidade" name="cidade" class="form-control custom-input" placeholder="Digite a cidade" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <!-- REMOVIDO: Campo estado -->
+                                        <!-- Mantido apenas o campo UF -->
+                                        <label for="uf" class="form-label required">UF</label>
+                                        <select id="uf" name="uf" class="form-select custom-input" required>
+                                            <option value="">Selecione a UF</option>
+                                            <option value="AC">Acre</option>
+                                            <option value="AL">Alagoas</option>
+                                            <option value="AP">Amapá</option>
+                                            <option value="AM">Amazonas</option>
+                                            <option value="BA">Bahia</option>
+                                            <option value="CE">Ceará</option>
+                                            <option value="DF">Distrito Federal</option>
+                                            <option value="ES">Espírito Santo</option>
+                                            <option value="GO">Goiás</option>
+                                            <option value="MA">Maranhão</option>
+                                            <option value="MT">Mato Grosso</option>
+                                            <option value="MS">Mato Grosso do Sul</option>
+                                            <option value="MG">Minas Gerais</option>
+                                            <option value="PA">Pará</option>
+                                            <option value="PB">Paraíba</option>
+                                            <option value="PR">Paraná</option>
+                                            <option value="PE">Pernambuco</option>
+                                            <option value="PI">Piauí</option>
+                                            <option value="RJ">Rio de Janeiro</option>
+                                            <option value="RN">Rio Grande do Norte</option>
+                                            <option value="RS">Rio Grande do Sul</option>
+                                            <option value="RO">Rondônia</option>
+                                            <option value="RR">Roraima</option>
+                                            <option value="SC">Santa Catarina</option>
+                                            <option value="SP">São Paulo</option>
+                                            <option value="SE">Sergipe</option>
+                                            <option value="TO">Tocantins</option>
+                                        </select>
+                                        <div class="form-help">Unidade Federativa</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="cep" class="form-label required">CEP</label>
+                                        <input type="text" id="cep" name="cep" class="form-control custom-input" placeholder="00000-000" required>
+                                        <div id="cepFeedback" class="form-error"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contato e Identidade Visual -->
+                            <div class="card-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-address-book me-2"></i>Contato e Identidade Visual
+                                </h5>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="telefone" class="form-label required">Telefone</label>
+                                        <input type="text" id="telefone" name="telefone" class="form-control custom-input" placeholder="(00) 00000-0000" required>
+                                        <div id="telefoneFeedback" class="form-error"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label required">Email</label>
+                                        <input type="email" id="email" name="email" class="form-control custom-input" placeholder="empresa@exemplo.com" required>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <label for="site" class="form-label">Site</label>
+                                        <input type="text" id="site" name="site" class="form-control custom-input" placeholder="https://www.exemplo.com">
+                                        <div class="form-help">URL do site oficial da empresa (opcional)</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="file" class="form-label">Logo da Empresa</label>
+                                        <input type="file" id="file" name="file" class="form-control custom-input" accept="image/*" onchange="previewLogo(this)">
+                                        <div class="form-help">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 2MB</div>
+
+                                        <!-- Corrigindo fechamento da div da logo -->
+                                        <div class="logo-preview-container mt-3">
+                                            <img id="logoPreview" class="logo-preview d-none" alt="Prévia da Logo">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Botões de Ação -->
+                                <div class="form-actions text-center">
+                                    <button type="reset" class="btn btn-secondary btn-custom me-3">
+                                        <i class="fas fa-eraser me-2"></i>Limpar
+                                    </button>
+                                    <button type="submit" class="btn btn-primary btn-custom">
+                                        <i class="fas fa-save me-2"></i>Cadastrar
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="./js/scriptParametrizacao.js"></script>
+</body>

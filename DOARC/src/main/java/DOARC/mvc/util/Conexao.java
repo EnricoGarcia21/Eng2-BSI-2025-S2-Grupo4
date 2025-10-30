@@ -81,4 +81,16 @@ public class Conexao
         }
         return max;
     }
+    public boolean desconectar() {
+        boolean desconectado = false;
+        try {
+            if (connect != null && !connect.isClosed()) {
+                connect.close();
+                desconectado = true;
+            }
+        } catch (SQLException e) {
+            erro = "Erro ao desconectar: " + e.toString();
+        }
+        return desconectado;
+    }
 }
