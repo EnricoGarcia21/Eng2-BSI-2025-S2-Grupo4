@@ -235,6 +235,25 @@
             color: white;
         }
 
+        /* Botão de menu */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .menu-btn:hover {
+            background: var(--secondary-color);
+        }
+
         /* Responsividade */
         @media (max-width: 768px) {
             .sidebar {
@@ -252,10 +271,23 @@
 
 <body class="bg-light">
 
+<!-- Botão de Menu -->
+<button class="menu-btn" id="menuBtn">
+    <i class="fas fa-bars"></i>
+</button>
+
 <!-- Overlay escuro -->
 <div class="overlay" id="overlay"></div>
 
 <!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h4><i class="fas fa-building me-2"></i>DOARC</h4>
+    <a href="#"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a href="#"><i class="fas fa-plus-circle me-2"></i>Cadastro de Empresa</a>
+    <a href="#"><i class="fas fa-users me-2"></i>Usuários</a>
+    <a href="#"><i class="fas fa-cogs me-2"></i>Configurações</a>
+    <a href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+</div>
 
 <!-- Conteúdo principal -->
 <div class="content" id="content">
@@ -440,4 +472,29 @@
 </div>
 
 <script src="./js/scriptParametrizacao.js"></script>
+<script>
+    // JavaScript para abrir/fechar a sidebar
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay');
+    const content = document.getElementById('content');
+
+    menuBtn.addEventListener('click', () => {
+        sidebar.style.left = '0';
+        overlay.style.display = 'block';
+        content.style.marginLeft = '250px';
+    });
+    const closeBtn = document.getElementById('closeBtn');
+    closeBtn.addEventListener('click', () => {
+        closeSidebar();
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.style.left = '-250px';
+        overlay.style.display = 'none';
+        content.style.marginLeft = '0';
+    });
+
+</script>
 </body>
+</html>

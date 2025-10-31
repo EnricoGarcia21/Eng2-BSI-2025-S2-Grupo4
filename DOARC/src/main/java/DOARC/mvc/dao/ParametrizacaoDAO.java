@@ -19,8 +19,8 @@ public class ParametrizacaoDAO implements IDAO<Parametrizacao> {
 
     @Override
     public Parametrizacao gravar(Parametrizacao entidade) {
-        String sql = "INSERT INTO parametrizacao (p_cnpj, p_razaosocial, p_nomefantasia, p_rua, p_cidade, p_bairro, numero, p_uf, p_cep, p_email, p_site, p_telefone) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
+        String sql = "INSERT INTO parametrizacao (id,p_cnpj, p_razaosocial, p_nomefantasia, p_rua, p_cidade, p_bairro, numero, p_uf, p_cep, p_email, p_site, p_telefone) " +
+                "VALUES (1,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entidade.getCnpj());
             pst.setString(2, entidade.getRazaoSocial());
