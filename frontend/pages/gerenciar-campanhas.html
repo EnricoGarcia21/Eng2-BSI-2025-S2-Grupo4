@@ -199,195 +199,299 @@
     </div>
 
     <script src="../js/app.js"></script>
-    <script>
-        // Configuração da API
-       const API_BASE_URL = 'http://localhost:8080/apis';
+   <script>
+    // Configuração da API
+    const API_BASE_URL = 'http://localhost:8080/apis';
+    
+    // Headers padrão para as requisições
+    const defaultHeaders = {
+        'Content-Type': 'application/json',
+    };
+
+async function fetchAPI(endpoint, options = {}) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+
+    try {
+        //console.log(`🌐 Fazendo requisição para: ${API_BASE_URL}${endpoint}`);
         
-        // Headers padrão para as requisições
-        const defaultHeaders = {
-            'Content-Type': 'application/json',
-        };
-
-        // Função utilitária para fazer requisições HTTP
-        async function fetchAPI(endpoint, options = {}) {
-            try {
-                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-                    headers: { ...defaultHeaders, ...options.headers },
-                    ...options
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Erro HTTP: ${response.status}`);
-                }
-
-                return await response.json();
-            } catch (error) {
-                console.error('Erro na requisição:', error);
-                UI.showAlert('Erro ao conectar com o servidor', 'error');
-                throw error;
-            }
-        }
-
-        // Carregar dados iniciais quando a página carregar
-        document.addEventListener('DOMContentLoaded', function() {
-            carregarCampanhas();
-            carregarVoluntarios();
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+            headers: { 
+                'Content-Type': 'application/json',
+                ...options.headers 
+            },
+            signal: controller.signal,
+            ...options
         });
 
-        // Função para carregar campanhas
-        async function carregarCampanhas() {
-            try {
-                const campanhas = await fetchAPI('/campanha');
-                renderizarCampanhas(campanhas);
-            } catch (error) {
-                console.error('Erro ao carregar campanhas:', error);
-            }
+        clearTimeout(timeoutId);
+
+       // console.log(`📡 Resposta recebida - Status: ${response.status}`);
+
+        if (!response.ok) {
+            const errorText = await response.text();
+           // console.error(`❌ Erro HTTP ${response.status}:`, errorText);
+            throw new Error(`Erro HTTP: ${response.status} - ${errorText}`);
         }
 
-        // Função para renderizar campanhas na tabela
-        function renderizarCampanhas(campanhas) {
-            const tbody = document.getElementById('tabelaCampanhas');
-            tbody.innerHTML = '';
+        const data = await response.json();
+       // console.log(`✅ Dados recebidos:`, data);
+        return data;
 
-            campanhas.forEach(campanha => {
-                const progresso = campanha.cam_meta_arrecadacao > 0 
-                    ? (campanha.cam_valor_arrecadado / campanha.cam_meta_arrecadacao) * 100 
-                    : 0;
-                
-                const status = new Date(campanha.cam_data_fim) >= new Date() ? 'Ativa' : 'Encerrada';
-                const badgeClass = status === 'Ativa' ? 'badge-success' : 'badge-secondary';
+    } catch (error) {
+        clearTimeout(timeoutId);
+        
+        if (error.name === 'AbortError') {
+            //console.error('⏰ Timeout na requisição:', error);
+            UI.showAlert('Timeout na conexão com o servidor', 'error');
+        } else {
+           // console.error('💥 Erro na requisição:', error);
+            UI.showAlert('Erro ao conectar com o servidor: ' + error.message, 'error');
+        }
+        throw error;
+    }
+}
+    // Carregar dados iniciais quando a página carregar
+    document.addEventListener('DOMContentLoaded', function() {
+        carregarCampanhas();
+        carregarVoluntarios();
+    });
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${campanha.cam_desc}</td>
-                    <td>${formatarData(campanha.cam_data_ini)} - ${formatarData(campanha.cam_data_fim)}</td>
-                    <td>${campanha.voluntario_nome || 'Não definido'}</td>
-                    <td>R$ ${campanha.cam_meta_arrecadacao?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}</td>
-                    <td>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <div style="flex: 1; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden;">
-                                <div style="width: ${Math.min(progresso, 100)}%; height: 100%; background: var(--success-color);"></div>
-                            </div>
-                            <span style="font-size: 0.875rem;">${progresso.toFixed(1)}%</span>
-                        </div>
-                    </td>
-                    <td><span class="badge ${badgeClass}">${status}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-info" onclick="editarCampanha(${campanha.cam_id})">✏️</button>
-                        <button class="btn btn-sm btn-warning" onclick="gerenciarVoluntarios(${campanha.cam_id})">👥</button>
-                        ${status === 'Ativa' ? 
-                            `<button class="btn btn-sm btn-danger" onclick="encerrarCampanha(${campanha.cam_id})">🔒</button>` : 
-                            `<button class="btn btn-sm btn-info" onclick="verDetalhes(${campanha.cam_id})">👁️</button>`
-                        }
-                    </td>
-                `;
-                tbody.appendChild(row);
+    // Função para carregar campanhas
+    async function carregarCampanhas() {
+        try {
+            const campanhas = await fetchAPI('/campanha');
+            renderizarCampanhas(campanhas);
+        } catch (error) {
+            console.error('Erro ao carregar campanhas:', error);
+        }
+    }
+    // FUNÇÃO PARA EXCLUIR CAMPANHA
+async function excluirCampanha(id) {
+    UI.confirm('Tem certeza que deseja EXCLUIR permanentemente esta campanha?', async function() {
+        try {
+            await fetchAPI(`/campanha/${id}`, {
+                method: 'DELETE'
             });
-        }
-
-        // Função para carregar voluntários nos selects
-        async function carregarVoluntarios() {
-            try {
-                const voluntarios = await fetchAPI('/voluntario');
-                const selectResponsavel = document.getElementById('responsavel');
-                const selectVoluntario = document.getElementById('addVoluntario');
-                
-                // Limpar options existentes (exceto a primeira)
-                selectResponsavel.innerHTML = '<option value="">Selecione</option>';
-                selectVoluntario.innerHTML = '<option value="">Selecione um voluntário</option>';
-                
-                voluntarios.forEach(voluntario => {
-                    const option1 = new Option(voluntario.vol_nome, voluntario.vol_id);
-                    const option2 = new Option(voluntario.vol_nome, voluntario.vol_id);
-                    selectResponsavel.add(option1);
-                    selectVoluntario.add(option2);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar voluntários:', error);
-            }
-        }
-
-        // Função para formatar data
-        function formatarData(dataString) {
-            const data = new Date(dataString);
-            return data.toLocaleDateString('pt-BR');
-        }
-
-        // Funções de busca e filtro
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
-            const rows = document.querySelectorAll('#tabelaCampanhas tr');
-            rows.forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
-            });
-        });
-
-        function filtrarPorStatus() {
-            const status = document.getElementById('filtroStatus').value.toLowerCase();
-            const rows = document.querySelectorAll('#tabelaCampanhas tr');
-            rows.forEach(row => {
-                if (!status || row.textContent.toLowerCase().includes(status)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
-
-        // Funções do modal
-        function openModal(modalId) {
-            if (modalId === 'modalCampanha') {
-                document.getElementById('formCampanha').reset();
-                document.getElementById('campanhaId').value = '';
-                document.getElementById('modalTitle').textContent = 'Nova Campanha';
-            }
-            UI.openModal(modalId);
-        }
-
-        function closeModal(modalId) { 
-            UI.closeModal(modalId); 
-        }
-
-        // Função para editar campanha
-        async function editarCampanha(id) {
-            try {
-                const campanha = await fetchAPI(`/campanha/${id}`);
-                
-                document.getElementById('campanhaId').value = campanha.cam_id;
-                document.getElementById('modalTitle').textContent = 'Editar Campanha';
-                document.getElementById('nome').value = campanha.cam_desc;
-                document.getElementById('descricao').value = campanha.cam_desc;
-                document.getElementById('dataInicio').value = campanha.cam_data_ini;
-                document.getElementById('dataFim').value = campanha.cam_data_fim;
-                document.getElementById('meta').value = campanha.cam_meta_arrecadacao || '';
-                document.getElementById('responsavel').value = campanha.voluntario_vol_id || '';
-                document.getElementById('observacoes').value = campanha.cam_observacoes || '';
-                
-                UI.openModal('modalCampanha');
-            } catch (error) {
-                console.error('Erro ao carregar campanha:', error);
-            }
-        }
-
-        // Função para gerenciar voluntários da campanha
-        async function gerenciarVoluntarios(id) {
-            document.getElementById('campanhaVoluntariosId').value = id;
             
-            try {
-                // Carregar voluntários vinculados à campanha
-                const voluntariosCampanha = await fetchAPI(`/campanha/${id}/voluntarios`);
-                renderizarVoluntariosCampanha(voluntariosCampanha);
-                UI.openModal('modalVoluntarios');
-            } catch (error) {
-                console.error('Erro ao carregar voluntários da campanha:', error);
-            }
+            UI.showAlert('Campanha excluída!', 'success');
+            carregarCampanhas(); // Recarregar a lista
+        } catch (error) {
+           // console.error('Erro ao excluir campanha:', error);
+            UI.showAlert('Erro ao excluir campanha. Certifique-se de que não há dados vinculados.', 'error');
         }
+    });
+}
 
-        // Função para renderizar voluntários da campanha
-        function renderizarVoluntariosCampanha(voluntarios) {
-            const tbody = document.getElementById('tabelaVoluntariosCampanha');
-            tbody.innerHTML = '';
+    // FUNÇÃO PARA RENDERIZAR CAMPANHAS (ATUALIZADA COM BOTÃO DE EXCLUIR)
+function renderizarCampanhas(campanhas) {
+    const tbody = document.getElementById('tabelaCampanhas');
+    tbody.innerHTML = '';
 
+    campanhas.forEach(campanha => {
+        const progresso = campanha.cam_meta_arrecadacao > 0 
+            ? (campanha.cam_valor_arrecadado / campanha.cam_meta_arrecadacao) * 100 
+            : 0;
+        
+        const status = new Date(campanha.cam_data_fim) >= new Date() ? 'Ativa' : 'Encerrada';
+        const badgeClass = status === 'Ativa' ? 'badge-success' : 'badge-secondary';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${campanha.cam_desc}</td>
+            <td>${formatarData(campanha.cam_data_ini)} - ${formatarData(campanha.cam_data_fim)}</td>
+            <td>${campanha.voluntario_nome || 'Não definido'}</td>
+            <td>R$ ${campanha.cam_meta_arrecadacao?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}</td>
+            <td>
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="flex: 1; height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden;">
+                        <div style="width: ${Math.min(progresso, 100)}%; height: 100%; background: var(--success-color);"></div>
+                    </div>
+                    <span style="font-size: 0.875rem;">${progresso.toFixed(1)}%</span>
+                </div>
+            </td>
+            <td><span class="badge ${badgeClass}">${status}</span></td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="editarCampanha(${campanha.cam_id})">✏️</button>
+                <button class="btn btn-sm btn-warning" onclick="gerenciarVoluntarios(${campanha.cam_id})">👥</button>
+                ${status === 'Ativa' ? 
+                    // Botão Encerrar Campanha
+                    `<button class="btn btn-sm btn-danger" onclick="encerrarCampanha(${campanha.cam_id})">🔒</button>` : 
+                    `<button class="btn btn-sm btn-info" onclick="verDetalhes(${campanha.cam_id})">👁️</button>`
+                }
+                <button class="btn btn-sm btn-danger" onclick="excluirCampanha(${campanha.cam_id})">🗑️</button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+   // Função para carregar voluntários nos selects
+async function carregarVoluntarios() {
+    const selectResponsavel = document.getElementById('responsavel');
+    const selectVoluntario = document.getElementById('addVoluntario');
+
+    // Limpar e adicionar opção padrão em ambos
+    selectResponsavel.innerHTML = '<option value="">Selecione</option>';
+    selectVoluntario.innerHTML = '<option value="">Selecione um voluntário</option>';
+
+    try {
+        //console.log('🔍 Carregando voluntários...');
+        
+        // 1. **USAR fetchAPI** para consistência, logs e tratamento de erros
+        const voluntarios = await fetchAPI('/voluntario'); 
+        
+        if (Array.isArray(voluntarios) && voluntarios.length > 0) {
+            console.log(`👥 Encontrados ${voluntarios.length} voluntários`);
+        voluntarios.forEach(voluntario => {
+    
+    // CORREÇÃO: Usamos 'nome' e 'id' porque o VoluntarioController retorna essas chaves.
+    const nomeVoluntario = voluntario.nome; 
+    const idVoluntario = voluntario.id; 
+
+    // Adiciona a opção SOMENTE se o nome for válido e o ID for um número inteiro.
+    if (nomeVoluntario && typeof idVoluntario === 'number') {
+        
+        //console.log(`➡️ Adicionando: ${nomeVoluntario} (ID: ${idVoluntario})`); // Log de sucesso para debug
+        
+        const option1 = new Option(nomeVoluntario, idVoluntario);
+        const option2 = new Option(nomeVoluntario, idVoluntario);
+        
+        selectResponsavel.appendChild(option1);
+        selectVoluntario.appendChild(option2);
+        
+    } else {
+        // Log de aviso se um voluntário vier sem ID ou Nome (útil para debug)
+       // console.warn('⚠️ Voluntário com campos essenciais faltando (Nome ou ID numérico):', voluntario);
+    }
+});
+            
+            //console.log(`📋 Select Responsavel tem ${selectResponsavel.options.length} options`);
+        } else if (voluntarios && voluntarios.message && voluntarios.message.includes("Nenhum voluntário encontrado")) {
+            // Caso o backend retorne uma mensagem de sucesso, mas sem dados
+            //console.warn('⚠️ O Backend informou: Nenhum voluntário encontrado.');
+        } else {
+           // console.warn('⚠️ A lista de voluntários está vazia ou não é um array.');
+            UI.showAlert('A lista de voluntários recebida está vazia ou inválida.', 'warning');
+        }
+        
+    } catch (error) {
+        //console.error('💥 Erro ao carregar voluntários (CATCH):', error);
+        
+        // 3. **Fallback para o caso de erro de conexão/API**
+        if (selectResponsavel.options.length <= 1) { // Verifica se só tem o 'Selecione'
+             selectResponsavel.innerHTML += `
+                 <option value="1">João Silva (Fallback)</option>
+                 <option value="2">Maria Santos (Fallback)</option>
+             `;
+             selectVoluntario.innerHTML += `
+                 <option value="1">João Silva (Fallback)</option>
+                 <option value="2">Maria Santos (Fallback)</option>
+             `;
+        }
+        
+        // A função fetchAPI já deve ter exibido um alerta, mas podemos reforçar
+        if (error.name !== 'AbortError') {
+           UI.showAlert('Falha ao carregar voluntários do servidor. Tente novamente.', 'error');
+        }
+    }
+}
+
+    // Função para formatar data para exibição
+    function formatarData(dataString) {
+        const data = new Date(dataString);
+        return data.toLocaleDateString('pt-BR');
+    }
+
+    // Função auxiliar para formatar data para input
+    function formatarDataParaInput(dataString) {
+        if (!dataString) return '';
+        const data = new Date(dataString);
+        return data.toISOString().split('T')[0];
+    }
+
+    // Funções de busca e filtro
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#tabelaCampanhas tr');
+        rows.forEach(row => {
+            row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+        });
+    });
+
+    function filtrarPorStatus() {
+        const status = document.getElementById('filtroStatus').value.toLowerCase();
+        const rows = document.querySelectorAll('#tabelaCampanhas tr');
+        rows.forEach(row => {
+            if (!status || row.textContent.toLowerCase().includes(status)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // Funções do modal
+    function openModal(modalId) {
+        if (modalId === 'modalCampanha') {
+            document.getElementById('formCampanha').reset();
+            document.getElementById('campanhaId').value = '';
+            document.getElementById('modalTitle').textContent = 'Nova Campanha';
+        }
+        UI.openModal(modalId);
+    }
+
+    function closeModal(modalId) { 
+        UI.closeModal(modalId); 
+    }
+
+    async function editarCampanha(id) {
+    try {
+        const campanha = await fetchAPI(`/campanha/${id}`);
+        
+        // 1. Armazena o valor arrecadado atual para ser usado no PUT/salvarCampanha
+        valorArrecadadoCampanhaEditando = campanha.cam_valor_arrecadado || 0; 
+        
+        document.getElementById('campanhaId').value = campanha.cam_id;
+        document.getElementById('modalTitle').textContent = 'Editar Campanha';
+        
+        // 2. Corrigido: Usar cam_nome se existir, senão cam_desc
+        document.getElementById('nome').value = campanha.cam_nome || campanha.cam_desc; 
+        
+        document.getElementById('descricao').value = campanha.cam_desc;
+        document.getElementById('dataInicio').value = formatarDataParaInput(campanha.cam_data_ini);
+        document.getElementById('dataFim').value = formatarDataParaInput(campanha.cam_data_fim);
+        document.getElementById('meta').value = campanha.cam_meta_arrecadacao || '';
+        document.getElementById('responsavel').value = campanha.voluntario_vol_id || '';
+        document.getElementById('observacoes').value = campanha.cam_observacoes || '';
+        
+        UI.openModal('modalCampanha');
+    } catch (error) {
+        console.error('Erro ao carregar campanha:', error);
+        UI.showAlert('Erro ao carregar dados da campanha', 'error');
+    }
+}
+    // Função para gerenciar voluntários da campanha
+    async function gerenciarVoluntarios(id) {
+        document.getElementById('campanhaVoluntariosId').value = id;
+        
+        try {
+            // Carregar voluntários vinculados à campanha
+            const voluntariosCampanha = await fetchAPI(`/campanha/${id}/voluntarios`);
+            renderizarVoluntariosCampanha(voluntariosCampanha);
+            UI.openModal('modalVoluntarios');
+        } catch (error) {
+            console.error('Erro ao carregar voluntários da campanha:', error);
+            UI.showAlert('Erro ao carregar voluntários da campanha', 'error');
+        }
+    }
+
+    // Função para renderizar voluntários da campanha
+    function renderizarVoluntariosCampanha(voluntarios) {
+        const tbody = document.getElementById('tabelaVoluntariosCampanha');
+        tbody.innerHTML = '';
+
+        if (voluntarios && voluntarios.length > 0) {
             voluntarios.forEach(voluntario => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -397,145 +501,177 @@
                 `;
                 tbody.appendChild(row);
             });
+        } else {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="3" class="text-center">Nenhum voluntário vinculado</td>`;
+            tbody.appendChild(row);
+        }
+    }
+
+    // Função para adicionar voluntário à campanha
+    async function adicionarVoluntario() {
+        const select = document.getElementById('addVoluntario');
+        const campanhaId = document.getElementById('campanhaVoluntariosId').value;
+        
+        if (!select.value) {
+            UI.showAlert('Selecione um voluntário', 'warning');
+            return;
         }
 
-        // Função para adicionar voluntário à campanha
-        async function adicionarVoluntario() {
-            const select = document.getElementById('addVoluntario');
-            const campanhaId = document.getElementById('campanhaVoluntariosId').value;
+        try {
+            await fetchAPI(`/campanha/${campanhaId}/voluntarios`, {
+                method: 'POST',
+                body: JSON.stringify({ vol_id: parseInt(select.value) })
+            });
             
-            if (!select.value) {
-                UI.showAlert('Selecione um voluntário', 'warning');
-                return;
-            }
+            UI.showAlert('Voluntário adicionado!', 'success');
+            select.value = '';
+            
+            // Recarregar lista de voluntários
+            const voluntariosCampanha = await fetchAPI(`/campanha/${campanhaId}/voluntarios`);
+            renderizarVoluntariosCampanha(voluntariosCampanha);
+        } catch (error) {
+            console.error('Erro ao adicionar voluntário:', error);
+            UI.showAlert('Erro ao adicionar voluntário', 'error');
+        }
+    }
 
+    // Função para remover voluntário da campanha
+    async function removerVoluntario(voluntarioId) {
+        const campanhaId = document.getElementById('campanhaVoluntariosId').value;
+        
+        UI.confirm('Remover voluntário desta campanha?', async function() {
             try {
-                await fetchAPI(`/campanha/${campanhaId}/voluntarios`, {
-                    method: 'POST',
-                    body: JSON.stringify({ vol_id: parseInt(select.value) })
+                await fetchAPI(`/campanha/${campanhaId}/voluntarios/${voluntarioId}`, {
+                    method: 'DELETE'
                 });
                 
-                UI.showAlert('Voluntário adicionado!', 'success');
-                select.value = '';
+                UI.showAlert('Voluntário removido!', 'success');
                 
                 // Recarregar lista de voluntários
                 const voluntariosCampanha = await fetchAPI(`/campanha/${campanhaId}/voluntarios`);
                 renderizarVoluntariosCampanha(voluntariosCampanha);
             } catch (error) {
-                console.error('Erro ao adicionar voluntário:', error);
+                console.error('Erro ao remover voluntário:', error);
+                UI.showAlert('Erro ao remover voluntário', 'error');
             }
-        }
+        });
+    }
 
-        // Função para remover voluntário da campanha
-        async function removerVoluntario(voluntarioId) {
-            const campanhaId = document.getElementById('campanhaVoluntariosId').value;
-            
-            UI.confirm('Remover voluntário desta campanha?', async function() {
-                try {
-                    await fetchAPI(`/campanha/${campanhaId}/voluntarios/${voluntarioId}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    UI.showAlert('Voluntário removido!', 'success');
-                    
-                    // Recarregar lista de voluntários
-                    const voluntariosCampanha = await fetchAPI(`/campanha/${campanhaId}/voluntarios`);
-                    renderizarVoluntariosCampanha(voluntariosCampanha);
-                } catch (error) {
-                    console.error('Erro ao remover voluntário:', error);
-                }
-            });
-        }
-
-        // Função para encerrar campanha
-        async function encerrarCampanha(id) {
-            UI.confirm('Deseja encerrar esta campanha?', async function() {
-                try {
-                    await fetchAPI(`/campanha/${id}/encerrar`, {
-                        method: 'PUT'
-                    });
-                    
-                    UI.showAlert('Campanha encerrada!', 'success');
-                    carregarCampanhas(); // Recarregar a lista
-                } catch (error) {
-                    console.error('Erro ao encerrar campanha:', error);
-                }
-            });
-        }
-
-        // Função para ver detalhes
-        function verDetalhes(id) {
-            window.location.href = `relatorios.html?campanha=${id}`;
-        }
-
-        // Função para salvar campanha (criar ou editar)
-        async function salvarCampanha() {
-            const form = document.getElementById('formCampanha');
-            const nome = document.getElementById('nome');
-            const descricao = document.getElementById('descricao');
-            const dataInicio = document.getElementById('dataInicio');
-            const dataFim = document.getElementById('dataFim');
-            const responsavel = document.getElementById('responsavel');
-
-            Validator.clearAllErrors(form);
-            let isValid = true;
-
-            if (Validator.isEmpty(nome.value)) {
-                Validator.showError(nome, 'Nome é obrigatório');
-                isValid = false;
-            }
-            if (Validator.isEmpty(descricao.value)) {
-                Validator.showError(descricao, 'Descrição é obrigatória');
-                isValid = false;
-            }
-            if (Validator.isEmpty(dataInicio.value)) {
-                Validator.showError(dataInicio, 'Data é obrigatória');
-                isValid = false;
-            }
-            if (Validator.isEmpty(dataFim.value)) {
-                Validator.showError(dataFim, 'Data é obrigatória');
-                isValid = false;
-            }
-            if (Validator.isEmpty(responsavel.value)) {
-                Validator.showError(responsavel, 'Responsável é obrigatório');
-                isValid = false;
-            }
-
-            if (!isValid) return;
-
+    // Função para encerrar campanha
+    async function encerrarCampanha(id) {
+        UI.confirm('Deseja encerrar esta campanha?', async function() {
             try {
-                const campanhaId = document.getElementById('campanhaId').value;
-                const data = {
-                    cam_desc: nome.value,
-                    cam_data_ini: dataInicio.value,
-                    cam_data_fim: dataFim.value,
-                    voluntario_vol_id: parseInt(responsavel.value),
-                    cam_meta_arrecadacao: parseFloat(document.getElementById('meta').value) || 0,
-                    cam_observacoes: document.getElementById('observacoes').value
-                };
-
-                if (campanhaId) {
-                    // Editar campanha existente
-                    await fetchAPI(`/campanha/${campanhaId}`, {
-                        method: 'PUT',
-                        body: JSON.stringify(data)
-                    });
-                    UI.showAlert('Campanha atualizada!', 'success');
-                } else {
-                    // Criar nova campanha
-                    await fetchAPI('/campanha', {
-                        method: 'POST',
-                        body: JSON.stringify(data)
-                    });
-                    UI.showAlert('Campanha cadastrada!', 'success');
-                }
+                await fetchAPI(`/campanha/${id}/encerrar`, {
+                    method: 'PUT'
+                });
                 
-                closeModal('modalCampanha');
+                UI.showAlert('Campanha encerrada!', 'success');
                 carregarCampanhas(); // Recarregar a lista
             } catch (error) {
-                console.error('Erro ao salvar campanha:', error);
+                console.error('Erro ao encerrar campanha:', error);
+                UI.showAlert('Erro ao encerrar campanha', 'error');
             }
+        });
+    }
+
+    // Função para ver detalhes
+    function verDetalhes(id) {
+        window.location.href = `relatorios.html?campanha=${id}`;
+    }
+
+    // Função para salvar campanha (criar ou editar) - CORRIGIDA
+    async function salvarCampanha() {
+        const form = document.getElementById('formCampanha');
+        const nome = document.getElementById('nome');
+        const descricao = document.getElementById('descricao');
+        const dataInicio = document.getElementById('dataInicio');
+        const dataFim = document.getElementById('dataFim');
+        const responsavel = document.getElementById('responsavel');
+
+        Validator.clearAllErrors(form);
+        let isValid = true;
+
+        if (Validator.isEmpty(nome.value)) {
+            Validator.showError(nome, 'Nome é obrigatório');
+            isValid = false;
         }
-    </script>
+        if (Validator.isEmpty(descricao.value)) {
+            Validator.showError(descricao, 'Descrição é obrigatória');
+            isValid = false;
+        }
+        if (Validator.isEmpty(dataInicio.value)) {
+            Validator.showError(dataInicio, 'Data de início é obrigatória');
+            isValid = false;
+        }
+        if (Validator.isEmpty(dataFim.value)) {
+            Validator.showError(dataFim, 'Data de fim é obrigatória');
+            isValid = false;
+        }
+        if (Validator.isEmpty(responsavel.value)) {
+            Validator.showError(responsavel, 'Responsável é obrigatório');
+            isValid = false;
+        }
+
+        if (!isValid) return;
+
+        try {
+            const campanhaId = document.getElementById('campanhaId').value;
+            const valoArrecadadoAtual = 0;
+            const data = {
+                cam_nome: nome.value,
+                cam_desc: descricao.value,
+                cam_data_ini: dataInicio.value,
+                cam_data_fim: dataFim.value,
+                voluntario_vol_id: parseInt(responsavel.value),
+                cam_meta_arrecadacao: parseFloat(document.getElementById('meta').value) || 0,
+                cam_observacoes: document.getElementById('observacoes').value,
+                cam_valor_arrecadado:valoArrecadadoAtual
+            };
+
+            //console.log('Dados enviados para salvar campanha:', data); // DEBUG
+
+            if (campanhaId) {
+                // Editar campanha existente
+                await fetchAPI(`/campanha/${campanhaId}`, {
+                    method: 'PUT',
+                    body: JSON.stringify(data)
+                });
+                UI.showAlert('Campanha atualizada!', 'success');
+            } else {
+                // Criar nova campanha
+                await fetchAPI('/campanha', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+                UI.showAlert('Campanha cadastrada!', 'success');
+            }
+            
+            closeModal('modalCampanha');
+            carregarCampanhas(); // Recarregar a lista
+        } catch (error) {
+            console.error('Erro ao salvar campanha:', error);
+            UI.showAlert('Erro ao salvar campanha', 'error');
+        }
+    }
+
+    // Função de teste para debug
+    async function testarVoluntarios() {
+        try {
+            const response = await fetch('http://localhost:8080/apis/voluntario');
+            const data = await response.json();
+            console.log('Resposta bruta dos voluntários:', data);
+            
+            if (!response.ok) {
+                console.error('Erro HTTP:', response.status);
+                return;
+            }
+            
+            return data;
+        } catch (error) {
+            console.error('Erro no teste:', error);
+        }
+    }
+</script>
 </body>
 </html>

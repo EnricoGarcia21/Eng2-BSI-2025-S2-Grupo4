@@ -24,7 +24,7 @@
 <body>
     <!-- Sistema de Autenticação -->
     <script>
-        console.log('🚀 Dashboard iniciando...');
+        //console.log('🚀 Dashboard iniciando...');
         
         // Sistema de autenticação
         const Auth = {
@@ -43,24 +43,24 @@
 
                     // Verificações críticas
                     if (!loggedIn || !token || token === 'undefined' || token === 'null' || token.trim() === '') {
-                        console.log('❌ Token inválido ou não existe');
+                        //console.log('❌ Token inválido ou não existe');
                         return false;
                     }
 
                     // Verificar expiração (24 horas)
                     if (loginTime) {
                         const hoursSinceLogin = (currentTime - parseInt(loginTime)) / (1000 * 60 * 60);
-                        console.log(`⏰ Horas desde login: ${hoursSinceLogin.toFixed(2)}`);
+                       // console.log(`⏰ Horas desde login: ${hoursSinceLogin.toFixed(2)}`);
                         if (hoursSinceLogin > 24) {
-                            console.log('❌ Login expirado');
+                            //console.log('❌ Login expirado');
                             return false;
                         }
                     }
 
-                    console.log('✅ Autenticação válida');
+                   // console.log('✅ Autenticação válida');
                     return true;
                 } catch (error) {
-                    console.error('💥 Erro na verificação:', error);
+                    //console.error('💥 Erro na verificação:', error);
                     return false;
                 }
             },
@@ -82,7 +82,7 @@
             // Verificar e redirecionar se não estiver logado
             checkAndRedirect: () => {
                 if (!Auth.isLoggedIn()) {
-                    console.log('🔄 Redirecionando para login...');
+                    //console.log('🔄 Redirecionando para login...');
                     window.location.href = '../index.html';
                     return false;
                 }
@@ -91,7 +91,7 @@
         };
 
         // Verificação IMEDIATA ao carregar a página
-        console.log('🛡️ Verificando autenticação IMEDIATAMENTE...');
+       // console.log('🛡️ Verificando autenticação IMEDIATAMENTE...');
         if (!Auth.checkAndRedirect()) {
             // Para completamente a execução se não estiver autenticado
             throw new Error('Usuário não autenticado');
@@ -287,11 +287,11 @@
     <script>
         // Sistema de gerenciamento de usuário
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('📄 DOM carregado - inicializando dashboard...');
+           // console.log('📄 DOM carregado - inicializando dashboard...');
             
             // Verificar novamente (segunda camada de segurança)
             if (!Auth.isLoggedIn()) {
-                console.log('❌ Segunda verificação falhou - redirecionando...');
+                //console.log('❌ Segunda verificação falhou - redirecionando...');
                 window.location.href = '../index.html';
                 return;
             }
@@ -324,7 +324,7 @@
         // Carrega dados do dashboard
         async function loadDashboardData() {
             try {
-                console.log('📊 Carregando dados do dashboard...');
+                //console.log('📊 Carregando dados do dashboard...');
                 
                 // TODO: Integrar com API real
                 // const stats = await API.get('/dashboard/stats');
@@ -368,7 +368,7 @@
                     `).join('');
                 }
 
-                console.log('✅ Dados do dashboard carregados com sucesso');
+                //console.log('✅ Dados do dashboard carregados com sucesso');
 
             } catch (error) {
                 console.error('Erro ao carregar dados do dashboard:', error);

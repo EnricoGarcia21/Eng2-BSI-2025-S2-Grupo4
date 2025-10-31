@@ -2,7 +2,7 @@
 // JavaScript Principal
 
 // ===== Configurações Globais =====
-const API_URL = 'http://localhost:8080/api'; // URL do backend Spring Boot
+const API_URL = 'http://localhost:8080/apis'; // URL do backend Spring Boot
 const STORAGE_KEY = 'doarc_user';
 
 // ===== Funções de Autenticação =====
