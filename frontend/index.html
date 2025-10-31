@@ -12,7 +12,7 @@
             justify-content: center; 
             align-items: center; 
             min-height: 100vh; 
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); /* FUNDO AZUL GRADIENTE */
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); /* FUNDO AZUL GRADIENTE */
             padding: 1rem; 
         }
         .login-card { 
@@ -24,27 +24,27 @@
             max-width: 400px; 
         }
         .login-header { text-align: center; margin-bottom: 2rem; }
-        .login-title { margin: 0; color: var(--primary-color); font-size: 2rem; font-weight: 600; }
-        .login-subtitle { margin: 0.5rem 0 0 0; color: var(--text-light); line-height: 1.4; }
+        .login-title { margin: 0; color: #007bff; font-size: 2rem; font-weight: 600; }
+        .login-subtitle { margin: 0.5rem 0 0 0; color: #666; line-height: 1.4; }
         .form-group { margin-bottom: 1.5rem; }
-        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--text-dark); }
-        .required::after { content: " *"; color: var(--error-color); }
+        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #333; }
+        .required::after { content: " *"; color: #dc3545; }
         .form-control { 
             width: 100%; 
             padding: 0.75rem; 
-            border: 1px solid var(--border-color); 
+            border: 1px solid #ddd; 
             border-radius: 6px; 
             box-sizing: border-box; 
             font-size: 1rem; 
             transition: all 0.3s ease;
         }
         .form-control:focus { 
-            border-color: var(--primary-color); 
+            border-color: #007bff; 
             outline: none; 
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); 
             transform: translateY(-1px);
         }
-        .form-error { color: var(--error-color); font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+        .form-error { color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
         .btn { 
             padding: 0.75rem 1.5rem; 
             border: none; 
@@ -55,25 +55,12 @@
             font-weight: 500; 
             transition: all 0.3s ease; 
         }
-        .btn-primary { background-color: var(--primary-color); color: white; }
-        .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); }
-        .btn:disabled { background-color: var(--disabled-color); cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:hover { background-color: #0056b3; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3); }
+        .btn:disabled { background-color: #6c757d; cursor: not-allowed; transform: none; box-shadow: none; }
         .btn:disabled:hover { transform: none; box-shadow: none; }
         .text-center { text-align: center; }
         .loading { opacity: 0.7; pointer-events: none; }
-
-        /* Variáveis de cores para manter consistência */
-        :root {
-            --primary-color: #007bff;
-            --primary-dark: #0056b3;
-            --background-color: #f8f9fa;
-            --text-dark: #333;
-            --text-light: #666;
-            --border-color: #ddd;
-            --error-color: #dc3545;
-            --disabled-color: #6c757d;
-            --success-color: #28a745;
-        }
 
         /* Alerta personalizado */
         .custom-alert {
@@ -95,9 +82,9 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .alert-success { background-color: var(--success-color); }
-        .alert-error { background-color: var(--error-color); }
-        .alert-info { background-color: var(--primary-color); }
+        .alert-success { background-color: #28a745; }
+        .alert-error { background-color: #dc3545; }
+        .alert-info { background-color: #007bff; }
     </style>
 </head>
 <body>
@@ -140,9 +127,9 @@
                 </div>
 
                 <div class="text-center">
-                    <p style="margin-top: 1rem; color: var(--text-light);">
+                    <p style="margin-top: 1rem; color: #666;">
                         Não tem uma conta?
-                        <a href="register.html" style="color: var(--primary-color); text-decoration: none; font-weight: 500;">
+                        <a href="register.html" style="color: #007bff; text-decoration: none; font-weight: 500;">
                             Cadastre-se aqui
                         </a>
                     </p>
@@ -150,230 +137,209 @@
             </form>
         </div>
     </div>
-<script>
-    // Sistema de autenticação melhorado
-    // Sistema de autenticação melhorado - CORRIGIDO
-const Auth = {
-    setUser: (userData, token) => {
-        localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', token);
-        localStorage.setItem('loggedIn', 'true');
-        localStorage.setItem('loginTime', new Date().getTime());
-    },
 
-    getUser: () => {
-        const user = localStorage.getItem('user');
-        return user ? JSON.parse(user) : null;
-    },
+    <script>
+        // Sistema de autenticação SIMPLIFICADO e FUNCIONAL
+        const Auth = {
+            setUser: (userData, token) => {
+                localStorage.setItem('user', JSON.stringify(userData));
+                localStorage.setItem('token', token);
+                localStorage.setItem('loggedIn', 'true');
+            },
 
-    getToken: () => {
-        return localStorage.getItem('token');
-    },
+            getUser: () => {
+                const user = localStorage.getItem('user');
+                return user ? JSON.parse(user) : null;
+            },
 
-    isLoggedIn: () => {
-        try {
-            const loggedIn = localStorage.getItem('loggedIn') === 'true';
-            const token = localStorage.getItem('token');
-            const loginTime = localStorage.getItem('loginTime');
-            const currentTime = new Date().getTime();
+            getToken: () => {
+                return localStorage.getItem('token');
+            },
 
-            // Verificações de segurança
-            if (!loggedIn || !token || token === 'undefined' || token === 'null') {
-                return false;
-            }
-
-            // Verificar expiração (24 horas)
-            if (loginTime) {
-                const hoursSinceLogin = (currentTime - parseInt(loginTime)) / (1000 * 60 * 60);
-                if (hoursSinceLogin > 24) {
-                    this.logout();
+            isLoggedIn: () => {
+                try {
+                    const loggedIn = localStorage.getItem('loggedIn') === 'true';
+                    const token = localStorage.getItem('token');
+                    
+                    // Verificações básicas
+                    if (!loggedIn || !token) {
+                        return false;
+                    }
+                    
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao verificar login:', error);
                     return false;
                 }
+            },
+
+            logout: () => {
+                localStorage.removeItem('user');
+                localStorage.removeItem('token');
+                localStorage.removeItem('loggedIn');
+            }
+        };
+
+        // UI simplificada
+        const UI = {
+            showAlert: (message, type) => {
+                // Remove alertas existentes
+                const existingAlerts = document.querySelectorAll('.custom-alert');
+                existingAlerts.forEach(alert => alert.remove());
+
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `custom-alert alert-${type}`;
+                alertDiv.textContent = message;
+                document.body.appendChild(alertDiv);
+
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 4000);
+            },
+
+            showLoading: (show) => {
+                const loginButton = document.getElementById('loginButton');
+                const loginForm = document.getElementById('loginForm');
+                
+                if (show) {
+                    loginButton.disabled = true;
+                    loginButton.textContent = 'Entrando...';
+                    loginForm.classList.add('loading');
+                } else {
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Entrar';
+                    loginForm.classList.remove('loading');
+                }
+            }
+        };
+
+        // Validator simplificado
+        const Validator = {
+            isEmpty: (value) => !value || value.trim() === '',
+            isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+            
+            showError: (input, message) => {
+                const errorElement = input.nextElementSibling;
+                if (errorElement && errorElement.classList.contains('form-error')) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                    input.style.borderColor = '#dc3545';
+                }
+            },
+            
+            clearAllErrors: (form) => {
+                const errors = form.querySelectorAll('.form-error');
+                const inputs = form.querySelectorAll('input');
+                errors.forEach(error => error.style.display = 'none');
+                inputs.forEach(input => input.style.borderColor = '#ddd');
+            }
+        };
+
+        // Sistema de login SIMPLIFICADO
+        const LoginSystem = {
+            handleLogin: async function(login, senha) {
+                try {
+                    UI.showLoading(true);
+
+                    //console.log('Enviando requisição de login...');
+                    
+                    const response = await fetch('http://localhost:8080/api/acesso/logar', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ login, senha })
+                    });
+
+                    //console.log('Resposta recebida:', response.status);
+
+                    if (!response.ok) {
+                        throw new Error(`Erro HTTP: ${response.status}`);
+                    }
+
+                    const resultado = await response.json();
+                    //console.log('Resultado:', resultado);
+
+                    if (resultado.token) {
+                        UI.showAlert('Login realizado com sucesso!', 'success');
+                        
+                        Auth.setUser(resultado.usuario || {}, resultado.token);
+                        
+                        // Pequeno delay para mostrar a mensagem
+                        setTimeout(() => {
+                            // Tenta redirecionar para dashboard
+                            window.location.href = 'pages/dashboard.html';
+                        }, 1000);
+                        
+                    } else {
+                        UI.showAlert(resultado.mensagem || 'Erro ao fazer login', 'error');
+                        UI.showLoading(false);
+                    }
+
+                } catch (error) {
+                   // console.error('Erro completo:', error);
+                    UI.showAlert('Erro de conexão. Verifique o servidor.', 'error');
+                    UI.showLoading(false);
+                }
+            },
+
+            // Verificar se já está logado
+            checkExistingAuth: function() {
+                if (Auth.isLoggedIn()) {
+                    //console.log('Usuário já logado, redirecionando...');
+                    window.location.href = 'pages/dashboard.html';
+                }
+            }
+        };
+
+        // Formulário de login - CORRIGIDO
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const loginInput = document.getElementById('login');
+            const senhaInput = document.getElementById('senha');
+
+            Validator.clearAllErrors(this);
+
+            let isValid = true;
+
+            // Validação de email
+            if (Validator.isEmpty(loginInput.value)) {
+                Validator.showError(loginInput, 'E-mail é obrigatório');
+                isValid = false;
+            } else if (!Validator.isValidEmail(loginInput.value)) {
+                Validator.showError(loginInput, 'E-mail inválido');
+                isValid = false;
             }
 
-            return true;
-        } catch (error) {
-            console.error('Erro ao verificar login:', error);
-            return false;
-        }
-    },
-
-    logout: () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        localStorage.removeItem('loggedIn');
-        localStorage.removeItem('loginTime');
-    },
-
-    // Verifica logout
-    handleLogoutRedirect: () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('logout')) {
-            this.logout();
-            UI.showAlert('Logout realizado com sucesso!', 'success');
-        }
-    }
-};
-
-// UI melhorada
-const UI = {
-    showAlert: (message, type) => {
-        const existingAlerts = document.querySelectorAll('.custom-alert');
-        existingAlerts.forEach(alert => alert.remove());
-
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `custom-alert alert-${type}`;
-        alertDiv.textContent = message;
-        document.body.appendChild(alertDiv);
-
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 4000);
-    },
-
-    showLoading: (show) => {
-        const loginButton = document.getElementById('loginButton');
-        const loginForm = document.getElementById('loginForm');
-        
-        if (show) {
-            loginButton.disabled = true;
-            loginButton.textContent = 'Entrando...';
-            loginForm.classList.add('loading');
-        } else {
-            loginButton.disabled = false;
-            loginButton.textContent = 'Entrar';
-            loginForm.classList.remove('loading');
-        }
-    }
-};
-
-// Validator
-const Validator = {
-    isEmpty: (value) => !value || value.trim() === '',
-    isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-    showError: (input, message) => {
-        let errorElement = input.nextElementSibling;
-        if (!errorElement || !errorElement.classList.contains('form-error')) {
-            errorElement = document.createElement('div');
-            errorElement.className = 'form-error';
-            input.parentNode.insertBefore(errorElement, input.nextSibling);
-        }
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-        input.style.borderColor = 'var(--error-color)';
-    },
-    clearAllErrors: (form) => {
-        const errors = form.querySelectorAll('.form-error');
-        const inputs = form.querySelectorAll('input');
-        errors.forEach(error => error.style.display = 'none');
-        inputs.forEach(input => input.style.borderColor = 'var(--border-color)');
-    }
-};
-
-// Sistema de login - CORRIGIDO
-const LoginSystem = {
-    isRedirecting: false,
-
-    handleLogin: async function(login, senha) {
-        if (this.isRedirecting) {
-            console.log('Redirecionamento já em andamento...');
-            return;
-        }
-
-        try {
-            UI.showLoading(true);
-
-            const response = await fetch('http://localhost:8080/api/acesso/logar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ login, senha })
-            });
-
-            const resultado = await response.json();
-
-            if (response.ok && resultado.token) {
-                UI.showAlert('Login realizado com sucesso!', 'success');
-                
-                // Aguardar um pouco para mostrar a mensagem
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                
-                Auth.setUser(resultado.usuario, resultado.token);
-                this.isRedirecting = true;
-
-                // REDIRECIONAMENTO CORRIGIDO - verificar se a pasta pages existe
-                console.log('Redirecionando para dashboard...');
-                window.location.href = 'pages/dashboard.html';
-                
-            } else {
-                UI.showAlert(resultado.mensagem || 'Erro ao fazer login', 'error');
-                UI.showLoading(false);
-                this.isRedirecting = false;
+            // Validação de senha
+            if (Validator.isEmpty(senhaInput.value)) {
+                Validator.showError(senhaInput, 'Senha é obrigatória');
+                isValid = false;
             }
 
-        } catch (error) {
-            console.error('Erro:', error);
-            UI.showAlert('Erro de conexão. Tente novamente.', 'error');
-            UI.showLoading(false);
-            this.isRedirecting = false;
-        }
-    },
+            if (!isValid) return;
 
-    // Verificar se já está logado
-    checkExistingAuth: function() {
-        if (Auth.isLoggedIn()) {
-            console.log('Usuário já logado, redirecionando...');
-            window.location.href = 'pages/dashboard.html';
-        }
-    }
-};
+            // Executar login
+            await LoginSystem.handleLogin(loginInput.value, senhaInput.value);
+        });
 
-// Formulário de login - CORRIGIDO
-document.getElementById('loginForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
+        // Enter key submit
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const loginForm = document.getElementById('loginForm');
+                const event = new Event('submit', { cancelable: true });
+                loginForm.dispatchEvent(event);
+            }
+        });
 
-    const loginInput = document.getElementById('login');
-    const senhaInput = document.getElementById('senha');
-
-    Validator.clearAllErrors(this);
-
-    let isValid = true;
-
-    if (Validator.isEmpty(loginInput.value)) {
-        Validator.showError(loginInput, 'E-mail é obrigatório');
-        isValid = false;
-    } else if (!Validator.isValidEmail(loginInput.value)) {
-        Validator.showError(loginInput, 'E-mail inválido');
-        isValid = false;
-    }
-
-    if (Validator.isEmpty(senhaInput.value)) {
-        Validator.showError(senhaInput, 'Senha é obrigatória');
-        isValid = false;
-    }
-
-    if (!isValid) return;
-
-    await LoginSystem.handleLogin(loginInput.value, senhaInput.value);
-});
-
-// Enter key submit
-document.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        const loginForm = document.getElementById('loginForm');
-        loginForm.dispatchEvent(new Event('submit'));
-    }
-});
-
-// Verificar autenticação existente ao carregar a página
-document.addEventListener('DOMContentLoaded', function() {
-    Auth.handleLogoutRedirect();
-    LoginSystem.checkExistingAuth();
-});
-</script>
-
+        // Verificar autenticação existente ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            //console.log('Página carregada, verificando autenticação...');
+            LoginSystem.checkExistingAuth();
+        });
+    </script>
 </body>
 </html>

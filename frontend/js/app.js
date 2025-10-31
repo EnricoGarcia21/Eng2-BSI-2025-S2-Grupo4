@@ -7,26 +7,30 @@ const STORAGE_KEY = 'doarc_user';
 
 // ===== Funções de Autenticação =====
 const Auth = {
-    // Verifica se usuário está logado
+    // Verifica se usuário está logado - USA SEU SISTEMA
     isAuthenticated() {
-        const user = localStorage.getItem(STORAGE_KEY);
-        return user !== null;
+        const token = localStorage.getItem('token');
+        const loggedIn = localStorage.getItem('loggedIn') === 'true';
+        return token && loggedIn;
     },
 
-    // Obtém dados do usuário logado
+    // Obtém dados do usuário logado - USA SEU SISTEMA
     getUser() {
-        const user = localStorage.getItem(STORAGE_KEY);
+        const user = localStorage.getItem('user');
         return user ? JSON.parse(user) : null;
     },
 
-    // Salva dados do usuário
+    // Salva dados do usuário - USA SEU SISTEMA
     setUser(userData) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+        localStorage.setItem('user', JSON.stringify(userData));
     },
 
-    // Remove dados do usuário (logout)
+    // Remove dados do usuário (logout) - USA SEU SISTEMA
     logout() {
-        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('loggedIn');
+        localStorage.removeItem('loginTime');
         window.location.href = '../index.html';
     },
 

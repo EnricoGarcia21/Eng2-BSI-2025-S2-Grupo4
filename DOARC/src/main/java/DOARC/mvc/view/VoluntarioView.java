@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin
+@CrossOrigin(origins = {"null", "http://127.0.0.1:5500", "http://localhost:5500"})
 @RestController
 @RequestMapping("/apis/voluntario")
 public class VoluntarioView {
