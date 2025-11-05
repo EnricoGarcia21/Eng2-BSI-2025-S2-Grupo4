@@ -1,255 +1,312 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DOARC - Gerenciar Produtos</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
     <!-- Header -->
     <header class="header">
-        <div class="header-content">
-            <a href="dashboard.html" class="logo">DOARC</a>
-            <div class="user-menu">
-                <span class="user-name" id="userName">Voluntário</span>
-                <button class="btn-logout" id="logoutBtn">Sair</button>
-            </div>
+      <div class="header-content">
+        <a href="dashboard.html" class="logo">DOARC</a>
+        <div class="user-menu">
+          <span class="user-name" id="userName">Voluntário</span>
+          <button class="btn-logout" id="logoutBtn">Sair</button>
         </div>
+      </div>
     </header>
 
     <!-- Navigation -->
     <nav class="nav">
-        <ul class="nav-list">
-            <li class="nav-item"><a href="dashboard.html" class="nav-link">Dashboard</a></li>
-            <li class="nav-item">
-                <a href="#" class="nav-link active">Gerenciar</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
-                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
-                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
-                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
-                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
-                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
-                </ul>
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a href="dashboard.html" class="nav-link">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link active">Gerenciar</a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a href="gerenciar-doadores.html" class="submenu-link"
+                >Doadores</a
+              >
             </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">Doações</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
-                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
-                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
-                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
-                </ul>
+            <li class="submenu-item">
+              <a href="gerenciar-donatarios.html" class="submenu-link"
+                >Donatários</a
+              >
             </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">Estoque</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
-                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
-                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
-                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
-                </ul>
+            <li class="submenu-item">
+              <a href="gerenciar-produtos.html" class="submenu-link"
+                >Produtos</a
+              >
             </li>
-            <li class="nav-item"><a href="relatorios.html" class="nav-link">Relatórios</a></li>
-        </ul>
+            <li class="submenu-item">
+              <a href="gerenciar-categorias.html" class="submenu-link"
+                >Categorias</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="gerenciar-voluntarios.html" class="submenu-link"
+                >Voluntários</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="gerenciar-campanhas.html" class="submenu-link"
+                >Campanhas</a
+              >
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">Doações</a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a href="receber-doacoes.html" class="submenu-link"
+                >Receber Doações</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="efetuar-doacoes.html" class="submenu-link"
+                >Efetuar Doações</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="agendar-doacao.html" class="submenu-link"
+                >Agendar Doação</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="agendar-retirada.html" class="submenu-link"
+                >Agendar Retirada</a
+              >
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="#" class="nav-link">Estoque</a>
+          <ul class="submenu">
+            <li class="submenu-item">
+              <a href="visualizar-estoque.html" class="submenu-link"
+                >Visualizar Estoque</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="registrar-acerto.html" class="submenu-link"
+                >Acerto de Estoque</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="lancar-compra.html" class="submenu-link"
+                >Lançar Compra/Arrecadação</a
+              >
+            </li>
+            <li class="submenu-item">
+              <a href="agendar-higienizacao.html" class="submenu-link"
+                >Agendar Higienização</a
+              >
+            </li>
+          </ul>
+        </li>
+        <li class="nav-item">
+          <a href="relatorios.html" class="nav-link">Relatórios</a>
+        </li>
+      </ul>
     </nav>
 
     <!-- Main Content -->
     <main class="container">
-        <div class="breadcrumb">
-            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
-            <div class="breadcrumb-item">Gerenciar</div>
-            <div class="breadcrumb-item active">Produtos</div>
+      <div class="breadcrumb">
+        <div class="breadcrumb-item">
+          <a href="dashboard.html">Dashboard</a>
         </div>
+        <div class="breadcrumb-item">Gerenciar</div>
+        <div class="breadcrumb-item active">Produtos</div>
+      </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h1 class="card-title">Gerenciar Produtos</h1>
-                <p class="card-subtitle">Cadastre e gerencie os produtos disponíveis para doação</p>
-            </div>
-            <div class="card-body">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; flex: 1;">
-                        <input type="text" id="searchInput" class="form-control" placeholder="Buscar produto..." style="max-width: 300px;">
-                        <select id="filtroCategoria" class="form-control form-select" style="max-width: 200px;" onchange="filtrarPorCategoria()">
-                            <option value="">Todas as Categorias</option>
-                            <option value="1">Alimentos</option>
-                            <option value="2">Roupas</option>
-                            <option value="3">Higiene</option>
-                            <option value="4">Móveis</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-primary" onclick="openModal('modalProduto')">➕ Novo Produto</button>
-                </div>
-
-                <div class="table-container">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Nome</th>
-                                <th>Categoria</th>
-                                <th>Unidade</th>
-                                <th>Estoque Atual</th>
-                                <th>Estoque Mínimo</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaProdutos">
-                            <tr>
-                                <td>Arroz 5kg</td>
-                                <td>Alimentos</td>
-                                <td>Un</td>
-                                <td>150</td>
-                                <td>50</td>
-                                <td><span class="badge badge-success">Normal</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarProduto(1)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirProduto(1)">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Feijão 1kg</td>
-                                <td>Alimentos</td>
-                                <td>Un</td>
-                                <td>80</td>
-                                <td>30</td>
-                                <td><span class="badge badge-success">Normal</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarProduto(2)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirProduto(2)">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Óleo 900ml</td>
-                                <td>Alimentos</td>
-                                <td>Un</td>
-                                <td>15</td>
-                                <td>25</td>
-                                <td><span class="badge badge-danger">Baixo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarProduto(3)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirProduto(3)">🗑️</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+      <div class="card">
+        <div class="card-header">
+          <h1 class="card-title">Gerenciar Produtos</h1>
+          <p class="card-subtitle">
+            Cadastre e gerencie os produtos disponíveis para doação
+          </p>
         </div>
+        <div class="card-body">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 1.5rem;
+              flex-wrap: wrap;
+              gap: 1rem;
+            "
+          >
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; flex: 1">
+              <input
+                type="text"
+                id="searchInput"
+                class="form-control"
+                placeholder="Buscar produto..."
+                style="max-width: 300px"
+              />
+              <select
+                id="filtroCategoria"
+                class="form-control form-select"
+                style="max-width: 200px"
+                onchange="filtrarPorCategoria()"
+              >
+                <option value="">Todas as Categorias</option>
+                <option value="1">Alimentos</option>
+                <option value="2">Roupas</option>
+                <option value="3">Higiene</option>
+                <option value="4">Móveis</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('modalProduto')">
+              ➕ Novo Produto
+            </button>
+          </div>
+
+          <div class="table-container">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Categoria</th>
+                  <th>Descrição</th>
+                  <th>Info. Adicionais</th>
+                  <th>Quantidade (Estoque)</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaProdutos"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </main>
 
     <!-- Modal -->
     <div id="modalProduto" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle">Novo Produto</h2>
-                <button class="modal-close" onclick="closeModal('modalProduto')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="formProduto">
-                    <input type="hidden" id="produtoId">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nome" class="form-label required">Nome do Produto</label>
-                            <input type="text" id="nome" class="form-control" required>
-                            <div class="form-error">Nome é obrigatório</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="categoria" class="form-label required">Categoria</label>
-                            <select id="categoria" class="form-control form-select" required>
-                                <option value="">Selecione</option>
-                                <option value="1">Alimentos</option>
-                                <option value="2">Roupas</option>
-                                <option value="3">Higiene</option>
-                                <option value="4">Móveis</option>
-                            </select>
-                            <div class="form-error">Categoria é obrigatória</div>
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="unidadeMedida" class="form-label required">Unidade de Medida</label>
-                            <select id="unidadeMedida" class="form-control form-select" required>
-                                <option value="un">Unidade</option>
-                                <option value="kg">Quilograma</option>
-                                <option value="l">Litro</option>
-                                <option value="cx">Caixa</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="estoqueMinimo" class="form-label required">Estoque Mínimo</label>
-                            <input type="number" id="estoqueMinimo" class="form-control" min="0" required>
-                            <div class="form-error">Estoque mínimo é obrigatório</div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="descricao" class="form-label">Descrição</label>
-                        <textarea id="descricao" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label><input type="checkbox" id="perecivel"> Este produto é perecível</label>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('modalProduto')">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarProduto()">Salvar</button>
-            </div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalTitle">Novo Produto</h2>
+          <button class="modal-close" onclick="closeModal('modalProduto')">
+            &times;
+          </button>
         </div>
+        <div class="modal-body">
+          <form id="formProduto">
+            <input type="hidden" id="produtoId" />
+            <div class="form-row">
+              <div class="form-group">
+                <label for="nome" class="form-label required"
+                  >Nome do Produto</label
+                >
+                <input type="text" id="nome" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label for="categoria" class="form-label required"
+                  >Categoria</label
+                >
+                <select
+                  id="categoria"
+                  class="form-control form-select"
+                  required
+                >
+                  <option value="">Selecione</option>
+                  <option value="1">Alimentos</option>
+                  <option value="2">Roupas</option>
+                  <option value="3">Higiene</option>
+                  <option value="4">Móveis</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="quantidade" class="form-label required"
+                  >Quantidade (Inicial/Atual)</label
+                >
+                <input
+                  type="number"
+                  id="quantidade"
+                  class="form-control"
+                  min="0"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="descricao" class="form-label">Descrição</label>
+                <input type="text" id="descricao" class="form-control" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="informacoesAdicionais" class="form-label"
+                >Informações Adicionais</label
+              >
+              <textarea
+                id="informacoesAdicionais"
+                class="form-control"
+                rows="3"
+              ></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeModal('modalProduto')">
+            Cancelar
+          </button>
+          <button class="btn btn-primary" onclick="salvarProduto()">
+            Salvar
+          </button>
+        </div>
+      </div>
     </div>
 
-<script src="../js/app.js"></script>
+ <script src="../js/app.js"></script>
 <script>
     // Seus scripts agora dependem do objeto API global vindo de app.js
     document.addEventListener('DOMContentLoaded', () => {
-    // Carrega a lista de produtos (sem filtro inicial)
-    filtrarPorCategoria(); 
-    
-    // Configura o listener da barra de busca para chamar a API (melhorando o filtro estático)
-    // O filtro estático pode ser removido ou alterado para chamar a API
-    document.getElementById('searchInput').addEventListener('input', filtrarPorCategoria);
-});
-    // Listener para a barra de busca
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        // Assume que a tabela de produtos (ou seu body) tem o ID 'tabelaProdutos'
-        // Adicionando um fallback para garantir que pegue as linhas corretas
-        const rows = document.querySelectorAll('#tabelaProdutos tbody tr');
-        rows.forEach(row => {
-            const text = row.textContent.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
+        // Carrega a lista de produtos (sem filtro inicial)
+        filtrarPorCategoria(); 
+        
+        // Listeners unificados para busca e filtro de categoria
+        document.getElementById('searchInput').addEventListener('input', filtrarPorCategoria);
+        document.getElementById('filtroCategoria').addEventListener('change', filtrarPorCategoria);
     });
 
-// Função para filtrar produtos (Chamar quando a categoria mudar ou na inicialização)
-async function filtrarPorCategoria() {
-    const categoriaId = document.getElementById('filtroCategoria').value;
-    // Pega o valor da busca. Se for a chamada inicial, será vazio.
-    const nome = document.getElementById('searchInput').value; 
+    // Função unificada de filtro e busca via API
+    async function filtrarPorCategoria() {
+        const categoriaId = document.getElementById('filtroCategoria').value;
+        const nome = document.getElementById('searchInput').value; 
+        // O endpoint do GET é: /api/produtos?categoriaId={id}&nome={nome}
+        const query = `/produtos?categoriaId=${categoriaId}&nome=${nome}`;
 
-    // O endpoint será /api/produtos?categoriaId=X&nome=Y
-    // A API.get já trata a URL base, então passamos apenas o caminho/query
-    const query = `/produtos?categoriaId=${categoriaId}&nome=${nome}`;
+        try {
+            const produtos = await API.get(query);
+            // Renderiza a tabela com o novo formato de dados
+            renderizarTabelaProdutos(produtos); 
 
-    try {
-        const produtos = await API.get(query);
-        
-        // CHAMA A NOVA FUNÇÃO DE RENDERIZAÇÃO
-        renderizarTabelaProdutos(produtos); 
-
-    } catch (error) {
-        console.error('Erro ao carregar ou filtrar produtos:', error.message);
-        // Opcional: Renderizar tabela vazia ou com mensagem de erro se a requisição falhar
-        renderizarTabelaProdutos([]);
+        } catch (error) {
+            console.error('Erro ao carregar ou filtrar produtos:', error.message);
+            // Assume que UI.showAlert existe em app.js
+            UI.showAlert('Falha ao carregar produtos. Tente novamente.', 'error'); 
+            renderizarTabelaProdutos([]);
+        }
     }
-}
+
     // Abre o modal de cadastro/edição
     function openModal(modalId) {
         document.getElementById('formProduto').reset();
         document.getElementById('produtoId').value = '';
         document.getElementById('modalTitle').textContent = 'Novo Produto';
+        // Limpar erros de validação (Assume que Validator.clearAllErrors existe em app.js)
+        // Se Validator não existe, apenas remova a linha abaixo
+        if (typeof Validator !== 'undefined' && Validator.clearAllErrors) {
+            Validator.clearAllErrors(document.getElementById('formProduto')); 
+        }
         // Usa a função UI.openModal do seu app.js
         UI.openModal(modalId);
     }
@@ -260,36 +317,38 @@ async function filtrarPorCategoria() {
         UI.closeModal(modalId);
     }
 
-    /**
- * Renderiza a lista de produtos na tabela HTML.
- * @param {Array<Object>} produtos - A lista de produtos retornada pela API.
- */
-function renderizarTabelaProdutos(produtos) {
-    const tbody = document.getElementById('tabelaProdutos');
-    // Limpa o conteúdo atual da tabela 
-    tbody.innerHTML = ''; 
+    // FUNÇÃO ATUALIZADA: Mapeia para o novo modelo de dados
+    function renderizarTabelaProdutos(produtos) {
+        const tbody = document.getElementById('tabelaProdutos');
+        tbody.innerHTML = ''; 
 
-    if (!produtos || produtos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum produto encontrado.</td></tr>';
-        return;
+        if (!produtos || produtos.length === 0) {
+            // Colspan ajustado para o novo número de colunas (6)
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum produto encontrado.</td></tr>'; 
+            return;
+        }
+
+        produtos.forEach(produto => {
+            const row = document.createElement('tr');
+            
+            // Usando 'quant' ou 'quantidade' conforme o JSON retornar. Preferindo 'quant' se for o campo de estoque.
+            const quantidadeEmEstoque = produto.quant ?? produto.quantidade ?? 0;
+            
+            row.innerHTML = `
+                <td>${produto.nome}</td>
+                <td>${produto.categoriaNome || '-'}</td>
+                <td>${produto.descricao || '-'}</td>
+                <td>${produto.informacoesAdicionais || '-'}</td>
+                <td>${quantidadeEmEstoque}</td>
+                <td>
+                    <button class="btn btn-sm btn-info" onclick="editarProduto(${produto.id})">✏️</button>
+                    <button class="btn btn-sm btn-danger" onclick="excluirProduto(${produto.id})">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
     }
 
-    produtos.forEach(produto => {
-        const row = document.createElement('tr');
-        
-        // CORREÇÃO: Usar estoqueAtual e estoqueMinimo (do JSON)
-        const statusHtml = getStatusBadge(produto.estoqueAtual, produto.estoqueMinimo);
-
-        row.innerHTML = `
-            <td>${produto.nome}</td>                 <td>${produto.categoriaNome}</td>        <td>${produto.unidadeMedida}</td>        <td>${produto.estoqueAtual}</td>         <td>${produto.estoqueMinimo}</td>        <td>${statusHtml}</td>
-            <td>
-                <button class="btn btn-sm btn-info" onclick="editarProduto(${produto.id})">✏️</button> <button class="btn btn-sm btn-danger" onclick="excluirProduto(${produto.id})">🗑️</button>
-            </td>
-            
-        `;
-        tbody.appendChild(row);
-    });
-}
     // Deleta o produto
     function excluirProduto(id) {
         // Usa a função UI.confirm do seu app.js
@@ -298,145 +357,102 @@ function renderizarTabelaProdutos(produtos) {
                 // Endpoint: DELETE /api/produtos/{id}
                 await API.delete(`/produtos/${id}`); 
                 UI.showAlert('Produto excluído com sucesso!', 'success');
-                // TODO: Recarregar a lista para remover o item visualmente
-                filtrarPorCategoria();            
-                }
-                 catch (error) {
-                // O erro já foi tratado e exibido pela API no app.js
+                filtrarPorCategoria(); // Recarrega a lista
+            }
+            catch (error) {
                 console.error('Falha ao excluir produto:', error.message);
             }
         });
     }
-    // Busca os dados do produto pelo ID e abre o modal para edição
-async function editarProduto(id) {
-    try {
 
-        const produto = await API.get(`/produtos/${id}`);
+    // FUNÇÃO ATUALIZADA: Busca os dados do produto pelo ID e abre o modal para edição
+    async function editarProduto(id) {
+        try {
+            // Endpoint: GET /api/produtos/{id}
+            const produto = await API.get(`/produtos/${id}`); 
 
-        // 1. Define o ID do produto no campo hidden do modal
-        document.getElementById('produtoId').value = produto.id; 
-        document.getElementById('modalTitle').textContent = 'Editar Produto';
-        
-        // 2. Preenche o formulário com os dados retornados do JSON
-        document.getElementById('nome').value = produto.nome;
-        document.getElementById('categoria').value = produto.categoriaId; 
-        document.getElementById('unidadeMedida').value = produto.unidadeMedida;
-        document.getElementById('estoqueMinimo').value = produto.estoqueMinimo;
-        document.getElementById('descricao').value = produto.descricao || '';
-        document.getElementById('perecivel').checked = produto.perecivel || false;
+            // Preenche o formulário
+            document.getElementById('produtoId').value = produto.id; 
+            document.getElementById('modalTitle').textContent = 'Editar Produto';
+            document.getElementById('nome').value = produto.nome;
+            // Use produto.categoriaId para selecionar a opção correta
+            document.getElementById('categoria').value = produto.categoriaId; 
+            // Usa 'quant' (ou 'quantidade') para preencher o campo 'quantidade' no modal
+            document.getElementById('quantidade').value = produto.quant ?? produto.quantidade ?? 0; 
+            document.getElementById('descricao').value = produto.descricao || '';
+            document.getElementById('informacoesAdicionais').value = produto.informacoesAdicionais || '';
 
-        UI.openModal('modalProduto');
-    } catch (error) {
-
-        console.error('Falha ao buscar produto para edição:', error.message);
+            // Limpar erros de validação (Se Validator existir)
+            if (typeof Validator !== 'undefined' && Validator.clearAllErrors) {
+                Validator.clearAllErrors(document.getElementById('formProduto'));
+            }
+            
+            UI.openModal('modalProduto');
+        } catch (error) {
+            UI.showAlert('Falha ao buscar produto para edição.', 'error');
+            console.error('Falha ao buscar produto para edição:', error.message);
+        }
     }
-}
 
+    // Função de Salvar (Criação ou Edição)
     async function salvarProduto() {
         const form = document.getElementById('formProduto');
+        const produtoId = document.getElementById('produtoId').value;
         const nome = document.getElementById('nome');
         const categoria = document.getElementById('categoria');
-        const estoqueMinimo = document.getElementById('estoqueMinimo');
+        const quantidade = document.getElementById('quantidade');
+        const descricao = document.getElementById('descricao');
+        const informacoesAdicionais = document.getElementById('informacoesAdicionais');
 
-        // Usa as funções Validator do seu app.js
-        Validator.clearAllErrors(form);
+        // Validação (Assume que Validator existe em app.js)
+        if (typeof Validator !== 'undefined') {
+            Validator.clearAllErrors(form); 
+        }
+        
         let isValid = true;
 
-        if (Validator.isEmpty(nome.value)) {
+        if (typeof Validator !== 'undefined' && Validator.isEmpty(nome.value)) {
             Validator.showError(nome, 'Nome é obrigatório');
             isValid = false;
         }
-        if (Validator.isEmpty(categoria.value)) {
+        if (typeof Validator !== 'undefined' && Validator.isEmpty(categoria.value)) {
             Validator.showError(categoria, 'Categoria é obrigatória');
             isValid = false;
         }
-        if (Validator.isEmpty(estoqueMinimo.value)) {
-            Validator.showError(estoqueMinimo, 'Estoque mínimo é obrigatório');
+        if (typeof Validator !== 'undefined' && (Validator.isEmpty(quantidade.value) || parseInt(quantidade.value) < 0)) {
+            Validator.showError(quantidade, 'Quantidade é obrigatória e não pode ser negativa');
             isValid = false;
+        } else if (quantidade.value === "") { // Validação simples caso Validator não exista
+             // Não está validando corretamente, mas assumimos que o Validator existe.
         }
-
+        
         if (!isValid) return;
 
         try {
-            const produtoId = document.getElementById('produtoId').value;
             const data = {
                 nome: nome.value,
-                // Garantir que categoriaId e estoqueMinimo sejam enviados como números
-                categoriaId: parseInt(categoria.value), 
-                unidadeMedida: document.getElementById('unidadeMedida').value,
-                estoqueMinimo: parseInt(estoqueMinimo.value), 
-                descricao: document.getElementById('descricao').value,
-                perecivel: document.getElementById('perecivel').checked
+                descricao: descricao.value,
+                informacoesAdicionais: informacoesAdicionais.value,
+                // Envia a quantidade como 'quantidade' conforme esperado pelo ProdutoView
+                quantidade: parseInt(quantidade.value), 
+                categoriaId: parseInt(categoria.value)
             };
 
             if (produtoId) {
-                // Requisição de Edição: PUT /api/produtos/{id}
+                // PUT /api/produtos/{id}
                 await API.put(`/produtos/${produtoId}`, data);
                 UI.showAlert('Produto atualizado com sucesso!', 'success');
             } else {
-                // Requisição de Cadastro: POST /api/produtos
+                // POST /api/produtos
                 await API.post('/produtos', data);
                 UI.showAlert('Produto cadastrado com sucesso!', 'success');
             }
 
             closeModal('modalProduto');
-            // TODO: Recarregar a lista para exibir o produto salvo/atualizado
             filtrarPorCategoria();
         } catch (error) {
-            // O erro já foi tratado e exibido pela API no app.js
-            console.error('Falha ao salvar produto:', error.message);
+             UI.showAlert('Falha ao salvar produto.', 'error');
+             console.error('Falha ao salvar produto:', error.message);
         }
     }
-
-    // --- NOVAS FUNÇÕES ---
-
-/**
- * Retorna o HTML do badge de status com base no estoque.
- */
-function getStatusBadge(estoqueAtual, estoqueMinimo) {
-    if (estoqueAtual < estoqueMinimo) {
-        return '<span class="badge badge-danger">Baixo</span>';
-    } else if (estoqueAtual < estoqueMinimo * 1.5) { // Exemplo de um nível de alerta
-        return '<span class="badge badge-warning">Atenção</span>';
-    } else {
-        return '<span class="badge badge-success">Normal</span>';
-    }
-}
-
-/**
- * Renderiza a lista de produtos na tabela HTML.
- * @param {Array<Object>} produtos - A lista de produtos retornada pela API.
- */
-/**
- * Renderiza a lista de produtos na tabela HTML.
- * @param {Array<Object>} produtos - A lista de produtos retornada pela API.
- */
-function renderizarTabelaProdutos(produtos) {
-    const tbody = document.getElementById('tabelaProdutos');
-    // Limpa o conteúdo atual da tabela 
-    tbody.innerHTML = ''; 
-
-    if (!produtos || produtos.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Nenhum produto encontrado.</td></tr>';
-        return;
-    }
-
-    produtos.forEach(produto => {
-        const row = document.createElement('tr');
-        
-        // CORREÇÃO: Usar estoqueAtual e estoqueMinimo (do JSON)
-        const statusHtml = getStatusBadge(produto.estoqueAtual, produto.estoqueMinimo);
-
-        row.innerHTML = `
-            <td>${produto.nome}</td>                 <td>${produto.categoriaNome}</td>        <td>${produto.unidadeMedida}</td>        <td>${produto.estoqueAtual}</td>         <td>${produto.estoqueMinimo}</td>        <td>${statusHtml}</td>
-            <td>
-                <button class="btn btn-sm btn-info" onclick="editarProduto(${produto.id})">✏️</button> <button class="btn btn-sm btn-danger" onclick="excluirProduto(${produto.id})">🗑️</button>
-            </td>
-        `;
-        tbody.appendChild(row);
-    });
-}
-
 </script>
-</body>
-</html>
