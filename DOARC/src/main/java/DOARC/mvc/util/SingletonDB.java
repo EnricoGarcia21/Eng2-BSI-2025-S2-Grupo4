@@ -6,12 +6,13 @@ public class SingletonDB {
     private SingletonDB() {
     }
 
-    public static boolean conectar()
+    public static Conexao conectar()
     {
-        conexao=new Conexao();
-        return conexao.conectar("jdbc:postgresql://localhost:5432/","DOARC","postgres","postgres123");
-    }
-    public static Conexao getConexao() {
+        if(conexao==null){
+            conexao=new Conexao();
+            conexao.conectar("jdbc:postgresql://localhost:5432/","DOARC","postgres","1234");
+        }
         return conexao;
     }
+
 }
