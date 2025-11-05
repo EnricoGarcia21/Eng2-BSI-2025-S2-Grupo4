@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Higienização de Roupas</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="header">
+    <nav>
+        <a href="consultaHigienizacao.html" class="nav-link">Voltar para Consulta de Higienização</a>
+    </nav>
+</header>
+
+<main>
+    <div class="form-container">
+        <h1>Cadastrar Novo Registro de Higienização</h1>
+        <form id="higienizacaoForm" novalidate>
+
+            <h2>Dados do Serviço</h2>
+
+            <label for="hig_data_agendada" class="form-label">Data Agendada:</label>
+            <input type="date" id="hig_data_agendada" name="data_agendada" class="form-control" required />
+
+            <label for="hig_hora" class="form-label">Hora Agendada:</label>
+            <input type="time" id="hig_hora" name="hora" class="form-control" placeholder="HH:MM" required />
+
+            <label for="hig_local" class="form-label">Local do Serviço (Lavanderia):</label>
+            <input type="text" id="hig_local" name="local" class="form-control" placeholder="Ex: Lavanderia A" required />
+            
+            <label for="hig_valorpago" class="form-label">Valor Pago (R$):</label>
+            <input type="number" step="0.01" id="hig_valorpago" name="valor_pago" class="form-control" placeholder="0.00" required />
+
+            <h2>Itens e Referência</h2>
+
+            <label for="hig_descricao_roupa" class="form-label">Descrição das Roupas (Lote):</label>
+            <textarea id="hig_descricao_roupa" name="descricao_roupa" class="form-control" rows="3" placeholder="Ex: Lote 1: Roupas de cama e banho." required></textarea>
+
+            <label for="vol_id" class="form-label">ID do Voluntário/Doador Responsável:</label>
+            <input type="number" id="vol_id" name="vol_id" class="form-control" min="1" placeholder="Ex: 1" required />
+
+
+            <p id="submitErrorMessage" class="error-message message" style="display: none;"></p>
+            <p id="submitSuccessMessage" class="success-message message" style="display: none;"></p>
+
+            <button type="submit" class="btn-gradient">Cadastrar Higienização</button>
+        </form>
+    </div>
+</main>
+
+<script src="cadastroHigienizacao.js"></script>
+</body>
+</html>
