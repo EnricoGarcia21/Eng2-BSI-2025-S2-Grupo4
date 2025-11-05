@@ -1,7 +1,8 @@
 package DOARC.mvc.controller;
 
-import DOARC.mvc.dao.DonatarioDAO;
 import DOARC.mvc.model.Donatario;
+import DOARC.mvc.util.Conexao; // Importação da classe Conexao
+import DOARC.mvc.util.SingletonDB; // Importação para obter a Conexao
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,12 +11,22 @@ import java.util.*;
 @Service
 public class DonatarioController {
 
-    @Autowired
-    private DonatarioDAO donatarioModel;
+    @Autowired // Controller recebe a Model
+    private Donatario donatarioModel;
 
+    private Conexao getConexao() {
+        // O Controller chama o método estático para obter a Conexao
+        return SingletonDB.conectar();
+    }
+    // --------------------------------------------------
+
+    // --- GET ALL ---
     public List<Map<String, Object>> getDonatario() {
-        List<Donatario> lista = donatarioModel.get("");
+        Conexao conexao = getConexao(); // 1. INSTANCIA a Conexão
+        // Chama o método consultar da Model, PASSANDO a Conexão
+        List<Donatario> lista = donatarioModel.consultar("", conexao);
         List<Map<String, Object>> result = new ArrayList<>();
+
         for (Donatario d : lista) {
             Map<String, Object> json = new HashMap<>();
             json.put("id", d.getDonId());
@@ -34,8 +45,12 @@ public class DonatarioController {
         return result;
     }
 
+    // --- GET BY ID ---
     public Map<String, Object> getDonatario(int id) {
-        Donatario d = donatarioModel.get(id);
+        Conexao conexao = getConexao(); // 1. INSTANCIA a Conexão
+        // Chama o método consultar da Model, PASSANDO a Conexão
+        Donatario d = donatarioModel.consultar(id, conexao);
+
         if (d == null) return Map.of("erro", "Donatário não encontrado");
 
         Map<String, Object> json = new HashMap<>();
@@ -53,11 +68,17 @@ public class DonatarioController {
         return json;
     }
 
+    // --- ADD ---
     public Map<String, Object> addDonatario(String nome, String dataNasc, String rua, String bairro,
                                             String cidade, String telefone, String cep, String uf,
                                             String email, String sexo) {
+        // Controller instancia a Model
         Donatario novo = new Donatario(nome, dataNasc, rua, bairro, cidade, telefone, cep, uf, email, sexo);
-        Donatario gravado = donatarioModel.gravar(novo);
+
+        Conexao conexao = getConexao(); // 1. INSTANCIA a Conexão
+        // Chama o método gravar da Model, PASSANDO a Conexão
+        Donatario gravado = donatarioModel.gravar(novo, conexao);
+
         if (gravado == null) return Map.of("erro", "Erro ao cadastrar o Donatário");
 
         Map<String, Object> json = new HashMap<>();
@@ -75,10 +96,15 @@ public class DonatarioController {
         return json;
     }
 
+    // --- UPDATE ---
     public Map<String, Object> updtDonatario(int id, String nome, String dataNasc, String rua, String bairro,
                                              String cidade, String telefone, String cep, String uf,
                                              String email, String sexo) {
-        Donatario existente = donatarioModel.get(id);
+
+        Conexao conexao = getConexao(); // 1. INSTANCIA a Conexão
+
+        // Chama o método consultar da Model, PASSANDO a Conexão
+        Donatario existente = donatarioModel.consultar(id, conexao);
         if (existente == null) return Map.of("erro", "Donatário não encontrado");
 
         existente.setDonNome(nome);
@@ -92,7 +118,8 @@ public class DonatarioController {
         existente.setDonEmail(email);
         existente.setDonSexo(sexo);
 
-        Donatario atualizado = donatarioModel.alterar(existente);
+        // Chama o método alterar da Model, PASSANDO a Conexão
+        Donatario atualizado = donatarioModel.alterar(existente, conexao);
         if (atualizado == null) return Map.of("erro", "Erro ao atualizar o Donatário");
 
         Map<String, Object> json = new HashMap<>();
@@ -110,11 +137,16 @@ public class DonatarioController {
         return json;
     }
 
+    // --- DELETE ---
     public Map<String, Object> deletarDonatario(int id) {
-        Donatario d = donatarioModel.get(id);
+        Conexao conexao = getConexao(); // 1. INSTANCIA a Conexão
+        // Chama o método consultar da Model, PASSANDO a Conexão
+        Donatario d = donatarioModel.consultar(id, conexao);
+
         if (d == null) return Map.of("erro", "Donatário não encontrado");
 
-        boolean deletado = donatarioModel.apagar(d);
+        // Chama o método apagar da Model, PASSANDO a Conexão
+        boolean deletado = donatarioModel.apagar(d, conexao);
         return deletado ? Map.of("mensagem", "Donatário removido com sucesso") : Map.of("erro", "Erro ao remover o Donatário");
     }
 }
