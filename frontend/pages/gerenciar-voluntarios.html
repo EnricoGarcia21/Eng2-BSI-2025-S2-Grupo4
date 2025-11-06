@@ -474,11 +474,12 @@
     function closeModal(modalId) { 
         UI.closeModal(modalId); 
     }
+    
 
-    // ===== FUNÇÕES DE VOLUNTÁRIOS =====
+    //AJUSTAR O EDITAR VOLUNTARIO, ao inves de editar ele cria um novo voluntario
     async function editarVoluntario(id) {
         try {
-            //console.log(`Editando voluntário ID: ${id}`);
+            
             const response = await fetch(`${VOLUNTARIOS_CONFIG.BASE_URL}/${id}`, {
                 method: 'GET',
                 headers: VOLUNTARIOS_CONFIG.HEADERS

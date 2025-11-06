@@ -1,7 +1,6 @@
 package DOARC.mvc.view;
 
 import DOARC.mvc.controller.CampanhaController;
-import DOARC.mvc.model.Campanha;
 import DOARC.mvc.util.Mensagem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,118 +17,74 @@ public class CampanhaView {
     @Autowired
     private CampanhaController campanhaController;
 
-    // ➤ CADASTRAR CAMPANHA
+    // --- CADASTRO (POST) ---
     @PostMapping
-    public ResponseEntity<Object> addCampanha(@RequestBody Campanha campanha) {
-        try {
-            Map<String, Object> json = campanhaController.addCampanha(
-                    campanha.getCam_data_ini(),
-                    campanha.getCam_data_fim(),
-                    campanha.getVoluntario_vol_id(),
-                    campanha.getCam_desc(),
-                    campanha.getCam_meta_arrecadacao(),
-                    campanha.getCam_valor_arrecadado()
-            );
+    public ResponseEntity<Object> addCampanha(@RequestParam String cam_data_ini,
+                                              @RequestParam String cam_data_fim,
+                                              @RequestParam int voluntario_vol_id,
+                                              @RequestParam String cam_desc,
+                                              @RequestParam Double cam_meta_arrecadacao,
+                                              @RequestParam Double cam_valor_arrecadado) {
 
-            if (json.get("erro") == null) {
-                return ResponseEntity.ok(new Mensagem("Campanha cadastrada com sucesso!"));
-            } else {
-                return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
-            }
+        Map<String, Object> json = campanhaController.addCampanha(cam_data_ini, cam_data_fim, voluntario_vol_id,
+                cam_desc, cam_meta_arrecadacao, cam_valor_arrecadado);
 
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new Mensagem("Erro interno: " + e.getMessage()));
-        }
+        return json.get("erro") == null
+                ? ResponseEntity.ok(new Mensagem("Campanha cadastrada com sucesso!"))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
-    // ➤ ATUALIZAR CAMPANHA
+    // --- ALTERAÇÃO (PUT) ---
     @PutMapping
-    public ResponseEntity<Object> updtCampanha(@RequestBody Campanha campanha) {
-        try {
-            Map<String, Object> json = campanhaController.updtCampanha(
-                    campanha.getCam_id(),
-                    campanha.getCam_data_ini(),
-                    campanha.getCam_data_fim(),
-                    campanha.getVoluntario_vol_id(),
-                    campanha.getCam_desc(),
-                    campanha.getCam_meta_arrecadacao(),
-                    campanha.getCam_valor_arrecadado()
-            );
+    public ResponseEntity<Object> updtCampanha(@RequestParam int cam_id,
+                                               @RequestParam String cam_data_ini,
+                                               @RequestParam String cam_data_fim,
+                                               @RequestParam int voluntario_vol_id,
+                                               @RequestParam String cam_desc,
+                                               @RequestParam Double cam_meta_arrecadacao,
+                                               @RequestParam Double cam_valor_arrecadado) {
 
-            if (json.get("erro") == null) {
-                return ResponseEntity.ok(new Mensagem("Campanha alterada com sucesso!"));
-            } else {
-                return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
-            }
+        Map<String, Object> json = campanhaController.updtCampanha(cam_id, cam_data_ini, cam_data_fim, voluntario_vol_id,
+                cam_desc, cam_meta_arrecadacao, cam_valor_arrecadado);
 
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new Mensagem("Erro interno: " + e.getMessage()));
-        }
+        return json.get("erro") == null
+                ? ResponseEntity.ok(new Mensagem("Campanha alterada com sucesso!"))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
-    // ➤ LISTAR TODAS
+    // --- LISTAR TODOS (GET) ---
     @GetMapping
     public ResponseEntity<Object> getAll() {
-        try {
-            List<Map<String, Object>> lista = campanhaController.getCampanhas();
-            if (lista != null && !lista.isEmpty()) {
-                return ResponseEntity.ok(lista);
-            } else {
-                return ResponseEntity.ok(new Mensagem("Nenhuma campanha encontrada."));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new Mensagem("Erro interno: " + e.getMessage()));
-        }
+        List<Map<String, Object>> lista = campanhaController.getCampanha();
+        return (lista != null && !lista.isEmpty())
+                ? ResponseEntity.ok(lista)
+                : ResponseEntity.ok(new Mensagem("Nenhuma campanha encontrada."));
     }
 
-    // ➤ BUSCAR POR ID
+    // --- BUSCAR POR ID (GET) ---
     @GetMapping("/{id}")
     public ResponseEntity<Object> getCampanhaId(@PathVariable int id) {
-        try {
-            Map<String, Object> json = campanhaController.getCampanha(id);
-            if (json.get("erro") == null) {
-                return ResponseEntity.ok(json);
-            } else {
-                return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new Mensagem("Erro interno: " + e.getMessage()));
-        }
+        Map<String, Object> json = campanhaController.getCampanha(id);
+        return (json.get("erro") == null)
+                ? ResponseEntity.ok(json)
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
-    // ➤ EXCLUIR CAMPANHA
+    // --- DELETAR (DELETE) ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deletarCampanha(@PathVariable int id) {
-        try {
-            Map<String, Object> json = campanhaController.deletarCampanha(id);
-            if (json.get("erro") == null) {
-                return ResponseEntity.ok(new Mensagem("Campanha excluída com sucesso!"));
-            } else {
-                return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new Mensagem("Erro interno: " + e.getMessage()));
-        }
+        Map<String, Object> json = campanhaController.deletarCampanha(id);
+        return (json.get("erro") == null)
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
-    // ➤ BUSCAR CAMPANHAS POR VOLUNTÁRIO
-    @GetMapping("/voluntario/{voluntarioId}")
-    public ResponseEntity<Object> getCampanhasPorVoluntario(@PathVariable int voluntarioId) {
-        try {
-            List<Map<String, Object>> lista = campanhaController.getCampanhasPorVoluntario(voluntarioId);
-            if (lista != null && !lista.isEmpty()) {
-                return ResponseEntity.ok(lista);
-            } else {
-                return ResponseEntity.ok(new Mensagem("Nenhuma campanha encontrada para este voluntário."));
-            }
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new Mensagem("Erro interno: " + e.getMessage()));
-        }
+    // --- BUSCAR CAMPANHAS POR VOLUNTÁRIO (GET) ---
+    @GetMapping("/voluntario/{voluntario_id}")
+    public ResponseEntity<Object> getCampanhasPorVoluntario(@PathVariable int voluntario_id) {
+        List<Map<String, Object>> lista = campanhaController.getCampanhasPorVoluntario(voluntario_id);
+        return (lista != null && !lista.isEmpty())
+                ? ResponseEntity.ok(lista)
+                : ResponseEntity.ok(new Mensagem("Nenhuma campanha encontrada para este voluntário."));
     }
 }

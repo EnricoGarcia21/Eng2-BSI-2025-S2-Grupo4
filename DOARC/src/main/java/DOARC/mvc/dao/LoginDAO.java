@@ -1,111 +1,141 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Login;
+import DOARC.mvc.util.Conexao;
 import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Repository
-public class LoginDAO {
+public class LoginDAO implements IDAO<Login> {
 
-    private Connection conn;
-
-    public LoginDAO() {
-        conn = SingletonDB.getConexao().getConnect();
+    private Conexao getConexao() {
+        return SingletonDB.conectar();
     }
 
-    public Login buscarPorLogin(String login) {
-        String sql = "SELECT * FROM login WHERE login = ? AND status = 'A'"; // 'A' para ATIVO
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, login);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
+    @Override
+    public Login gravar(Login entidade) {
+        String sql = String.format("INSERT INTO login (voluntario_vol_id, login, senha, nive_acesso, status) VALUES (%d, '%s', '%s', '%s', '%s') RETURNING login_id",
+                entidade.getVoluntarioId(),
+                entidade.getLogin().replace("'", "''"),
+                entidade.getSenha().replace("'", "''"),
+                entidade.getNiveAcesso().replace("'", "''"),
+                String.valueOf(entidade.getStatus()).replace("'", "''")
+        );
+
+        try (ResultSet rs = getConexao().consultar(sql)) {
+            if (rs != null && rs.next()) {
+                entidade.setLoginId(rs.getInt("login_id"));
+                return entidade;
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao gravar Login (SQL): " + getConexao().getMensagemErro());
+        }
+        return null;
+    }
+
+    @Override
+    public Login alterar(Login entidade) {
+        String sql = String.format("UPDATE login SET voluntario_vol_id=%d, login='%s', senha='%s', nive_acesso='%s', status='%s' WHERE login_id=%d",
+                entidade.getVoluntarioId(),
+                entidade.getLogin().replace("'", "''"),
+                entidade.getSenha().replace("'", "''"),
+                entidade.getNiveAcesso().replace("'", "''"),
+                String.valueOf(entidade.getStatus()).replace("'", "''"),
+                entidade.getLoginId()
+        );
+
+        return getConexao().manipular(sql) ? entidade : null;
+    }
+
+    @Override
+    public boolean apagar(Login entidade) {
+        String sql = "DELETE FROM login WHERE login_id=" + entidade.getLoginId();
+        return getConexao().manipular(sql);
+    }
+
+    @Override
+    public Login get(int id) {
+        String sql = "SELECT * FROM login WHERE login_id=" + id;
+        try (ResultSet rs = getConexao().consultar(sql)) {
+            if (rs != null && rs.next()) {
                 return mapLogin(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao buscar Login por ID: " + getConexao().getMensagemErro());
+        }
+        return null;
+    }
+
+    @Override
+    public List<Login> get(String filtro) {
+        List<Login> lista = new ArrayList<>();
+        String sql = "SELECT * FROM login";
+        if (filtro != null && !filtro.isEmpty()) {
+            sql += String.format(" WHERE login ILIKE '%%%s%%' OR nive_acesso ILIKE '%%%s%%'",
+                    filtro.replace("'", "''"), filtro.replace("'", "''"));
+        }
+
+        try (ResultSet rs = getConexao().consultar(sql)) {
+            while (rs != null && rs.next()) {
+                lista.add(mapLogin(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar Logins: " + getConexao().getMensagemErro());
+        }
+        return lista;
+    }
+
+    // Métodos específicos para Login
+    public Login autenticar(String login, String senha) {
+        String sql = String.format("SELECT * FROM login WHERE login = '%s' AND senha = '%s' AND status = 'A'",
+                login.replace("'", "''"), senha.replace("'", "''"));
+
+        try (ResultSet rs = getConexao().consultar(sql)) {
+            if (rs != null && rs.next()) {
+                return mapLogin(rs);
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao autenticar Login: " + getConexao().getMensagemErro());
         }
         return null;
     }
 
     public Login buscarPorVoluntarioId(int voluntarioId) {
-        String sql = "SELECT * FROM login WHERE voluntario_vol_id = ?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, voluntarioId);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
+        String sql = "SELECT * FROM login WHERE voluntario_vol_id=" + voluntarioId;
+        try (ResultSet rs = getConexao().consultar(sql)) {
+            if (rs != null && rs.next()) {
                 return mapLogin(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao buscar Login por Voluntario ID: " + getConexao().getMensagemErro());
         }
         return null;
     }
 
-    public boolean criarLogin(Login login) {
-        String sql = "INSERT INTO login (voluntario_vol_id, login, senha, nive_acesso, status) VALUES (?, ?, ?, ?, ?)";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, login.getVoluntarioId());
-            pst.setString(2, login.getLogin());
-            pst.setString(3, login.getSenha());
-            pst.setString(4, login.getNive_acesso()); // ✅ CORRIGIDO: getNive_acesso()
-            pst.setString(5, String.valueOf(login.getStatus())); // ✅ CORRIGIDO: char para String
-
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            // Pode ser violação de chave única (já existe login para este voluntário)
-            if (e.getMessage().contains("duplicate key") || e.getMessage().contains("unique constraint")) {
-                System.out.println("Já existe login para o voluntário ID: " + login.getVoluntarioId());
-            }
-        }
-        return false;
+    public boolean atualizarSenha(int loginId, String novaSenha) {
+        String sql = String.format("UPDATE login SET senha='%s' WHERE login_id=%d",
+                novaSenha.replace("'", "''"), loginId);
+        return getConexao().manipular(sql);
     }
 
-    public boolean atualizarSenha(int voluntarioId, String novaSenha) {
-        String sql = "UPDATE login SET senha = ? WHERE voluntario_vol_id = ?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, novaSenha);
-            pst.setInt(2, voluntarioId);
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean alterarStatus(int voluntarioId, char status) { // ✅ CORRIGIDO: char como parâmetro
-        String sql = "UPDATE login SET status = ? WHERE voluntario_vol_id = ?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, String.valueOf(status)); // ✅ CORRIGIDO: char para String
-            pst.setInt(2, voluntarioId);
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean excluirLogin(int voluntarioId) {
-        String sql = "DELETE FROM login WHERE voluntario_vol_id = ?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, voluntarioId);
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
+    public boolean alterarStatus(int loginId, char status) {
+        String sql = String.format("UPDATE login SET status='%s' WHERE login_id=%d",
+                String.valueOf(status).replace("'", "''"), loginId);
+        return getConexao().manipular(sql);
     }
 
     private Login mapLogin(ResultSet rs) throws SQLException {
         Login login = new Login();
+        login.setLoginId(rs.getInt("login_id"));
         login.setVoluntarioId(rs.getInt("voluntario_vol_id"));
         login.setLogin(rs.getString("login"));
         login.setSenha(rs.getString("senha"));
-        login.setNive_acesso(rs.getString("nive_acesso")); // ✅ CORRIGIDO: setNive_acesso()
+        login.setNiveAcesso(rs.getString("nive_acesso"));
 
-        // ✅ CORRIGIDO: Converte String do banco para char
         String statusStr = rs.getString("status");
         if (statusStr != null && !statusStr.isEmpty()) {
             login.setStatus(statusStr.charAt(0));

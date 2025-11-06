@@ -1,8 +1,6 @@
 package DOARC.mvc.view;
 
 import DOARC.mvc.controller.AcessoController;
-import DOARC.mvc.controller.VoluntarioController;
-import DOARC.mvc.security.JWTTokenProvider;
 import DOARC.mvc.util.Mensagem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -12,95 +10,70 @@ import java.util.Map;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/acesso")
-public class AcessoView{
-    
+@RequestMapping("/apis/acesso")
+public class AcessoView {
+
     @Autowired
     private AcessoController acessoController;
 
-    @Autowired
-    private VoluntarioController voluntarioController;
-
+    // --- AUTENTICAR (POST) ---
     @PostMapping("/logar")
-    public ResponseEntity<Object> login(@RequestBody Map<String, String> credenciais) {
-        String login = credenciais.get("login");
-        String senha = credenciais.get("senha");
-        
-        if (login == null || senha == null) {
-            return ResponseEntity.badRequest().body(new Mensagem("Login e senha são obrigatórios"));
-        }
-        
-        Map<String, Object> resultado = acessoController.autenticar(login, senha);
-        
-        boolean sucesso = (boolean) resultado.get("sucesso");
-        
-        if (sucesso) {
-            Map<String, Object> usuario = (Map<String, Object>) resultado.get("usuario");
-            String nivelAcesso = (String) usuario.get("nivelAcesso");
-            String voluntarioId = String.valueOf(usuario.get("voluntarioId")); // ← USA VOLUNTARIO_ID
-            
-            String token = JWTTokenProvider.getToken(login, nivelAcesso, voluntarioId);
-            
-            return ResponseEntity.ok(Map.of(
-                "mensagem", "Login realizado com sucesso",
-                "token", token,
-                "usuario", usuario
-            ));
-        } else {
-            String mensagem = (String) resultado.get("mensagem");
-            return ResponseEntity.badRequest().body(new Mensagem(mensagem));
-        }
+    public ResponseEntity<Object> logar(@RequestParam String login,
+                                        @RequestParam String senha) {
+
+        Map<String, Object> json = acessoController.autenticar(login, senha);
+
+        return (boolean) json.get("sucesso")
+                ? ResponseEntity.ok(json)
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("mensagem").toString()));
     }
 
-    @PostMapping("/registrar")
-    public ResponseEntity<Object> registrar(@RequestBody Map<String, String> dados) {
-        try {
-            // Validações básicas
-            if (dados.get("nome") == null || dados.get("email") == null || dados.get("senha") == null) {
-                return ResponseEntity.badRequest().body(new Mensagem("Nome, email e senha são obrigatórios"));
-            }
+    // --- CRIAR CREDENCIAIS (POST) ---
+    @PostMapping("/credenciais")
+    public ResponseEntity<Object> criarCredenciais(@RequestParam int voluntario_id,
+                                                   @RequestParam String login,
+                                                   @RequestParam String senha,
+                                                   @RequestParam String nivel_acesso) {
 
-            // Cadastra o voluntário
-            Map<String, Object> resultadoVoluntario = voluntarioController.addVoluntario(
-                dados.get("nome"),
-                dados.get("bairro") != null ? dados.get("bairro") : "Centro",
-                dados.get("numero") != null ? dados.get("numero") : "S/N",
-                dados.get("rua") != null ? dados.get("rua") : "Não informado",
-                dados.get("telefone"),
-                dados.get("cidade") != null ? dados.get("cidade") : "São Paulo",
-                dados.get("cep") != null ? dados.get("cep") : "00000-000",
-                dados.get("uf") != null ? dados.get("uf") : "SP",
-                dados.get("email"),
-                dados.get("cpf"),
-                dados.get("dataNascimento"),
-                dados.get("sexo") != null ? dados.get("sexo") : "M"
-            );
+        Map<String, Object> json = acessoController.criarCredenciais(voluntario_id, login, senha, nivel_acesso);
 
-            if (resultadoVoluntario.get("erro") != null) {
-                return ResponseEntity.badRequest().body(new Mensagem(resultadoVoluntario.get("erro").toString()));
-            }
+        return (boolean) json.get("sucesso")
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("mensagem").toString()));
+    }
 
-            // Recupera o ID do voluntário cadastrado (AGORA É A CHAVE PRIMÁRIA DO LOGIN)
-            Integer voluntarioId = (Integer) resultadoVoluntario.get("id");
-            
-            // Cria as credenciais de login
-            Map<String, Object> resultadoCredenciais = acessoController.criarCredenciais(
-                voluntarioId, // ← AGORA É A PK DA TABELA LOGIN
-                dados.get("email"),
-                dados.get("senha"),
-                "VOLUNTARIO"
-            );
+    // --- ALTERAR SENHA (PUT) ---
+    @PutMapping("/senha")
+    public ResponseEntity<Object> alterarSenha(@RequestParam int voluntario_id,
+                                               @RequestParam String senha_atual,
+                                               @RequestParam String nova_senha) {
 
-            if (!(boolean) resultadoCredenciais.get("sucesso")) {
-                System.out.println("Aviso: " + resultadoCredenciais.get("mensagem"));
-                // Mesmo com aviso, retorna sucesso pois o voluntário foi cadastrado
-            }
+        Map<String, Object> json = acessoController.alterarSenha(voluntario_id, senha_atual, nova_senha);
 
-            return ResponseEntity.ok(new Mensagem("Cadastro realizado com sucesso! Você já pode fazer login."));
+        return (boolean) json.get("sucesso")
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("mensagem").toString()));
+    }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(new Mensagem("Erro ao realizar cadastro: " + e.getMessage()));
-        }
+    // --- ALTERAR STATUS (PUT) ---
+    @PutMapping("/status")
+    public ResponseEntity<Object> alterarStatus(@RequestParam int voluntario_id,
+                                                @RequestParam char status) {
+
+        Map<String, Object> json = acessoController.alterarStatus(voluntario_id, status);
+
+        return (boolean) json.get("sucesso")
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("mensagem").toString()));
+    }
+
+    // --- DELETAR CREDENCIAIS (DELETE) ---
+    @DeleteMapping("/{voluntario_id}")
+    public ResponseEntity<Object> deletarCredenciais(@PathVariable int voluntario_id) {
+        Map<String, Object> json = acessoController.deletarCredenciais(voluntario_id);
+
+        return (boolean) json.get("sucesso")
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("mensagem").toString()));
     }
 }

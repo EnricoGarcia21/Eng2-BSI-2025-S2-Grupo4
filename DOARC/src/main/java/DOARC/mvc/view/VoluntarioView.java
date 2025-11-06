@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = {"null", "http://127.0.0.1:5500", "http://localhost:5500"})
+@CrossOrigin
 @RestController
 @RequestMapping("/apis/voluntario")
 public class VoluntarioView {
@@ -17,76 +17,77 @@ public class VoluntarioView {
     @Autowired
     private VoluntarioController voluntarioController;
 
+    // --- CADASTRO (POST) ---
     @PostMapping
     public ResponseEntity<Object> addVoluntario(@RequestParam String vol_nome,
-                                                @RequestParam String vol_bairro,
-                                                @RequestParam String vol_numero,
+                                                @RequestParam String vol_data_nasc,
                                                 @RequestParam String vol_rua,
-                                                @RequestParam String vol_telefone,
+                                                @RequestParam String vol_bairro,
                                                 @RequestParam String vol_cidade,
+                                                @RequestParam String vol_telefone,
                                                 @RequestParam String vol_cep,
                                                 @RequestParam String vol_uf,
                                                 @RequestParam String vol_email,
-                                                @RequestParam String vol_cpf,
-                                                @RequestParam String vol_dataNasc,
-                                                @RequestParam String vol_sexo) {
+                                                @RequestParam String vol_sexo,
+                                                @RequestParam String vol_numero,
+                                                @RequestParam String vol_cpf) {
 
-        Map<String, Object> json = voluntarioController.addVoluntario(
-                vol_nome, vol_bairro, vol_numero, vol_rua, vol_telefone,
-                vol_cidade, vol_cep, vol_uf, vol_email, vol_cpf, vol_dataNasc, vol_sexo
-        );
+        Map<String, Object> json = voluntarioController.addVoluntario(vol_nome, vol_data_nasc, vol_rua, vol_bairro,
+                vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf);
 
         return json.get("erro") == null
                 ? ResponseEntity.ok(new Mensagem("Voluntário cadastrado com sucesso!"))
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
+    // --- ALTERAÇÃO (PUT) ---
     @PutMapping
     public ResponseEntity<Object> updtVoluntario(@RequestParam int vol_id,
                                                  @RequestParam String vol_nome,
-                                                 @RequestParam String vol_bairro,
-                                                 @RequestParam String vol_numero,
+                                                 @RequestParam String vol_data_nasc,
                                                  @RequestParam String vol_rua,
-                                                 @RequestParam String vol_telefone,
+                                                 @RequestParam String vol_bairro,
                                                  @RequestParam String vol_cidade,
+                                                 @RequestParam String vol_telefone,
                                                  @RequestParam String vol_cep,
                                                  @RequestParam String vol_uf,
                                                  @RequestParam String vol_email,
-                                                 @RequestParam String vol_cpf,
-                                                 @RequestParam String vol_dataNasc,
-                                                 @RequestParam String vol_sexo) {
+                                                 @RequestParam String vol_sexo,
+                                                 @RequestParam String vol_numero,
+                                                 @RequestParam String vol_cpf) {
 
-        Map<String, Object> json = voluntarioController.updtVoluntario(
-                vol_id, vol_nome, vol_bairro, vol_numero, vol_rua, vol_telefone,
-                vol_cidade, vol_cep, vol_uf, vol_email, vol_cpf, vol_dataNasc, vol_sexo
-        );
+        Map<String, Object> json = voluntarioController.updtVoluntario(vol_id, vol_nome, vol_data_nasc, vol_rua, vol_bairro,
+                vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf);
 
         return json.get("erro") == null
                 ? ResponseEntity.ok(new Mensagem("Voluntário alterado com sucesso!"))
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
+    // --- LISTAR TODOS (GET) ---
     @GetMapping
     public ResponseEntity<Object> getAll() {
         List<Map<String, Object>> lista = voluntarioController.getVoluntarios();
         return (lista != null && !lista.isEmpty())
                 ? ResponseEntity.ok(lista)
-                : ResponseEntity.badRequest().body(new Mensagem("Nenhum voluntário encontrado."));
+                : ResponseEntity.ok(new Mensagem("Nenhum voluntário encontrado.")); // Alterado para 200 OK com mensagem, se lista vazia.
     }
 
+    // --- BUSCAR POR ID (GET) ---
     @GetMapping("/{id}")
     public ResponseEntity<Object> getVoluntarioId(@PathVariable int id) {
-        Map<String, Object> json = voluntarioController.getVoluntario(id);
+        Map<String, Object> json = voluntarioController.getVoluntarioById(id);
         return (json.get("erro") == null)
                 ? ResponseEntity.ok(json)
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
+    // --- DELETAR (DELETE) ---
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deletarVoluntario(@PathVariable int id) {
         Map<String, Object> json = voluntarioController.deletarVoluntario(id);
         return (json.get("erro") == null)
-                ? ResponseEntity.ok(new Mensagem("Voluntário excluído com sucesso!"))
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 }

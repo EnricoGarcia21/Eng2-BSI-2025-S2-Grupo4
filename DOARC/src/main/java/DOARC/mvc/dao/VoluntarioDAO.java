@@ -1,6 +1,7 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Voluntario;
+import DOARC.mvc.util.Conexao;
 import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
@@ -11,15 +12,15 @@ import java.util.List;
 @Repository
 public class VoluntarioDAO implements IDAO<Voluntario> {
 
-    private Connection conn;
-
-    public VoluntarioDAO() {
-        conn = SingletonDB.getConexao().getConnect();
+    private Conexao getConexao() {
+        return SingletonDB.conectar();
     }
 
     @Override
     public Voluntario gravar(Voluntario entidade) {
+        Connection conn = getConexao().getConnect();
         String sql = "INSERT INTO voluntario (vol_nome, vol_datanasc, vol_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING vol_id";
+
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entidade.getVolNome());
             pst.setString(2, entidade.getVolDataNasc());
@@ -34,12 +35,14 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
             pst.setString(11, entidade.getVolNumero());
             pst.setString(12, entidade.getVolCpf());
 
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                entidade.setVolId(rs.getInt("vol_id"));
-                return entidade;
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    entidade.setVolId(rs.getInt("vol_id"));
+                    return entidade;
+                }
             }
         } catch (SQLException e) {
+            System.err.println("Erro ao gravar Voluntário: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -47,7 +50,9 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     @Override
     public Voluntario alterar(Voluntario entidade) {
+        Connection conn = getConexao().getConnect();
         String sql = "UPDATE voluntario SET vol_nome=?, vol_datanasc=?, vol_rua=?, vol_bairro=?, vol_cidade=?, vol_telefone=?, vol_cep=?, vol_uf=?, vol_email=?, vol_sexo=?, vol_numero=?, vol_cpf=? WHERE vol_id=?";
+
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setString(1, entidade.getVolNome());
             pst.setString(2, entidade.getVolDataNasc());
@@ -66,6 +71,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
             int updated = pst.executeUpdate();
             return (updated > 0) ? entidade : null;
         } catch (SQLException e) {
+            System.err.println("Erro ao alterar Voluntário: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -73,11 +79,14 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     @Override
     public boolean apagar(Voluntario entidade) {
+        Connection conn = getConexao().getConnect();
         String sql = "DELETE FROM voluntario WHERE vol_id=?";
+
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, entidade.getVolId());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
+            System.err.println("Erro ao apagar Voluntário: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
@@ -85,14 +94,19 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     @Override
     public Voluntario get(int id) {
+        Connection conn = getConexao().getConnect();
         String sql = "SELECT * FROM voluntario WHERE vol_id=?";
+
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
             pst.setInt(1, id);
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                return mapVoluntario(rs);
+
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return mapVoluntario(rs);
+                }
             }
         } catch (SQLException e) {
+            System.err.println("Erro ao buscar Voluntário por ID: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -101,16 +115,37 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
     @Override
     public List<Voluntario> get(String filtro) {
         List<Voluntario> lista = new ArrayList<>();
+        Connection conn = getConexao().getConnect();
         String sql = "SELECT * FROM voluntario";
-        if (filtro != null && !filtro.isEmpty()) sql += " WHERE " + filtro;
 
-        try (Statement st = conn.createStatement()) {
-            ResultSet rs = st.executeQuery(sql);
-            while (rs.next()) {
-                lista.add(mapVoluntario(rs));
+        if (filtro != null && !filtro.isEmpty()) {
+            // Usando PreparedStatement para o filtro também
+            sql += " WHERE vol_nome ILIKE ? OR vol_email ILIKE ? OR vol_cpf ILIKE ?";
+
+            try (PreparedStatement pst = conn.prepareStatement(sql)) {
+                String likePattern = "%" + filtro + "%";
+                pst.setString(1, likePattern);
+                pst.setString(2, likePattern);
+                pst.setString(3, likePattern);
+
+                try (ResultSet rs = pst.executeQuery()) {
+                    while (rs.next()) {
+                        lista.add(mapVoluntario(rs));
+                    }
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao listar Voluntários com filtro: " + e.getMessage());
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
+        } else {
+            // Sem filtro, usa consulta simples
+            try (ResultSet rs = getConexao().consultar(sql)) {
+                while (rs != null && rs.next()) {
+                    lista.add(mapVoluntario(rs));
+                }
+            } catch (SQLException e) {
+                System.err.println("Erro ao listar Voluntários: " + getConexao().getMensagemErro());
+            }
         }
         return lista;
     }

@@ -1,7 +1,5 @@
 package DOARC.mvc.controller;
 
-import DOARC.mvc.dao.LoginDAO;
-import DOARC.mvc.dao.VoluntarioDAO;
 import DOARC.mvc.model.Login;
 import DOARC.mvc.model.Voluntario;
 import DOARC.mvc.security.PasswordEncoder;
@@ -9,16 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
 public class AcessoController {
 
-    @Autowired
-    private LoginDAO loginDAO;
+    @Autowired // Controller recebe a Model (não o DAO)
+    private Login loginModel;
 
-    @Autowired
-    private VoluntarioDAO voluntarioDAO;
+    @Autowired // Controller recebe a Model (não o DAO)
+    private Voluntario voluntarioModel;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -27,31 +26,24 @@ public class AcessoController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Busca login pelo username
-            Login credencial = loginDAO.buscarPorLogin(login);
+            // Busca login usando o método específico da model
+            Login credencial = loginModel.autenticar(login, senha);
 
             if (credencial == null) {
                 response.put("sucesso", false);
-                response.put("mensagem", "Usuário não encontrado");
+                response.put("mensagem", "Usuário não encontrado ou credenciais inválidas");
                 return response;
             }
 
             // Verifica status
-            if (credencial.getStatus() != 'A') {  // 'A' com aspas simples (char)
+            if (credencial.getStatus() != 'A') {
                 response.put("sucesso", false);
                 response.put("mensagem", "Usuário inativo");
                 return response;
             }
 
-            // Verifica senha com hash
-            if (!passwordEncoder.matches(senha, credencial.getSenha())) {
-                response.put("sucesso", false);
-                response.put("mensagem", "Senha incorreta");
-                return response;
-            }
-
-            // Busca dados do voluntário
-            Voluntario voluntario = voluntarioDAO.get(credencial.getVoluntarioId());
+            // Busca dados do voluntário usando a model
+            Voluntario voluntario = voluntarioModel.consultar(credencial.getVoluntarioId());
 
             if (voluntario == null) {
                 response.put("sucesso", false);
@@ -63,9 +55,9 @@ public class AcessoController {
             response.put("sucesso", true);
             response.put("mensagem", "Login realizado com sucesso");
             response.put("usuario", Map.of(
-                    "voluntarioId", credencial.getVoluntarioId(), // ← USA O ID DO VOLUNTÁRIO
+                    "voluntarioId", credencial.getVoluntarioId(),
                     "login", credencial.getLogin(),
-                    "nivelAcesso", credencial.getNive_acesso(),
+                    "nivelAcesso", credencial.getNiveAcesso(),
                     "nome", voluntario.getVolNome(),
                     "email", voluntario.getVolEmail()
             ));
@@ -82,8 +74,8 @@ public class AcessoController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Verifica se o voluntário existe
-            Voluntario voluntario = voluntarioDAO.get(voluntarioId);
+            // Verifica se o voluntário existe usando a model
+            Voluntario voluntario = voluntarioModel.consultar(voluntarioId);
             if (voluntario == null) {
                 response.put("sucesso", false);
                 response.put("mensagem", "Voluntário não encontrado");
@@ -91,7 +83,7 @@ public class AcessoController {
             }
 
             // Verifica se já existe login para este voluntário
-            Login existente = loginDAO.buscarPorVoluntarioId(voluntarioId);
+            Login existente = buscarLoginPorVoluntarioId(voluntarioId);
             if (existente != null) {
                 response.put("sucesso", false);
                 response.put("mensagem", "Já existem credenciais para este voluntário");
@@ -99,24 +91,24 @@ public class AcessoController {
             }
 
             // Verifica se o login já está em uso
-            Login loginExistente = loginDAO.buscarPorLogin(login);
+            Login loginExistente = buscarLoginPorUsuario(login);
             if (loginExistente != null) {
                 response.put("sucesso", false);
                 response.put("mensagem", "Login já está em uso");
                 return response;
             }
 
-            // Cria nova credencial (usa voluntarioId como identificador)
-            Login novaCredencial = new Login();
-            novaCredencial.setVoluntarioId(voluntarioId); // ← CHAVE PRIMÁRIA
-            novaCredencial.setLogin(login);
-            novaCredencial.setSenha(passwordEncoder.encode(senha));
-            novaCredencial.setNive_acesso(nivelAcesso != null ? nivelAcesso : "VOLUNTARIO");
-            novaCredencial.setStatus('A');
+            // Configura os dados na model injetada
+            loginModel.setVoluntarioId(voluntarioId);
+            loginModel.setLogin(login);
+            loginModel.setSenha(passwordEncoder.encode(senha));
+            loginModel.setNiveAcesso(nivelAcesso != null ? nivelAcesso : "VOLUNTARIO");
+            loginModel.setStatus('A');
 
-            boolean criado = loginDAO.criarLogin(novaCredencial);
+            // Chama o método gravar da Model (sem parâmetro - usa this)
+            Login novaCredencial = loginModel.gravar();
 
-            if (criado) {
+            if (novaCredencial != null) {
                 response.put("sucesso", true);
                 response.put("mensagem", "Credenciais criadas com sucesso");
             } else {
@@ -136,7 +128,8 @@ public class AcessoController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            Login credencial = loginDAO.buscarPorVoluntarioId(voluntarioId);
+            // Busca credenciais usando a model
+            Login credencial = buscarLoginPorVoluntarioId(voluntarioId);
 
             if (credencial == null) {
                 response.put("sucesso", false);
@@ -151,10 +144,13 @@ public class AcessoController {
                 return response;
             }
 
-            // Atualiza senha
-            boolean atualizado = loginDAO.atualizarSenha(voluntarioId, passwordEncoder.encode(novaSenha));
+            // Atualiza senha no objeto
+            credencial.setSenha(passwordEncoder.encode(novaSenha));
 
-            if (atualizado) {
+            // Chama o método alterar da Model (sem parâmetro - usa this)
+            Login atualizado = credencial.alterar();
+
+            if (atualizado != null) {
                 response.put("sucesso", true);
                 response.put("mensagem", "Senha alterada com sucesso");
             } else {
@@ -170,8 +166,83 @@ public class AcessoController {
         return response;
     }
 
+    public Map<String, Object> deletarCredenciais(int voluntarioId) {
+        Map<String, Object> response = new HashMap<>();
 
-    public boolean excluirCredenciais(int voluntarioId) {
-        return loginDAO.excluirLogin(voluntarioId);
+        try {
+            // Busca credenciais usando a model
+            Login credencial = buscarLoginPorVoluntarioId(voluntarioId);
+
+            if (credencial == null) {
+                response.put("sucesso", false);
+                response.put("mensagem", "Credenciais não encontradas");
+                return response;
+            }
+
+            // Chama o método apagar da Model (sem parâmetro - usa this)
+            boolean deletado = credencial.apagar();
+
+            if (deletado) {
+                response.put("sucesso", true);
+                response.put("mensagem", "Credenciais removidas com sucesso");
+            } else {
+                response.put("sucesso", false);
+                response.put("mensagem", "Erro ao remover credenciais");
+            }
+
+        } catch (Exception e) {
+            response.put("sucesso", false);
+            response.put("mensagem", "Erro: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    public Map<String, Object> alterarStatus(int voluntarioId, char status) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Busca credenciais usando a model
+            Login credencial = buscarLoginPorVoluntarioId(voluntarioId);
+
+            if (credencial == null) {
+                response.put("sucesso", false);
+                response.put("mensagem", "Credenciais não encontradas");
+                return response;
+            }
+
+            // Atualiza status no objeto
+            credencial.setStatus(status);
+
+            // Chama o método alterar da Model (sem parâmetro - usa this)
+            Login atualizado = credencial.alterar();
+
+            if (atualizado != null) {
+                response.put("sucesso", true);
+                response.put("mensagem", "Status alterado com sucesso");
+            } else {
+                response.put("sucesso", false);
+                response.put("mensagem", "Erro ao alterar status");
+            }
+
+        } catch (Exception e) {
+            response.put("sucesso", false);
+            response.put("mensagem", "Erro: " + e.getMessage());
+        }
+
+        return response;
+    }
+
+    // --- MÉTODOS AUXILIARES ---
+
+    private Login buscarLoginPorUsuario(String login) {
+        List<Login> logins = loginModel.consultar(login);
+        return logins != null && !logins.isEmpty() ? logins.get(0) : null;
+    }
+
+    private Login buscarLoginPorVoluntarioId(int voluntarioId) {
+        // Busca por voluntarioId específico
+        List<Login> logins = loginModel.consultar("voluntario_vol_id = " + voluntarioId);
+        return logins != null && !logins.isEmpty() ? logins.get(0) : null;
     }
 }
