@@ -82,10 +82,7 @@
                             <label for="categoria" class="form-label required">Categoria</label>
                             <select id="categoria" class="form-control form-select" required onchange="carregarProdutos()">
                                 <option value="">Selecione uma categoria</option>
-                                <option value="1">Alimentos</option>
-                                <option value="2">Roupas</option>
-                                <option value="3">Higiene</option>
-                                <option value="4">Móveis</option>
+                                <!-- Categorias carregadas dinamicamente -->
                             </select>
                             <div class="form-error">Selecione uma categoria</div>
                         </div>
@@ -278,22 +275,44 @@
 
     <script src="../js/app.js"></script>
     <script>
+        // API Base URLs
+        const API_ACERTO = 'http://localhost:8080/apis/acerto-estoque';
+        const API_PRODUTO = 'http://localhost:8080/apis/produto';
+        const API_CATEGORIA = 'http://localhost:8080/apis/categoria';
+
         // Definir data de hoje como padrão
         document.getElementById('dataAcerto').valueAsDate = new Date();
 
-        // Simular estoque (em produção, virá da API)
-        const estoqueProdutos = {
-            '1_0': { quantidade: 50, unidade: 'kg', nome: 'Arroz Tipo 1' },
-            '1_1': { quantidade: 30, unidade: 'kg', nome: 'Feijão Preto' },
-            '1_2': { quantidade: 20, unidade: 'kg', nome: 'Macarrão' },
-            '2_0': { quantidade: 40, unidade: 'un', nome: 'Camisetas Tamanho M' },
-            '2_1': { quantidade: 35, unidade: 'un', nome: 'Calças Jeans' },
-            '3_0': { quantidade: 60, unidade: 'un', nome: 'Sabonete' },
-            '3_1': { quantidade: 40, unidade: 'un', nome: 'Shampoo' },
-            '4_0': { quantidade: 5, unidade: 'un', nome: 'Mesa de Jantar' }
-        };
+        // Cache de produtos
+        let produtosCache = {};
 
-        function carregarProdutos() {
+        // Carrega categorias ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarCategorias();
+            carregarAcertosRecentes();
+        });
+
+        async function carregarCategorias() {
+            try {
+                const response = await fetch(API_CATEGORIA);
+                if (!response.ok) throw new Error('Erro ao buscar categorias');
+
+                const categorias = await response.json();
+                const categoriaSelect = document.getElementById('categoria');
+
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    categoriaSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                alert('Erro ao carregar categorias. Verifique se o backend está rodando.');
+            }
+        }
+
+        async function carregarProdutos() {
             const categoriaId = document.getElementById('categoria').value;
             const selectProduto = document.getElementById('produto');
 
@@ -303,21 +322,25 @@
 
             if (!categoriaId) return;
 
-            // TODO: Carregar produtos da API
-            const produtos = {
-                '1': ['Arroz Tipo 1', 'Feijão Preto', 'Macarrão'],
-                '2': ['Camisetas Tamanho M', 'Calças Jeans'],
-                '3': ['Sabonete', 'Shampoo'],
-                '4': ['Mesa de Jantar']
-            };
+            try {
+                const response = await fetch(`${API_PRODUTO}?categoria_id=${categoriaId}`);
+                if (!response.ok) throw new Error('Erro ao buscar produtos');
 
-            if (produtos[categoriaId]) {
-                produtos[categoriaId].forEach((produto, index) => {
+                const produtos = await response.json();
+                produtosCache = {}; // Limpa o cache
+
+                produtos.forEach(prod => {
                     const option = document.createElement('option');
-                    option.value = `${categoriaId}_${index}`;
-                    option.textContent = produto;
+                    option.value = prod.id;
+                    option.textContent = prod.nome;
                     selectProduto.appendChild(option);
+
+                    // Armazena no cache para uso posterior
+                    produtosCache[prod.id] = prod;
                 });
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                alert('Erro ao carregar produtos da categoria selecionada.');
             }
         }
 
@@ -329,12 +352,10 @@
                 return;
             }
 
-            // TODO: Carregar estoque da API
-            const estoque = estoqueProdutos[produtoId];
-
-            if (estoque) {
-                document.getElementById('estoqueAtual').textContent = estoque.quantidade;
-                document.getElementById('unidadeEstoque').textContent = estoque.unidade;
+            const produto = produtosCache[produtoId];
+            if (produto) {
+                document.getElementById('estoqueAtual').textContent = produto.quantidade;
+                document.getElementById('unidadeEstoque').textContent = 'un';
                 document.getElementById('infoEstoqueAtual').style.display = 'block';
             }
         }
@@ -349,19 +370,21 @@
                 return;
             }
 
-            const estoque = estoqueProdutos[produtoId];
-            let novoEstoque = estoque.quantidade;
+            const produto = produtosCache[produtoId];
+            if (!produto) return;
+
+            let novoEstoque = produto.quantidade;
 
             if (tipoAcerto === 'adicao') {
-                novoEstoque = estoque.quantidade + quantidade;
+                novoEstoque = produto.quantidade + quantidade;
             } else if (tipoAcerto === 'subtracao') {
-                novoEstoque = estoque.quantidade - quantidade;
+                novoEstoque = produto.quantidade - quantidade;
             } else if (tipoAcerto === 'correcao') {
                 novoEstoque = quantidade;
             }
 
             document.getElementById('estoquePrevisao').textContent = novoEstoque;
-            document.getElementById('unidadePrevisao').textContent = estoque.unidade;
+            document.getElementById('unidadePrevisao').textContent = 'un';
             document.getElementById('previsaoEstoque').style.display = 'block';
 
             // Alerta se o estoque ficará negativo
@@ -381,11 +404,43 @@
         }
 
         function verHistoricoProduto() {
-            UI.showAlert('Funcionalidade em desenvolvimento', 'info');
+            alert('Funcionalidade em desenvolvimento');
         }
 
         function verDetalhesAcerto(id) {
-            UI.showAlert('Funcionalidade em desenvolvimento', 'info');
+            alert('Funcionalidade em desenvolvimento');
+        }
+
+        async function carregarAcertosRecentes() {
+            try {
+                const response = await fetch(API_ACERTO);
+                if (!response.ok) return;
+
+                const acertos = await response.json();
+                const tbody = document.getElementById('tabelaAcertos');
+                tbody.innerHTML = '';
+
+                acertos.slice(0, 10).forEach(acerto => {
+                    const tr = document.createElement('tr');
+                    const badgeClass = acerto.tipo === 'Entrada' ? 'badge-success' : 'badge-danger';
+                    const sinalQtd = acerto.tipo === 'Entrada' ? '+' : '-';
+
+                    tr.innerHTML = `
+                        <td>${acerto.data}</td>
+                        <td>${acerto.produto_nome || 'N/A'}</td>
+                        <td><span class="badge ${badgeClass}">${acerto.tipo}</span></td>
+                        <td>${sinalQtd}${acerto.quantidade}</td>
+                        <td>${acerto.motivo}</td>
+                        <td>Vol. ${acerto.voluntario_id}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="verDetalhesAcerto(${acerto.id})" title="Ver detalhes">👁️</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar acertos recentes:', error);
+            }
         }
 
         // Submissão do formulário
@@ -461,29 +516,72 @@
             if (!isValid) return;
 
             try {
-                const data = {
-                    produtoId: produto.value,
-                    tipoAcerto: tipoAcerto.value,
-                    quantidade: parseFloat(quantidade.value),
-                    motivo: motivoAcerto.value === 'outro'
-                        ? document.getElementById('outroMotivo').value
-                        : motivoAcerto.options[motivoAcerto.selectedIndex].text,
-                    observacoes: observacoes.value,
-                    data: dataAcerto.value,
-                    voluntarioId: voluntarioResponsavel.value
+                // Mapeamento dos motivos do frontend para o backend
+                const motivosMap = {
+                    'inventario': 'Ajuste',
+                    'erro_lancamento': 'Ajuste',
+                    'perda': 'Perda',
+                    'vencimento': 'Vencimento',
+                    'dano': 'Perda',
+                    'diferenca': 'Ajuste',
+                    'outro': 'Outro'
                 };
 
-                // TODO: Integrar com API
-                // await API.post('/estoque/acerto', data);
+                // Mapeamento dos tipos (frontend usa adicao/subtracao/correcao, backend usa Entrada/Saída)
+                let tipo, qtd;
+                const tipoFrontend = tipoAcerto.value;
+                const quantidade = parseFloat(document.getElementById('quantidade').value);
+                const produto = produtosCache[document.getElementById('produto').value];
 
-                UI.showAlert('Acerto de estoque registrado com sucesso!', 'success');
+                if (tipoFrontend === 'adicao') {
+                    tipo = 'Entrada';
+                    qtd = quantidade;
+                } else if (tipoFrontend === 'subtracao') {
+                    tipo = 'Saída';
+                    qtd = quantidade;
+                } else if (tipoFrontend === 'correcao') {
+                    // Correção: calcula se é entrada ou saída baseado no estoque atual
+                    const estoqueAtual = produto.quantidade;
+                    if (quantidade > estoqueAtual) {
+                        tipo = 'Entrada';
+                        qtd = quantidade - estoqueAtual;
+                    } else {
+                        tipo = 'Saída';
+                        qtd = estoqueAtual - quantidade;
+                    }
+                }
 
-                setTimeout(() => {
+                const motivoValue = motivoAcerto.value === 'outro'
+                    ? document.getElementById('outroMotivo').value
+                    : motivosMap[motivoAcerto.value] || 'Ajuste';
+
+                const params = new URLSearchParams();
+                params.append('ac_data', dataAcerto.value);
+                params.append('ac_motivo', motivoValue);
+                params.append('ac_obs', observacoes.value);
+                params.append('ac_tipo', tipo);
+                params.append('ac_quantidade', qtd);
+                params.append('vol_id', voluntarioResponsavel.value || '1');
+                params.append('prod_id', document.getElementById('produto').value);
+
+                const response = await fetch(`${API_ACERTO}?${params.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Acerto de estoque registrado com sucesso!');
                     window.location.href = 'visualizar-estoque.html';
-                }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.mensagem || 'Erro ao registrar acerto');
+                }
 
             } catch (error) {
                 console.error('Erro ao registrar acerto:', error);
+                alert('Erro ao registrar acerto: ' + error.message);
             }
         });
     </script>

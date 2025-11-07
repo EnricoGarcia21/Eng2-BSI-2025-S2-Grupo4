@@ -1,13 +1,13 @@
 //package casoft.mvc.view;
 //
-//import casoft.mvc.controller.UsuarioController;
+//import casoft.mvc.control.UsuarioControl;
 //import casoft.mvc.model.Usuario;
 //
 //import java.util.List;
 //import java.util.Scanner;
 //
 //public class UsuarioView {
-//    private UsuarioController controller = new UsuarioController();
+//    private UsuarioControl control = new UsuarioControl();
 //    private Scanner scanner = new Scanner(System.in);
 //
 //    public void mostrarTelaLogin() {
@@ -17,7 +17,7 @@
 //        System.out.print("Senha: ");
 //        String senha = scanner.nextLine();
 //
-//        Usuario usuario = controller.fazerLogin(login, senha);
+//        Usuario usuario = control.fazerLogin(login, senha);
 //        if (usuario != null) {
 //            System.out.println("Bem-vindo, " + usuario.getNome() + "!");
 //            // Menu principal pd ser chamado aq
@@ -48,7 +48,7 @@
 //        System.out.print("Telefone (apenas números): ");
 //        String telefone = formatarTelefone(scanner.nextLine());
 //
-//        boolean sucesso = controller.cadastrarUsuario(nome, login, senha, nivelAcesso, cpf, telefone);
+//        boolean sucesso = control.cadastrarUsuario(nome, login, senha, nivelAcesso, cpf, telefone);
 //        if (sucesso) {
 //            System.out.println("Usuário cadastrado com sucesso!");
 //        } else {
@@ -85,7 +85,7 @@
 //                filtro = "";
 //        }
 //
-//        List<Usuario> usuarios = controller.listarUsuarios(filtro);
+//        List<Usuario> usuarios = control.listarUsuarios(filtro);
 //        System.out.println("\n=== RESULTADOS ===");
 //        for (Usuario usuario : usuarios) {
 //            System.out.printf(

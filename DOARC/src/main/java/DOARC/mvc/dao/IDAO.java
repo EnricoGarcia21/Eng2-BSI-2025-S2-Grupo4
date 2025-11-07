@@ -3,9 +3,9 @@ package DOARC.mvc.dao;
 import java.util.List;
 
 public interface IDAO<T>{
-    // Retorno alterado de Object para T
+    // DAO gerencia a Connection internamente via Singleton
     public T gravar(T entidade);
-    // Retorno alterado de Object para T
+
     public T alterar(T entidade);
 
     public boolean apagar(T entidade);

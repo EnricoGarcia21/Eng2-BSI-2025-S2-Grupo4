@@ -75,40 +75,14 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Nome</th>
-                                <th>Descrição</th>
-                                <th>Produtos</th>
+                                <th>Especificação</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaCategorias">
-                            <tr>
-                                <td>Alimentos</td>
-                                <td>Produtos alimentícios não perecíveis e perecíveis</td>
-                                <td>45</td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarCategoria(1)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirCategoria(1)">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Roupas</td>
-                                <td>Vestuário em geral</td>
-                                <td>32</td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarCategoria(2)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirCategoria(2)">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Higiene</td>
-                                <td>Produtos de higiene pessoal</td>
-                                <td>28</td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarCategoria(3)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirCategoria(3)">🗑️</button>
-                                </td>
-                            </tr>
+                            <!-- Dados carregados via API -->
                         </tbody>
                     </table>
                 </div>
@@ -131,8 +105,9 @@
                         <div class="form-error">Nome é obrigatório</div>
                     </div>
                     <div class="form-group">
-                        <label for="descricao" class="form-label">Descrição</label>
-                        <textarea id="descricao" class="form-control" rows="3"></textarea>
+                        <label for="especificacao" class="form-label">Especificação</label>
+                        <textarea id="especificacao" class="form-control" rows="3" placeholder="Descreva os detalhes da categoria (opcional)"></textarea>
+                        <div class="form-error">Especificação muito longa (máximo 130 caracteres)</div>
                     </div>
                 </form>
             </div>
@@ -145,6 +120,15 @@
 
     <script src="../js/app.js"></script>
     <script>
+        // API Base URL - Backend Spring Boot
+        const API_BASE = 'http://localhost:8080/apis/categoria';
+
+        // Carrega as categorias ao iniciar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarCategorias();
+        });
+
+        // Busca em tempo real
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('#tabelaCategorias tr');
@@ -153,6 +137,46 @@
             });
         });
 
+        async function carregarCategorias() {
+            try {
+                console.log('Carregando categorias de:', API_BASE);
+                const response = await fetch(API_BASE);
+
+                if (!response.ok) {
+                    console.error('Status da resposta:', response.status);
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                const categorias = await response.json();
+                console.log('Categorias recebidas:', categorias);
+
+                const tbody = document.getElementById('tabelaCategorias');
+                tbody.innerHTML = '';
+
+                if (!categorias || categorias.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Nenhuma categoria cadastrada</td></tr>';
+                    return;
+                }
+
+                categorias.forEach(cat => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${cat.id}</td>
+                        <td>${cat.nome}</td>
+                        <td>${cat.especificacao || '-'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="editarCategoria(${cat.id})">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="excluirCategoria(${cat.id})">🗑️</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro completo ao carregar:', error);
+                alert('Erro ao carregar categorias. Verifique se o backend está rodando na porta 8080.');
+            }
+        }
+
         function openModal(modalId) {
             document.getElementById('formCategoria').reset();
             document.getElementById('categoriaId').value = '';
@@ -160,30 +184,63 @@
             UI.openModal(modalId);
         }
 
-        function closeModal(modalId) { UI.closeModal(modalId); }
+        function closeModal(modalId) {
+            UI.closeModal(modalId);
+        }
 
-        function editarCategoria(id) {
-            document.getElementById('categoriaId').value = id;
-            document.getElementById('modalTitle').textContent = 'Editar Categoria';
-            document.getElementById('nome').value = 'Alimentos';
-            document.getElementById('descricao').value = 'Produtos alimentícios não perecíveis e perecíveis';
-            UI.openModal('modalCategoria');
+        async function editarCategoria(id) {
+            try {
+                const response = await fetch(`${API_BASE}/${id}`);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Erro na resposta:', errorData);
+                    throw new Error(errorData.mensagem || errorData.erro || 'Erro ao buscar categoria');
+                }
+
+                const categoria = await response.json();
+                console.log('Categoria carregada:', categoria);
+
+                // Verifica se há erro na resposta
+                if (categoria.erro) {
+                    throw new Error(categoria.erro);
+                }
+
+                document.getElementById('categoriaId').value = categoria.id;
+                document.getElementById('modalTitle').textContent = 'Editar Categoria';
+                document.getElementById('nome').value = categoria.nome || '';
+                document.getElementById('especificacao').value = categoria.especificacao || '';
+                UI.openModal('modalCategoria');
+            } catch (error) {
+                console.error('Erro completo:', error);
+                alert('Erro ao carregar categoria: ' + error.message);
+            }
         }
 
         function excluirCategoria(id) {
-            UI.confirm('Tem certeza? Os produtos desta categoria não serão excluídos.', async function() {
-                try {
-                    // await API.delete(`/categorias/${id}`);
-                    UI.showAlert('Categoria excluída com sucesso!', 'success');
-                } catch (error) {
+            if (confirm('Tem certeza que deseja excluir esta categoria?')) {
+                fetch(`${API_BASE}/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Categoria excluída com sucesso!');
+                        carregarCategorias();
+                    } else {
+                        throw new Error('Erro ao excluir categoria');
+                    }
+                })
+                .catch(error => {
                     console.error('Erro:', error);
-                }
-            });
+                    alert('Erro ao excluir categoria');
+                });
+            }
         }
 
         async function salvarCategoria() {
             const form = document.getElementById('formCategoria');
             const nome = document.getElementById('nome');
+            const especificacao = document.getElementById('especificacao');
 
             Validator.clearAllErrors(form);
 
@@ -192,23 +249,43 @@
                 return;
             }
 
+            if (especificacao.value && especificacao.value.length > 130) {
+                Validator.showError(especificacao, 'Especificação muito longa (máximo 130 caracteres)');
+                return;
+            }
+
             try {
                 const categoriaId = document.getElementById('categoriaId').value;
-                const data = {
-                    nome: nome.value,
-                    descricao: document.getElementById('descricao').value
-                };
+
+                let url = API_BASE;
+                let method = 'POST';
+                let params = new URLSearchParams();
+                params.append('cat_nome', nome.value);
+                params.append('cat_especificacao', especificacao.value || '');
 
                 if (categoriaId) {
-                    // await API.put(`/categorias/${categoriaId}`, data);
-                    UI.showAlert('Categoria atualizada!', 'success');
-                } else {
-                    // await API.post('/categorias', data);
-                    UI.showAlert('Categoria cadastrada!', 'success');
+                    method = 'PUT';
+                    params.append('cat_id', categoriaId);
                 }
-                closeModal('modalCategoria');
+
+                const response = await fetch(`${url}?${params.toString()}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+
+                if (response.ok) {
+                    alert(categoriaId ? 'Categoria atualizada com sucesso!' : 'Categoria cadastrada com sucesso!');
+                    closeModal('modalCategoria');
+                    carregarCategorias();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.mensagem || 'Erro ao salvar categoria');
+                }
             } catch (error) {
                 console.error('Erro:', error);
+                alert('Erro ao salvar categoria: ' + error.message);
             }
         }
     </script>

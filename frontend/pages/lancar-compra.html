@@ -153,10 +153,7 @@
                             <label for="categoria" class="form-label required">Categoria</label>
                             <select id="categoria" class="form-control form-select" onchange="carregarProdutos()">
                                 <option value="">Selecione uma categoria</option>
-                                <option value="1">Alimentos</option>
-                                <option value="2">Roupas</option>
-                                <option value="3">Higiene</option>
-                                <option value="4">Móveis</option>
+                                <!-- Categorias carregadas dinamicamente -->
                             </select>
                         </div>
 
@@ -260,11 +257,42 @@
 
     <script src="../js/app.js"></script>
     <script>
+        // API Base URLs
+        const API_COMPRA = 'http://localhost:8080/apis/compra';
+        const API_PRODUTO = 'http://localhost:8080/apis/produto';
+        const API_CATEGORIA = 'http://localhost:8080/apis/categoria';
+
         // Definir data de hoje como padrão
         document.getElementById('dataLancamento').valueAsDate = new Date();
 
         // Array para produtos adicionados
         let produtosAdicionados = [];
+        let produtosCache = {}; // Cache de produtos por categoria
+
+        // Carrega categorias ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarCategorias();
+        });
+
+        async function carregarCategorias() {
+            try {
+                const response = await fetch(API_CATEGORIA);
+                if (!response.ok) throw new Error('Erro ao buscar categorias');
+
+                const categorias = await response.json();
+                const categoriaSelect = document.getElementById('categoria');
+
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    categoriaSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                alert('Erro ao carregar categorias. Verifique se o backend está rodando.');
+            }
+        }
 
         function toggleTipoLancamento() {
             const tipo = document.getElementById('tipoLancamento').value;
@@ -281,7 +309,7 @@
             }
         }
 
-        function carregarProdutos() {
+        async function carregarProdutos() {
             const categoriaId = document.getElementById('categoria').value;
             const selectProduto = document.getElementById('produto');
 
@@ -289,50 +317,50 @@
 
             if (!categoriaId) return;
 
-            // TODO: Carregar produtos da API
-            const produtos = {
-                '1': ['Arroz', 'Feijão', 'Macarrão', 'Óleo', 'Açúcar'],
-                '2': ['Camiseta', 'Calça', 'Agasalho', 'Sapatos'],
-                '3': ['Sabonete', 'Shampoo', 'Pasta de Dente', 'Desodorante'],
-                '4': ['Mesa', 'Cadeira', 'Cama', 'Guarda-roupa']
-            };
+            try {
+                const response = await fetch(`${API_PRODUTO}?categoria_id=${categoriaId}`);
+                if (!response.ok) throw new Error('Erro ao buscar produtos');
 
-            if (produtos[categoriaId]) {
-                produtos[categoriaId].forEach((produto, index) => {
+                const produtos = await response.json();
+                produtosCache = {}; // Limpa o cache
+
+                produtos.forEach(prod => {
                     const option = document.createElement('option');
-                    option.value = `${categoriaId}_${index}`;
-                    option.textContent = produto;
+                    option.value = prod.id;
+                    option.textContent = prod.nome;
                     selectProduto.appendChild(option);
+
+                    // Armazena no cache para uso posterior
+                    produtosCache[prod.id] = prod;
                 });
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                alert('Erro ao carregar produtos da categoria selecionada.');
             }
         }
 
         function adicionarProduto() {
             const produto = document.getElementById('produto');
             const quantidade = document.getElementById('quantidade');
-            const unidade = document.getElementById('unidadeMedida');
             const valorUnitario = document.getElementById('valorUnitario');
-            const dataValidade = document.getElementById('dataValidade');
 
             if (!produto.value || !quantidade.value) {
-                UI.showAlert('Selecione um produto e informe a quantidade', 'warning');
+                alert('Selecione um produto e informe a quantidade');
                 return;
             }
 
+            const produtoId = parseInt(produto.value);
             const produtoTexto = produto.options[produto.selectedIndex].text;
-            const unidadeTexto = unidade.options[unidade.selectedIndex].text;
             const valorUnit = parseFloat(valorUnitario.value) || 0;
             const qtd = parseFloat(quantidade.value);
             const subtotal = valorUnit * qtd;
 
             produtosAdicionados.push({
-                produtoId: produto.value,
+                prodId: produtoId,
                 produto: produtoTexto,
-                quantidade: qtd,
-                unidade: unidadeTexto,
-                valorUnitario: valorUnit,
-                subtotal: subtotal,
-                dataValidade: dataValidade.value
+                qtde: qtd,
+                valorUnit: valorUnit,
+                subtotal: subtotal
             });
 
             atualizarTabelaProdutos();
@@ -341,7 +369,6 @@
             produto.value = '';
             quantidade.value = '';
             valorUnitario.value = '';
-            dataValidade.value = '';
         }
 
         function atualizarTabelaProdutos() {
@@ -362,10 +389,10 @@
                 return `
                     <tr>
                         <td>${item.produto}</td>
-                        <td>${item.quantidade} ${item.unidade}</td>
-                        <td>R$ ${item.valorUnitario.toFixed(2)}</td>
+                        <td>${item.qtde}</td>
+                        <td>R$ ${item.valorUnit.toFixed(2)}</td>
                         <td>R$ ${item.subtotal.toFixed(2)}</td>
-                        <td>${item.dataValidade ? Formatter.formatDate(item.dataValidade) : '-'}</td>
+                        <td>-</td>
                         <td>
                             <button class="btn btn-sm btn-danger" onclick="removerProduto(${index})">
                                 🗑️ Remover
@@ -404,7 +431,7 @@
             }
 
             if (produtosAdicionados.length === 0) {
-                UI.showAlert('Adicione pelo menos um produto', 'warning');
+                alert('Adicione pelo menos um produto');
                 isValid = false;
             }
 
@@ -427,30 +454,42 @@
             if (!isValid) return;
 
             try {
-                const data = {
-                    tipo: tipoLancamento.value,
-                    data: dataLancamento.value,
-                    numeroDocumento: document.getElementById('numeroDocumento').value,
-                    fornecedor: document.getElementById('fornecedor').value,
-                    valorTotal: parseFloat(document.getElementById('valorTotal').value) || 0,
-                    formaPagamento: document.getElementById('formaPagamento').value,
-                    origemArrecadacao: document.getElementById('origemArrecadacao').value,
-                    produtos: produtosAdicionados,
-                    campanhaId: document.getElementById('campanha').value,
-                    observacoes: document.getElementById('observacoes').value
-                };
+                // Monta os parâmetros para o backend
+                const fornecedor = tipoLancamento.value === 'compra' ? document.getElementById('fornecedor').value : '';
+                const valorTotal = tipoLancamento.value === 'compra' ? parseFloat(document.getElementById('valorTotal').value) : 0;
+                const observacoes = tipoLancamento.value === 'arrecadacao'
+                    ? `Arrecadação - ${document.getElementById('origemArrecadacao').value}`
+                    : document.getElementById('observacoes').value;
 
-                // TODO: Integrar com API
-                // await API.post('/estoque/lancamento', data);
+                // Prepara os produtos para envio
+                const produtosJSON = JSON.stringify(produtosAdicionados);
 
-                UI.showAlert('Lançamento registrado com sucesso! Estoque atualizado.', 'success');
+                const params = new URLSearchParams();
+                params.append('comp_data_compra', dataLancamento.value);
+                params.append('comp_desc', observacoes || '');
+                params.append('vol_id', '1'); // TODO: Usar ID do voluntário logado
+                params.append('com_valor_total', valorTotal);
+                params.append('com_fornecedor', fornecedor);
+                params.append('produtos', produtosJSON);
 
-                setTimeout(() => {
+                const response = await fetch(`${API_COMPRA}?${params.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Lançamento registrado com sucesso! Estoque atualizado.');
                     window.location.href = 'visualizar-estoque.html';
-                }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.mensagem || 'Erro ao registrar lançamento');
+                }
 
             } catch (error) {
                 console.error('Erro ao registrar lançamento:', error);
+                alert('Erro ao registrar lançamento: ' + error.message);
             }
         });
     </script>

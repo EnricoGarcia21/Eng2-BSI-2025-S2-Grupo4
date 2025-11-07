@@ -1,8 +1,8 @@
 package DOARC.mvc.view;
 
-import DOARC.mvc.controller.DonatarioController;
-import DOARC.mvc.model.Donatario;
+import DOARC.mvc.control.DonatarioControl;
 import DOARC.mvc.util.Mensagem;
+import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +16,7 @@ import java.util.Map;
 public class DonatarioView {
 
     @Autowired
-    private DonatarioController donatarioController;
+    private DonatarioControl donatarioControl;
 
     @PostMapping
     public ResponseEntity<Object> addDonatario(@RequestParam String don_nome,
@@ -30,7 +30,7 @@ public class DonatarioView {
                                                @RequestParam String don_email,
                                                @RequestParam String don_sexo) {
 
-        Map<String, Object> json = donatarioController.addDonatario(don_nome, don_data_nasc, don_rua, don_bairro,
+        Map<String, Object> json = donatarioControl.addDonatario(don_nome, don_data_nasc, don_rua, don_bairro,
                 don_cidade, don_telefone, don_cep, don_uf,
                 don_email, don_sexo);
 
@@ -52,7 +52,7 @@ public class DonatarioView {
                                                 @RequestParam String don_email,
                                                 @RequestParam String don_sexo) {
 
-        Map<String, Object> json = donatarioController.updtDonatario(don_id, don_nome, don_data_nasc, don_rua, don_bairro,
+        Map<String, Object> json = donatarioControl.updtDonatario(don_id, don_nome, don_data_nasc, don_rua, don_bairro,
                 don_cidade, don_telefone, don_cep, don_uf, don_email, don_sexo);
 
         return json.get("erro") == null
@@ -61,16 +61,21 @@ public class DonatarioView {
     }
 
     @GetMapping
-    public ResponseEntity<Object> getAll() {
-        List<Map<String, Object>> lista = donatarioController.getDonatario();
-        return (lista != null && !lista.isEmpty())
-                ? ResponseEntity.ok(lista)
-                : ResponseEntity.badRequest().body(new Mensagem("Nenhum donatário encontrado."));
+    public ResponseEntity<Object> getAll(@RequestParam(required = false) String filtro) {
+        List<Map<String, Object>> lista;
+
+        if (filtro != null && !filtro.trim().isEmpty()) {
+            lista = donatarioControl.buscarDonatarios(filtro);
+        } else {
+            lista = donatarioControl.getDonatarios();
+        }
+
+        return ResponseEntity.ok(lista != null ? lista : new ArrayList<>());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getDonatarioId(@PathVariable int id) {
-        Map<String, Object> json = donatarioController.getDonatario(id);
+        Map<String, Object> json = donatarioControl.getDonatario(id);
         return (json.get("erro") == null)
                 ? ResponseEntity.ok(json)
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
@@ -78,9 +83,9 @@ public class DonatarioView {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deletarDonatario(@PathVariable int id) {
-        Map<String, Object> json = donatarioController.deletarDonatario(id);
+        Map<String, Object> json = donatarioControl.deletarDonatario(id);
         return (json.get("erro") == null)
-                ? ResponseEntity.ok(new Mensagem("Donatário excluído com sucesso!"))
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 }

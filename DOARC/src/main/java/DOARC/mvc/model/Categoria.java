@@ -3,19 +3,23 @@ package DOARC.mvc.model;
 public class Categoria {
 
     private int catId;
-    private String catNome;
+    private String catNomeProd;
+    private String catEspecificacao;
 
-    // --- CONSTRUTORES ---
     public Categoria() {
         // Construtor vazio necessário para mapeamento e frameworks
     }
 
-    // Construtor para cadastro (sem ID, pois o banco gera)
-    public Categoria(String catNome) {
-        this.catNome = catNome;
+    public Categoria(String catNomeProd, String catEspecificacao) {
+        this.catNomeProd = catNomeProd;
+        this.catEspecificacao = catEspecificacao;
     }
 
-    // --- GETTERS E SETTERS ---
+    public Categoria(String catNomeProd) {
+        this.catNomeProd = catNomeProd;
+        this.catEspecificacao = "";
+    }
+
     public int getCatId() {
         return catId;
     }
@@ -24,11 +28,19 @@ public class Categoria {
         this.catId = catId;
     }
 
-    public String getCatNome() {
-        return catNome;
+    public String getCatNomeProd() {
+        return catNomeProd;
     }
 
-    public void setCatNome(String catNome) {
-        this.catNome = catNome;
+    public void setCatNomeProd(String catNomeProd) {
+        this.catNomeProd = catNomeProd;
+    }
+
+    public String getCatEspecificacao() {
+        return catEspecificacao;
+    }
+
+    public void setCatEspecificacao(String catEspecificacao) {
+        this.catEspecificacao = catEspecificacao;
     }
 }

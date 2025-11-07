@@ -74,10 +74,7 @@
                         <input type="text" id="searchInput" class="form-control" placeholder="Buscar produto..." style="max-width: 300px;">
                         <select id="filtroCategoria" class="form-control form-select" style="max-width: 200px;" onchange="filtrarPorCategoria()">
                             <option value="">Todas as Categorias</option>
-                            <option value="1">Alimentos</option>
-                            <option value="2">Roupas</option>
-                            <option value="3">Higiene</option>
-                            <option value="4">Móveis</option>
+                            <!-- Categorias carregadas dinamicamente -->
                         </select>
                     </div>
                     <button class="btn btn-primary" onclick="openModal('modalProduto')">➕ Novo Produto</button>
@@ -87,52 +84,16 @@
                     <table class="table table-striped">
                         <thead>
                             <tr>
+                                <th>ID</th>
                                 <th>Nome</th>
                                 <th>Categoria</th>
-                                <th>Unidade</th>
-                                <th>Estoque Atual</th>
-                                <th>Estoque Mínimo</th>
-                                <th>Status</th>
+                                <th>Descrição</th>
+                                <th>Quantidade</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaProdutos">
-                            <tr>
-                                <td>Arroz 5kg</td>
-                                <td>Alimentos</td>
-                                <td>Un</td>
-                                <td>150</td>
-                                <td>50</td>
-                                <td><span class="badge badge-success">Normal</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarProduto(1)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirProduto(1)">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Feijão 1kg</td>
-                                <td>Alimentos</td>
-                                <td>Un</td>
-                                <td>80</td>
-                                <td>30</td>
-                                <td><span class="badge badge-success">Normal</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarProduto(2)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirProduto(2)">🗑️</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Óleo 900ml</td>
-                                <td>Alimentos</td>
-                                <td>Un</td>
-                                <td>15</td>
-                                <td>25</td>
-                                <td><span class="badge badge-danger">Baixo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarProduto(3)">✏️</button>
-                                    <button class="btn btn-sm btn-danger" onclick="excluirProduto(3)">🗑️</button>
-                                </td>
-                            </tr>
+                            <!-- Dados carregados via API -->
                         </tbody>
                     </table>
                 </div>
@@ -150,46 +111,33 @@
             <div class="modal-body">
                 <form id="formProduto">
                     <input type="hidden" id="produtoId">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="nome" class="form-label required">Nome do Produto</label>
-                            <input type="text" id="nome" class="form-control" required>
-                            <div class="form-error">Nome é obrigatório</div>
-                        </div>
-                        <div class="form-group">
-                            <label for="categoria" class="form-label required">Categoria</label>
-                            <select id="categoria" class="form-control form-select" required>
-                                <option value="">Selecione</option>
-                                <option value="1">Alimentos</option>
-                                <option value="2">Roupas</option>
-                                <option value="3">Higiene</option>
-                                <option value="4">Móveis</option>
-                            </select>
-                            <div class="form-error">Categoria é obrigatória</div>
-                        </div>
+                    <div class="form-group">
+                        <label for="nome" class="form-label required">Nome do Produto</label>
+                        <input type="text" id="nome" class="form-control" required>
+                        <div class="form-error">Nome é obrigatório</div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="unidadeMedida" class="form-label required">Unidade de Medida</label>
-                            <select id="unidadeMedida" class="form-control form-select" required>
-                                <option value="un">Unidade</option>
-                                <option value="kg">Quilograma</option>
-                                <option value="l">Litro</option>
-                                <option value="cx">Caixa</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="estoqueMinimo" class="form-label required">Estoque Mínimo</label>
-                            <input type="number" id="estoqueMinimo" class="form-control" min="0" required>
-                            <div class="form-error">Estoque mínimo é obrigatório</div>
-                        </div>
+                    <div class="form-group">
+                        <label for="categoria" class="form-label required">Categoria</label>
+                        <select id="categoria" class="form-control form-select" required>
+                            <option value="">Selecione uma categoria</option>
+                            <!-- Categorias carregadas dinamicamente -->
+                        </select>
+                        <div class="form-error">Categoria é obrigatória</div>
                     </div>
                     <div class="form-group">
                         <label for="descricao" class="form-label">Descrição</label>
-                        <textarea id="descricao" class="form-control" rows="3"></textarea>
+                        <textarea id="descricao" class="form-control" rows="3" placeholder="Descrição do produto (opcional)" maxlength="150"></textarea>
+                        <div class="form-error">Descrição muito longa (máximo 150 caracteres)</div>
                     </div>
                     <div class="form-group">
-                        <label><input type="checkbox" id="perecivel"> Este produto é perecível</label>
+                        <label for="informacoesAdicionais" class="form-label">Informações Adicionais</label>
+                        <textarea id="informacoesAdicionais" class="form-control" rows="3" placeholder="Informações adicionais (opcional)" maxlength="150"></textarea>
+                        <div class="form-error">Informações adicionais muito longas (máximo 150 caracteres)</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantidade" class="form-label required">Quantidade</label>
+                        <input type="number" id="quantidade" class="form-control" min="0" value="0" required>
+                        <div class="form-error">Quantidade é obrigatória e não pode ser negativa</div>
                     </div>
                 </form>
             </div>
@@ -202,18 +150,108 @@
 
     <script src="../js/app.js"></script>
     <script>
+        // API Base URL - Backend Spring Boot
+        const API_BASE = 'http://localhost:8080/apis/produto';
+        const API_CATEGORIA = 'http://localhost:8080/apis/categoria';
+
+        // Carrega produtos e categorias ao iniciar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarCategorias();
+            carregarProdutos();
+        });
+
+        // Busca em tempo real
         document.getElementById('searchInput').addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('#tabelaProdutos tr');
             rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(searchTerm) ? '' : 'none';
+                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
             });
         });
 
+        async function carregarCategorias() {
+            try {
+                const response = await fetch(API_CATEGORIA);
+                if (!response.ok) throw new Error('Erro ao buscar categorias');
+
+                const categorias = await response.json();
+
+                // Preenche o select do filtro
+                const filtroSelect = document.getElementById('filtroCategoria');
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    filtroSelect.appendChild(option);
+                });
+
+                // Preenche o select do modal
+                const categoriaSelect = document.getElementById('categoria');
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    categoriaSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+
+        async function carregarProdutos(categoriaId = null) {
+            try {
+                let url = API_BASE;
+                if (categoriaId) {
+                    url += `?categoria_id=${categoriaId}`;
+                }
+
+                console.log('Carregando produtos de:', url);
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    console.error('Status da resposta:', response.status);
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+
+                const produtos = await response.json();
+                console.log('Produtos recebidos:', produtos);
+
+                const tbody = document.getElementById('tabelaProdutos');
+                tbody.innerHTML = '';
+
+                if (!produtos || produtos.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Nenhum produto cadastrado</td></tr>';
+                    return;
+                }
+
+                produtos.forEach(prod => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${prod.id}</td>
+                        <td>${prod.nome}</td>
+                        <td>${prod.categoria_nome || '-'}</td>
+                        <td>${prod.descricao || '-'}</td>
+                        <td>${prod.quantidade}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="editarProduto(${prod.id})">✏️</button>
+                            <button class="btn btn-sm btn-danger" onclick="excluirProduto(${prod.id})">🗑️</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Erro completo ao carregar:', error);
+                alert('Erro ao carregar produtos. Verifique se o backend está rodando na porta 8080.');
+            }
+        }
+
         function filtrarPorCategoria() {
-            const categoria = document.getElementById('filtroCategoria').value;
-            // TODO: Implementar filtro por categoria
+            const categoriaId = document.getElementById('filtroCategoria').value;
+            if (categoriaId) {
+                carregarProdutos(categoriaId);
+            } else {
+                carregarProdutos();
+            }
         }
 
         function openModal(modalId) {
@@ -227,73 +265,129 @@
             UI.closeModal(modalId);
         }
 
-        function editarProduto(id) {
-            document.getElementById('produtoId').value = id;
-            document.getElementById('modalTitle').textContent = 'Editar Produto';
-            document.getElementById('nome').value = 'Arroz 5kg';
-            document.getElementById('categoria').value = '1';
-            document.getElementById('unidadeMedida').value = 'un';
-            document.getElementById('estoqueMinimo').value = '50';
-            UI.openModal('modalProduto');
+        async function editarProduto(id) {
+            try {
+                const response = await fetch(`${API_BASE}/${id}`);
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    console.error('Erro na resposta:', errorData);
+                    throw new Error(errorData.mensagem || errorData.erro || 'Erro ao buscar produto');
+                }
+
+                const produto = await response.json();
+                console.log('Produto carregado:', produto);
+
+                if (produto.erro) {
+                    throw new Error(produto.erro);
+                }
+
+                document.getElementById('produtoId').value = produto.id;
+                document.getElementById('modalTitle').textContent = 'Editar Produto';
+                document.getElementById('nome').value = produto.nome || '';
+                document.getElementById('categoria').value = produto.categoria_id || '';
+                document.getElementById('descricao').value = produto.descricao || '';
+                document.getElementById('informacoesAdicionais').value = produto.informacoes_adicionais || '';
+                document.getElementById('quantidade').value = produto.quantidade || 0;
+                UI.openModal('modalProduto');
+            } catch (error) {
+                console.error('Erro completo:', error);
+                alert('Erro ao carregar produto: ' + error.message);
+            }
         }
 
         function excluirProduto(id) {
-            UI.confirm('Tem certeza que deseja excluir este produto?', async function() {
-                try {
-                    // await API.delete(`/produtos/${id}`);
-                    UI.showAlert('Produto excluído com sucesso!', 'success');
-                } catch (error) {
-                    console.error('Erro ao excluir produto:', error);
-                }
-            });
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                fetch(`${API_BASE}/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('Produto excluído com sucesso!');
+                        carregarProdutos();
+                    } else {
+                        return response.json().then(data => {
+                            throw new Error(data.mensagem || 'Erro ao excluir produto');
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir produto: ' + error.message);
+                });
+            }
         }
 
         async function salvarProduto() {
             const form = document.getElementById('formProduto');
             const nome = document.getElementById('nome');
             const categoria = document.getElementById('categoria');
-            const estoqueMinimo = document.getElementById('estoqueMinimo');
+            const descricao = document.getElementById('descricao');
+            const informacoesAdicionais = document.getElementById('informacoesAdicionais');
+            const quantidade = document.getElementById('quantidade');
 
             Validator.clearAllErrors(form);
-            let isValid = true;
 
             if (Validator.isEmpty(nome.value)) {
                 Validator.showError(nome, 'Nome é obrigatório');
-                isValid = false;
-            }
-            if (Validator.isEmpty(categoria.value)) {
-                Validator.showError(categoria, 'Categoria é obrigatória');
-                isValid = false;
-            }
-            if (Validator.isEmpty(estoqueMinimo.value)) {
-                Validator.showError(estoqueMinimo, 'Estoque mínimo é obrigatório');
-                isValid = false;
+                return;
             }
 
-            if (!isValid) return;
+            if (Validator.isEmpty(categoria.value)) {
+                Validator.showError(categoria, 'Categoria é obrigatória');
+                return;
+            }
+
+            if (descricao.value && descricao.value.length > 150) {
+                Validator.showError(descricao, 'Descrição muito longa (máximo 150 caracteres)');
+                return;
+            }
+
+            if (informacoesAdicionais.value && informacoesAdicionais.value.length > 150) {
+                Validator.showError(informacoesAdicionais, 'Informações adicionais muito longas (máximo 150 caracteres)');
+                return;
+            }
+
+            if (quantidade.value < 0) {
+                Validator.showError(quantidade, 'Quantidade não pode ser negativa');
+                return;
+            }
 
             try {
                 const produtoId = document.getElementById('produtoId').value;
-                const data = {
-                    nome: nome.value,
-                    categoriaId: categoria.value,
-                    unidadeMedida: document.getElementById('unidadeMedida').value,
-                    estoqueMinimo: estoqueMinimo.value,
-                    descricao: document.getElementById('descricao').value,
-                    perecivel: document.getElementById('perecivel').checked
-                };
+
+                let url = API_BASE;
+                let method = 'POST';
+                let params = new URLSearchParams();
+                params.append('prod_nome', nome.value);
+                params.append('prod_descricao', descricao.value || '');
+                params.append('prod_informacoes_adicionais', informacoesAdicionais.value || '');
+                params.append('prod_quant', quantidade.value);
+                params.append('cat_id', categoria.value);
 
                 if (produtoId) {
-                    // await API.put(`/produtos/${produtoId}`, data);
-                    UI.showAlert('Produto atualizado com sucesso!', 'success');
-                } else {
-                    // await API.post('/produtos', data);
-                    UI.showAlert('Produto cadastrado com sucesso!', 'success');
+                    method = 'PUT';
+                    params.append('prod_id', produtoId);
                 }
 
-                closeModal('modalProduto');
+                const response = await fetch(`${url}?${params.toString()}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+
+                if (response.ok) {
+                    alert(produtoId ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!');
+                    closeModal('modalProduto');
+                    carregarProdutos();
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.mensagem || 'Erro ao salvar produto');
+                }
             } catch (error) {
-                console.error('Erro ao salvar produto:', error);
+                console.error('Erro:', error);
+                alert('Erro ao salvar produto: ' + error.message);
             }
         }
     </script>
