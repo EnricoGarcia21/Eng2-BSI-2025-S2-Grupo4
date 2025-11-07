@@ -1,17 +1,12 @@
 package DOARC.mvc.dao;
 
+import DOARC.mvc.util.SingletonDB;
 import java.util.List;
 
-public interface IDAO<T>{
-    // Retorno alterado de Object para T
-    public T gravar(T entidade);
-    // Retorno alterado de Object para T
-    public T alterar(T entidade);
-
-    public boolean apagar(T entidade);
-
-    public T get(int id);
-
-    // Método get com filtro (substitui listar())
-    public List<T> get(String filtro);
+public interface IDAO<T> {
+    T gravar(T entidade, SingletonDB conexao);
+    T alterar(T entidade, SingletonDB conexao);
+    boolean apagar(T entidade, SingletonDB conexao);
+    T get(int id, SingletonDB conexao);
+    List<T> get(String filtro, SingletonDB conexao);
 }

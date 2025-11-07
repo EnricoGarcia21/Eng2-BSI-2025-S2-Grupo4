@@ -8,10 +8,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DOARCApplication {
 
     public static void main(String[] args) {
-        if(!SingletonDB.conectar()){
-            System.out.println("Nao foi possivel conectar");
+        SingletonDB conexao = SingletonDB.getInstancia();
+        if(!conexao.conectar()){
+            System.out.println("DEBUG: Não foi possível conectar ao banco de dados");
+        } else {
+            System.out.println("DEBUG: Conexão com o banco estabelecida com sucesso");
         }
         SpringApplication.run(DOARCApplication.class, args);
     }
-
 }

@@ -18,11 +18,12 @@ public class ParametrizacaoController {
 
     public Map<String,Object> getParam(int id) {
         SingletonDB conexao = SingletonDB.getInstancia();
+        Map<String,Object> json = new HashMap<>();
+
         if(conexao.conectar()){
             try {
-                Parametrizacao param = paramModel.get(id);
+                Parametrizacao param = paramModel.get(id, conexao);
                 if (param != null){
-                    Map<String,Object> json = new HashMap<>();
                     json.put("id", param.getId());
                     json.put("razaoSocial", param.getRazaoSocial());
                     json.put("nomeFantasia", param.getNomeFantasia());
@@ -31,20 +32,24 @@ public class ParametrizacaoController {
                     json.put("numero", param.getNumero());
                     json.put("bairro", param.getBairro());
                     json.put("cidade", param.getCidade());
-                    // REMOVIDO: json.put("estado", param.getEstado());
                     json.put("uf", param.getUf());
                     json.put("cep", param.getCep());
                     json.put("telefone", param.getTelefone());
                     json.put("email", param.getEmail());
                     json.put("site", param.getSite());
-                    return json;
+                } else {
+                    json.put("erro", "Parâmetros não encontrados");
                 }
-                return null;
+            } catch (Exception e) {
+                System.out.println("DEBUG: Erro no controller ao buscar parâmetros: " + e.getMessage());
+                json.put("erro", "Erro interno: " + e.getMessage());
             } finally {
                 conexao.Desconectar();
             }
+        } else {
+            json.put("erro", "Erro ao conectar com o BD");
         }
-        return null;
+        return json;
     }
 
     public Map<String,Object> addParam(String razaoSocial, String nomeFantasia, String cnpj, String rua,
@@ -55,55 +60,63 @@ public class ParametrizacaoController {
         Map<String,Object> json = new HashMap<>();
 
         if(conexao.conectar()){
-            // regra de negocio - verificar se já existe empresa cadastrada
-            if (isEmpty(conexao)) {
-                try{
-                    // Upload do arquivo
-                    File uploadFolder = new File("DOARC/src/main/resources/templates/img/");
-                    if (!uploadFolder.exists())
-                        uploadFolder.mkdirs();
-                    if (file != null && !file.isEmpty()) {
-                        file.transferTo(new File(uploadFolder.getAbsoluteFile() + File.separator + "logo.png"));
-                    }
+            try {
+                // Remove a verificação isEmpty se sempre vai ter apenas um registro
+                // Ou mantém se quiser evitar duplicação
+                if (isEmpty(conexao)) {
+                    try{
+                        // Upload do arquivo
+                        File uploadFolder = new File("DOARC/src/main/resources/templates/img/");
+                        if (!uploadFolder.exists())
+                            uploadFolder.mkdirs();
+                        if (file != null && !file.isEmpty()) {
+                            file.transferTo(new File(uploadFolder.getAbsoluteFile() + File.separator + "logo.png"));
+                        }
 
-                    // Formatação dos dados
-                    cnpj = cnpj.replaceAll("[^\\d]", "");
-                    cep = cep.replaceAll("[^\\d]", "");
-                    telefone = telefone.replaceAll("[^\\d]", "");
+                        // Formatação dos dados
+                        cnpj = cnpj.replaceAll("[^\\d]", "");
+                        cep = cep.replaceAll("[^\\d]", "");
+                        telefone = telefone.replaceAll("[^\\d]", "");
 
-                    // Cria objeto Parametrizacao SEM estado
-                    Parametrizacao param = new Parametrizacao(
-                            cnpj, razaoSocial, nomeFantasia, rua, cidade,
-                            bairro, Integer.parseInt(numero), uf, cep, email, site, telefone
-                    );
+                        // Cria objeto Parametrizacao
+                        Parametrizacao param = new Parametrizacao(
+                                cnpj, razaoSocial, nomeFantasia, rua, cidade,
+                                bairro, Integer.parseInt(numero), uf, cep, email, site, telefone
+                        );
 
-                    Parametrizacao resultado = paramModel.gravar(param);
-                    if (resultado != null){
-                        json.put("id", resultado.getId());
-                        json.put("razaoSocial", resultado.getRazaoSocial());
-                        json.put("nomeFantasia", resultado.getNomeFantasia());
-                        json.put("cnpj", resultado.getCnpj());
-                        json.put("rua", resultado.getRua());
-                        json.put("numero", resultado.getNumero());
-                        json.put("bairro", resultado.getBairro());
-                        json.put("cidade", resultado.getCidade());
-                        // REMOVIDO: json.put("estado", resultado.getEstado());
-                        json.put("uf", resultado.getUf());
-                        json.put("cep", resultado.getCep());
-                        json.put("telefone", resultado.getTelefone());
-                        json.put("email", resultado.getEmail());
-                        json.put("site", resultado.getSite());
+                        Parametrizacao resultado = paramModel.gravar(param, conexao);
+                        if (resultado != null){
+                            json.put("id", resultado.getId());
+                            json.put("razaoSocial", resultado.getRazaoSocial());
+                            json.put("nomeFantasia", resultado.getNomeFantasia());
+                            json.put("cnpj", resultado.getCnpj());
+                            json.put("rua", resultado.getRua());
+                            json.put("numero", resultado.getNumero());
+                            json.put("bairro", resultado.getBairro());
+                            json.put("cidade", resultado.getCidade());
+                            json.put("uf", resultado.getUf());
+                            json.put("cep", resultado.getCep());
+                            json.put("telefone", resultado.getTelefone());
+                            json.put("email", resultado.getEmail());
+                            json.put("site", resultado.getSite());
+                            json.put("mensagem", "Empresa cadastrada com sucesso!");
+                        }
+                        else{
+                            json.put("erro", "Erro ao cadastrar a Empresa");
+                        }
+                    } catch (Exception e) {
+                        json.put("erro", "Erro ao armazenar o arquivo. " + e.getMessage());
                     }
-                    else{
-                        json.put("erro", "Erro ao cadastrar a Empresa");
-                    }
-                } catch (Exception e) {
-                    json.put("erro", "Erro ao armazenar o arquivo. " + e.getMessage());
+                } else {
+                    // Se já existe, faz update em vez de insert
+                    json.put("erro", "Já existe uma Empresa cadastrada. Use a função de editar.");
                 }
-            } else {
-                json.put("erro", "Já existe uma Empresa cadastrada");
+            } catch (Exception e) {
+                System.out.println("DEBUG: Erro no controller ao adicionar parâmetros: " + e.getMessage());
+                json.put("erro", "Erro interno: " + e.getMessage());
+            } finally {
+                conexao.Desconectar();
             }
-            conexao.Desconectar();
         }
         else{
             json.put("erro", "Erro ao conectar com o BD");
@@ -121,7 +134,7 @@ public class ParametrizacaoController {
         if(conexao.conectar()){
             try{
                 // Upload do arquivo
-                File uploadFolder = new File("casoftWebSpring/src/main/resources/templates/img/");
+                File uploadFolder = new File("DOARC/src/main/resources/templates/img/");
                 if (!uploadFolder.exists())
                     uploadFolder.mkdirs();
                 if (file != null && !file.isEmpty()) {
@@ -133,13 +146,13 @@ public class ParametrizacaoController {
                 cep = cep.replaceAll("[^\\d]", "");
                 telefone = telefone.replaceAll("[^\\d]", "");
 
-                // Cria objeto Parametrizacao SEM estado
+                // Cria objeto Parametrizacao
                 Parametrizacao param = new Parametrizacao(
                         id, cnpj, razaoSocial, nomeFantasia, rua, cidade,
                         bairro, Integer.parseInt(numero), uf, cep, email, site, telefone
                 );
 
-                Parametrizacao resultado = paramModel.alterar(param);
+                Parametrizacao resultado = paramModel.alterar(param, conexao);
                 if (resultado != null){
                     json.put("id", resultado.getId());
                     json.put("razaoSocial", resultado.getRazaoSocial());
@@ -149,20 +162,21 @@ public class ParametrizacaoController {
                     json.put("numero", resultado.getNumero());
                     json.put("bairro", resultado.getBairro());
                     json.put("cidade", resultado.getCidade());
-                    // REMOVIDO: json.put("estado", resultado.getEstado());
                     json.put("uf", resultado.getUf());
                     json.put("cep", resultado.getCep());
                     json.put("telefone", resultado.getTelefone());
                     json.put("email", resultado.getEmail());
                     json.put("site", resultado.getSite());
+                    json.put("mensagem", "Empresa atualizada com sucesso!");
                 }
                 else {
                     json.put("erro", "Erro ao alterar a Empresa");
                 }
             } catch (Exception e) {
                 json.put("erro", "Erro ao armazenar o arquivo. " + e.getMessage());
+            } finally {
+                conexao.Desconectar();
             }
-            conexao.Desconectar();
         }
         else {
             json.put("erro", "Erro ao conectar com o BD");
@@ -170,16 +184,53 @@ public class ParametrizacaoController {
         return json;
     }
 
-    // Método para verificar se já existe empresa cadastrada
-    private boolean isEmpty(SingletonDB conexao) {
-        if (conexao.conectar()) {
+    // Método para obter todos os parâmetros (útil para o frontend)
+    public Map<String,Object> getAllParams() {
+        SingletonDB conexao = SingletonDB.getInstancia();
+        Map<String,Object> json = new HashMap<>();
+
+        if(conexao.conectar()){
             try {
-                List<Parametrizacao> parametrizacoes = paramModel.get(null);
-                return parametrizacoes == null || parametrizacoes.isEmpty();
+                List<Parametrizacao> parametrizacoes = paramModel.get(null, conexao);
+                if (parametrizacoes != null && !parametrizacoes.isEmpty()) {
+                    // Retorna o primeiro (e único) registro de parametrização
+                    Parametrizacao param = parametrizacoes.get(0);
+                    json.put("id", param.getId());
+                    json.put("razaoSocial", param.getRazaoSocial());
+                    json.put("nomeFantasia", param.getNomeFantasia());
+                    json.put("cnpj", param.getCnpj());
+                    json.put("rua", param.getRua());
+                    json.put("numero", param.getNumero());
+                    json.put("bairro", param.getBairro());
+                    json.put("cidade", param.getCidade());
+                    json.put("uf", param.getUf());
+                    json.put("cep", param.getCep());
+                    json.put("telefone", param.getTelefone());
+                    json.put("email", param.getEmail());
+                    json.put("site", param.getSite());
+                } else {
+                    json.put("erro", "Nenhuma empresa cadastrada");
+                }
+            } catch (Exception e) {
+                System.out.println("DEBUG: Erro no controller ao buscar todos parâmetros: " + e.getMessage());
+                json.put("erro", "Erro interno: " + e.getMessage());
             } finally {
                 conexao.Desconectar();
             }
+        } else {
+            json.put("erro", "Erro ao conectar com o BD");
         }
-        return true;
+        return json;
+    }
+
+    // Método para verificar se já existe empresa cadastrada - NÃO desconecta!
+    private boolean isEmpty(SingletonDB conexao) {
+        try {
+            List<Parametrizacao> parametrizacoes = paramModel.get(null, conexao);
+            return parametrizacoes == null || parametrizacoes.isEmpty();
+        } catch (Exception e) {
+            System.out.println("DEBUG: Erro no isEmpty: " + e.getMessage());
+            return true;
+        }
     }
 }

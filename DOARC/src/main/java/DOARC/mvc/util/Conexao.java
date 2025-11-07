@@ -2,7 +2,7 @@ package DOARC.mvc.util;
 
 import java.sql.*;
 
-public class Conexao 
+public class Conexao
 {
     private Connection connect;
     private String erro;
@@ -52,45 +52,33 @@ public class Conexao
     public ResultSet consultar(String sql)
     {   ResultSet rs=null;
         try {
-           Statement statement = connect.createStatement();
-             //ResultSet.TYPE_SCROLL_INSENSITIVE,
-             //ResultSet.CONCUR_READ_ONLY);
-           rs = statement.executeQuery( sql );
-           //statement.close();
+            Statement statement = connect.createStatement();
+            //ResultSet.TYPE_SCROLL_INSENSITIVE,
+            //ResultSet.CONCUR_READ_ONLY);
+            rs = statement.executeQuery( sql );
+            //statement.close();
         }
         catch ( SQLException sqlex )
         { erro="Erro: "+sqlex.toString();
-          rs = null;
+            rs = null;
         }
         return rs;
     }
-    public int getMaxPK(String tabela,String chave) 
+    public int getMaxPK(String tabela,String chave)
     {
         String sql="select max("+chave+") from "+tabela;
         int max=0;
         ResultSet rs= consultar(sql);
-        try 
+        try
         {
             if(rs.next())
                 max=rs.getInt(1);
         }
         catch (SQLException sqlex)
-        { 
-             erro="Erro: " + sqlex.toString();
-             max = -1;
+        {
+            erro="Erro: " + sqlex.toString();
+            max = -1;
         }
         return max;
-    }
-    public boolean desconectar() {
-        boolean desconectado = false;
-        try {
-            if (connect != null && !connect.isClosed()) {
-                connect.close();
-                desconectado = true;
-            }
-        } catch (SQLException e) {
-            erro = "Erro ao desconectar: " + e.toString();
-        }
-        return desconectado;
     }
 }

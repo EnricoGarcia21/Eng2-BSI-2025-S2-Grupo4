@@ -1,8 +1,4 @@
-// JavaScript completo para o formulário de cadastro de empresa
 
-// === ADICIONE ESTAS NOVAS FUNÇÕES AQUI ===
-
-// Função para verificar se existe empresa cadastrada
 async function verificarEmpresaCadastrada() {
     try {
         const response = await fetch('http://localhost:8080/apis/parametrizacao/1');

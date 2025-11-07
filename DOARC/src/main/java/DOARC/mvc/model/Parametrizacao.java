@@ -165,9 +165,19 @@ public class Parametrizacao {
         this.telefone = telefone;
     }
 
-    public Parametrizacao gravar(Parametrizacao param){return dao.gravar(param);}
-    public Parametrizacao alterar(Parametrizacao param){return dao.alterar(param);}
-    public Parametrizacao get(int id){return dao.get(id);}
-    public List<Parametrizacao> get(String filtro){return dao.get(filtro);}
+    public Parametrizacao gravar(Parametrizacao param, SingletonDB conexao) {
+        return dao.gravar(param, conexao);
+    }
 
+    public Parametrizacao alterar(Parametrizacao param, SingletonDB conexao) {
+        return dao.alterar(param, conexao);
+    }
+
+    public Parametrizacao get(int id, SingletonDB conexao) {
+        return dao.get(id, conexao);
+    }
+
+    public List<Parametrizacao> get(String filtro, SingletonDB conexao) {
+        return dao.get(filtro, conexao);
+    }
 }

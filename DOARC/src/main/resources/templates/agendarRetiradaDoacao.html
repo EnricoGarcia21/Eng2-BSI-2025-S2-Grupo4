@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Retirada - DOARC</title>
+
+    <!-- Bootstrap CSS para base -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome para ícones -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts para tipografia -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Cores principais */
+            --primary-color: #2c5f8d;
+            --secondary-color: #4a8fc7;
+            --accent-color: #f39c12;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #3498db;
+
+            /* Cores neutras */
+            --bg-light: #f5f7fa;
+            --bg-white: #ffffff;
+            --text-dark: #2c3e50;
+            --text-light: #7f8c8d;
+            --border-color: #dce4ec;
+
+            /* Sombras */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+            /* Transições */
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: var(--bg-light);
+            min-height: 100vh;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .bg-light {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            width: 250px;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            transition: left 0.3s ease;
+            z-index: 1000;
+            padding-top: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .sidebar h4 {
+            color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 15px 20px;
+            transition: var(--transition);
+        }
+
+        .sidebar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
+        .content {
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+            padding: 20px;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 40px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .page-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .badge {
+            border-radius: 20px;
+            font-size: 1rem;
+            background: var(--bg-white) !important;
+            color: var(--primary-color) !important;
+        }
+
+        .form-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            background: var(--bg-white);
+        }
+
+        .card-section {
+            padding: 30px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .custom-input, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            transition: var(--transition);
+        }
+
+        .custom-input:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 10px rgba(44, 95, 141, 0.3);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .required::after {
+            content: ' *';
+            color: var(--danger-color);
+        }
+
+        .form-help {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 5px;
+        }
+
+        .form-error {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .form-actions {
+            padding: 30px;
+            background: var(--bg-light);
+        }
+
+        .btn-custom {
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #234a6d;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            border: none;
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            border: none;
+            color: white;
+        }
+
+        /* Botão de menu */
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .menu-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Tabela de agendamentos */
+        .table-custom {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-custom thead {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .table-custom th {
+            border: none;
+            padding: 15px;
+            font-weight: 500;
+        }
+
+        .table-custom td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-agendado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-concluido {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-cancelado {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .page-title {
+                font-size: 2rem;
+            }
+            .table-responsive {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Estilos para validação - CORRIGIDOS */
+        .input-group {
+            position: relative;
+        }
+
+        .is-invalid {
+            border-color: var(--danger-color) !important;
+            padding-right: 2.5rem !important;
+        }
+
+        .invalid-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--danger-color);
+            display: none;
+            z-index: 5;
+        }
+
+        .is-invalid ~ .invalid-icon {
+            display: block;
+        }
+
+        .invalid-feedback {
+            display: none;
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .is-invalid ~ .invalid-feedback {
+            display: block;
+        }
+
+        /* Ajuste para o modal não sobrepor */
+        .modal {
+            z-index: 1060;
+        }
+
+        /* Ajuste para os botões de ação na tabela */
+        .btn-group-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .btn-group-actions .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
+        /* Toast personalizado */
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
+        }
+
+        /* Loading spinner */
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Estados de loading */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Botão de edição desabilitado para status concluído/cancelado */
+        .btn-warning:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+
+<!-- Botão de Menu -->
+<button class="menu-btn" id="menuBtn">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Overlay escuro -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <h4><i class="fas fa-building me-2"></i>DOARC</h4>
+    <a href="#"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
+    <a href="agendarRetiradaDoacao.html" class="active"><i class="fas fa-plus-circle me-2"></i>Agendar Retirada</a>
+    <a href="#"><i class="fas fa-list me-2"></i>Agendamentos</a>
+    <a href="#"><i class="fas fa-users me-2"></i>Voluntários</a>
+    <a href="#"><i class="fas fa-box me-2"></i>Doações</a>
+    <a href="#"><i class="fas fa-cogs me-2"></i>Configurações</a>
+    <a href="#"><i class="fas fa-sign-out-alt me-2"></i>Sair</a>
+</div>
+
+<!-- Conteúdo principal -->
+<div class="content" id="content">
+
+    <!-- Header da Página -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="page-title"><i class="fas fa-truck-loading me-3"></i>Agendar Retirada</h1>
+                    <p class="page-subtitle">Agende a retirada de doações por voluntários</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="badge bg-white text-primary p-3">
+                        <i class="fas fa-calendar-check me-2"></i>Sistema de Agendamentos
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Formulário de Agendamento -->
+            <div class="col-lg-6">
+                <div class="card form-card mb-4">
+                    <div class="card-body p-0">
+                        <form method="POST" id="formAgendamento" onsubmit="return salvarAgendamento(event)">
+
+                            <!-- Dados do Agendamento -->
+                            <div class="card-section">
+                                <h5 class="section-title">
+                                    <i class="fas fa-calendar-alt me-2"></i>
+                                    <span id="formTitle">Dados do Agendamento</span>
+                                    <input type="hidden" id="agendaId" name="agendaId">
+                                </h5>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="dataRetiro" class="form-label required">Data da Retirada</label>
+                                        <div class="input-group">
+                                            <input type="date" id="dataRetiro" name="dataRetiro" class="form-control custom-input" required>
+                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Selecione uma data válida (hoje ou futura).</div>
+                                        <div class="form-help">Selecione a data para retirada</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="horaRetiro" class="form-label required">Hora da Retirada</label>
+                                        <div class="input-group">
+                                            <input type="time" id="horaRetiro" name="horaRetiro" class="form-control custom-input" required min="08:00" max="18:00">
+                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Selecione uma hora válida entre 8:00 e 18:00.</div>
+                                        <div class="form-help">Selecione o horário para retirada (8:00 às 18:00)</div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label for="volId" class="form-label required">Voluntário</label>
+                                        <div class="input-group">
+                                            <select id="volId" name="volId" class="form-select custom-input" required>
+                                                <option value="">Carregando voluntários...</option>
+                                            </select>
+                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Selecione um voluntário.</div>
+                                        <div class="form-help">Escolha o voluntário responsável pela retirada</div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <label for="doaId" class="form-label required">Doação</label>
+                                        <div class="input-group">
+                                            <select id="doaId" name="doaId" class="form-select custom-input" required>
+                                                <option value="">Carregando doações...</option>
+                                            </select>
+                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Selecione uma doação.</div>
+                                        <div class="form-help">Escolha a doação a ser retirada</div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-12">
+                                        <label for="obsRetiro" class="form-label">Observações</label>
+                                        <textarea id="obsRetiro" name="obsRetiro" class="form-control custom-input" rows="4" placeholder="Informações adicionais sobre a retirada..."></textarea>
+                                        <div class="form-help">Instruções especiais ou observações (opcional)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Botões de Ação -->
+                            <div class="form-actions text-center">
+                                <button type="button" class="btn btn-secondary btn-custom me-2" id="btnCancelarEdicao" onclick="cancelarEdicao()" style="display: none;">
+                                    <i class="fas fa-times me-2"></i>Cancelar Edição
+                                </button>
+                                <button type="reset" class="btn btn-secondary btn-custom me-2" id="btnLimpar">
+                                    <i class="fas fa-eraser me-2"></i>Limpar
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-custom" id="btnSalvar">
+                                    <i class="fas fa-calendar-plus me-2"></i>Agendar Retirada
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de Agendamentos -->
+            <!-- Lista de Agendamentos -->
+            <div class="col-lg-6">
+                <div class="card form-card">
+                    <div class="card-body p-0">
+                        <div class="card-section">
+                            <h5 class="section-title">
+                                <i class="fas fa-list me-2"></i>Agendamentos Recentes
+                                <button class="btn btn-sm btn-outline-primary float-end" onclick="carregarAgendamentos()" title="Recarregar">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </h5>
+
+                            <!-- Filtros -->
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="filtroVoluntario" class="form-label">Filtrar por Voluntário</label>
+                                    <select id="filtroVoluntario" class="form-select custom-input" onchange="filtrarAgendamentos()">
+                                        <option value="">Todos os voluntários</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="filtroData" class="form-label">Filtrar por Data</label>
+                                    <input type="date" id="filtroData" class="form-control custom-input" onchange="filtrarAgendamentos()">
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="limparFiltros()">
+                                        <i class="fas fa-times me-1"></i>Limpar Filtros
+                                    </button>
+                                </div>
+                                <div class="text-muted small">
+                                    <span id="contadorAgendamentos">0</span> agendamento(s) encontrado(s)
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-custom table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Voluntário</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="tabelaAgendamentos">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            <i class="fas fa-spinner fa-spin me-2"></i>Carregando agendamentos...
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes do Agendamento</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalDetalhesBody">
+                <!-- Conteúdo será preenchido via JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/scriptAgendarRetirada.js"></script>
+</body>
+</html>

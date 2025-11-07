@@ -11,17 +11,13 @@ import java.util.List;
 @Repository
 public class ParametrizacaoDAO implements IDAO<Parametrizacao> {
 
-    private Connection conn;
-
-    public ParametrizacaoDAO() {
-        conn = SingletonDB.getConexao().getConnect();
-    }
-
     @Override
-    public Parametrizacao gravar(Parametrizacao entidade) {
-        String sql = "INSERT INTO parametrizacao (id,p_cnpj, p_razaosocial, p_nomefantasia, p_rua, p_cidade, p_bairro, numero, p_uf, p_cep, p_email, p_site, p_telefone) " +
-                "VALUES (1,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+    public Parametrizacao gravar(Parametrizacao entidade, SingletonDB conexao) {
+        // Força o ID para 1 sempre
+        String sql = "INSERT INTO parametrizacao (id, p_cnpj, p_razaosocial, p_nomefantasia, p_rua, p_cidade, p_bairro, numero, p_uf, p_cep, p_email, p_site, p_telefone) " +
+                "VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pst = conexao.getConnection().prepareStatement(sql)) {
             pst.setString(1, entidade.getCnpj());
             pst.setString(2, entidade.getRazaoSocial());
             pst.setString(3, entidade.getNomeFantasia());
@@ -35,21 +31,22 @@ public class ParametrizacaoDAO implements IDAO<Parametrizacao> {
             pst.setString(11, entidade.getSite());
             pst.setString(12, entidade.getTelefone());
 
-            ResultSet rs = pst.executeQuery();
-            if (rs.next()) {
-                entidade.setId(rs.getInt("id"));
+            int affectedRows = pst.executeUpdate();
+            if (affectedRows > 0) {
+                entidade.setId(1); // Define o ID como 1
                 return entidade;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("DEBUG: Erro ao gravar parametrização: " + e.getMessage());
         }
         return null;
     }
 
     @Override
-    public Parametrizacao alterar(Parametrizacao entidade) {
-        String sql = "UPDATE parametrizacao SET p_cnpj=?, p_razaosocial=?, p_nomefantasia=?, p_rua=?, p_cidade=?, p_bairro=?, numero=?, p_uf=?, p_cep=?, p_email=?, p_site=?, p_telefone=? WHERE id=?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+    public Parametrizacao alterar(Parametrizacao entidade, SingletonDB conexao) {
+        String sql = "UPDATE parametrizacao SET p_cnpj=?, p_razaosocial=?, p_nomefantasia=?, p_rua=?, p_cidade=?, p_bairro=?, numero=?, p_uf=?, p_cep=?, p_email=?, p_site=?, p_telefone=? WHERE id=1"; // Sempre ID 1
+
+        try (PreparedStatement pst = conexao.getConnection().prepareStatement(sql)) {
             pst.setString(1, entidade.getCnpj());
             pst.setString(2, entidade.getRazaoSocial());
             pst.setString(3, entidade.getNomeFantasia());
@@ -62,49 +59,50 @@ public class ParametrizacaoDAO implements IDAO<Parametrizacao> {
             pst.setString(10, entidade.getEmail());
             pst.setString(11, entidade.getSite());
             pst.setString(12, entidade.getTelefone());
-            pst.setInt(13, entidade.getId());
 
             int updated = pst.executeUpdate();
             return (updated > 0) ? entidade : null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("DEBUG: Erro ao alterar parametrização: " + e.getMessage());
         }
         return null;
     }
 
     @Override
-    public boolean apagar(Parametrizacao entidade) {
+    public boolean apagar(Parametrizacao entidade, SingletonDB conexao) {
         return false;
     }
 
     @Override
-    public Parametrizacao get(int id) {
-        String sql = "SELECT * FROM parametrizacao WHERE id=?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, id);
+    public Parametrizacao get(int id, SingletonDB conexao) {
+        String sql = "SELECT * FROM parametrizacao WHERE id=1"; // Sempre busca ID 1
+
+        try (PreparedStatement pst = conexao.getConnection().prepareStatement(sql)) {
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 return mapParametrizacao(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("DEBUG: Erro ao buscar parametrização: " + e.getMessage());
         }
         return null;
     }
 
     @Override
-    public List<Parametrizacao> get(String filtro) {
+    public List<Parametrizacao> get(String filtro, SingletonDB conexao) {
         List<Parametrizacao> lista = new ArrayList<>();
         String sql = "SELECT * FROM parametrizacao";
-        if (filtro != null && !filtro.isEmpty()) sql += " WHERE " + filtro;
+        if (filtro != null && !filtro.isEmpty()) {
+            sql += " WHERE " + filtro;
+        }
 
-        try (Statement st = conn.createStatement()) {
-            ResultSet rs = st.executeQuery(sql);
+        try (Statement st = conexao.getConnection().createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 lista.add(mapParametrizacao(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("DEBUG: Erro ao listar parametrizações: " + e.getMessage());
         }
         return lista;
     }
