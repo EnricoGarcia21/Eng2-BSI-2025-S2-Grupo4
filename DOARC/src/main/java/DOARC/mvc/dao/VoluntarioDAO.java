@@ -22,22 +22,22 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         String sql = "INSERT INTO voluntario (vol_nome, vol_datanasc, vol_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING vol_id";
 
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, entidade.getVolNome());
-            pst.setString(2, entidade.getVolDataNasc());
-            pst.setString(3, entidade.getVolRua());
-            pst.setString(4, entidade.getVolBairro());
-            pst.setString(5, entidade.getVolCidade());
-            pst.setString(6, entidade.getVolTelefone());
-            pst.setString(7, entidade.getVolCep());
-            pst.setString(8, entidade.getVolUf());
-            pst.setString(9, entidade.getVolEmail());
-            pst.setString(10, entidade.getVolSexo());
-            pst.setString(11, entidade.getVolNumero());
-            pst.setString(12, entidade.getVolCpf());
+            pst.setString(1, entidade.getVol_nome());
+            pst.setString(2, entidade.getVol_datanasc());
+            pst.setString(3, entidade.getVol_rua());
+            pst.setString(4, entidade.getVol_bairro());
+            pst.setString(5, entidade.getVol_cidade());
+            pst.setString(6, entidade.getVol_telefone());
+            pst.setString(7, entidade.getVol_cep());
+            pst.setString(8, entidade.getVol_uf());
+            pst.setString(9, entidade.getVol_email());
+            pst.setString(10, entidade.getVol_sexo());
+            pst.setString(11, entidade.getVol_numero());
+            pst.setString(12, entidade.getVol_cpf());
 
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    entidade.setVolId(rs.getInt("vol_id"));
+                    entidade.setVol_id(rs.getInt("vol_id"));
                     return entidade;
                 }
             }
@@ -54,19 +54,19 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         String sql = "UPDATE voluntario SET vol_nome=?, vol_datanasc=?, vol_rua=?, vol_bairro=?, vol_cidade=?, vol_telefone=?, vol_cep=?, vol_uf=?, vol_email=?, vol_sexo=?, vol_numero=?, vol_cpf=? WHERE vol_id=?";
 
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, entidade.getVolNome());
-            pst.setString(2, entidade.getVolDataNasc());
-            pst.setString(3, entidade.getVolRua());
-            pst.setString(4, entidade.getVolBairro());
-            pst.setString(5, entidade.getVolCidade());
-            pst.setString(6, entidade.getVolTelefone());
-            pst.setString(7, entidade.getVolCep());
-            pst.setString(8, entidade.getVolUf());
-            pst.setString(9, entidade.getVolEmail());
-            pst.setString(10, entidade.getVolSexo());
-            pst.setString(11, entidade.getVolNumero());
-            pst.setString(12, entidade.getVolCpf());
-            pst.setInt(13, entidade.getVolId());
+            pst.setString(1, entidade.getVol_nome());
+            pst.setString(2, entidade.getVol_datanasc());
+            pst.setString(3, entidade.getVol_rua());
+            pst.setString(4, entidade.getVol_bairro());
+            pst.setString(5, entidade.getVol_cidade());
+            pst.setString(6, entidade.getVol_telefone());
+            pst.setString(7, entidade.getVol_cep());
+            pst.setString(8, entidade.getVol_uf());
+            pst.setString(9, entidade.getVol_email());
+            pst.setString(10, entidade.getVol_sexo());
+            pst.setString(11, entidade.getVol_numero());
+            pst.setString(12, entidade.getVol_cpf());
+            pst.setInt(13, entidade.getVol_id());
 
             int updated = pst.executeUpdate();
             return (updated > 0) ? entidade : null;
@@ -83,7 +83,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         String sql = "DELETE FROM voluntario WHERE vol_id=?";
 
         try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, entidade.getVolId());
+            pst.setInt(1, entidade.getVol_id());
             return pst.executeUpdate() > 0;
         } catch (SQLException e) {
             System.err.println("Erro ao apagar Voluntário: " + e.getMessage());
@@ -152,19 +152,19 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
 
     private Voluntario mapVoluntario(ResultSet rs) throws SQLException {
         Voluntario v = new Voluntario();
-        v.setVolId(rs.getInt("vol_id"));
-        v.setVolNome(rs.getString("vol_nome"));
-        v.setVolDataNasc(rs.getString("vol_datanasc"));
-        v.setVolRua(rs.getString("vol_rua"));
-        v.setVolBairro(rs.getString("vol_bairro"));
-        v.setVolCidade(rs.getString("vol_cidade"));
-        v.setVolTelefone(rs.getString("vol_telefone"));
-        v.setVolCep(rs.getString("vol_cep"));
-        v.setVolUf(rs.getString("vol_uf"));
-        v.setVolEmail(rs.getString("vol_email"));
-        v.setVolSexo(rs.getString("vol_sexo"));
-        v.setVolNumero(rs.getString("vol_numero"));
-        v.setVolCpf(rs.getString("vol_cpf"));
+        v.setVol_id(rs.getInt("vol_id"));
+        v.setVol_nome(rs.getString("vol_nome"));
+        v.setVol_datanasc(rs.getString("vol_datanasc"));
+        v.setVol_rua(rs.getString("vol_rua"));
+        v.setVol_bairro(rs.getString("vol_bairro"));
+        v.setVol_cidade(rs.getString("vol_cidade"));
+        v.setVol_telefone(rs.getString("vol_telefone"));
+        v.setVol_cep(rs.getString("vol_cep"));
+        v.setVol_uf(rs.getString("vol_uf"));
+        v.setVol_email(rs.getString("vol_email"));
+        v.setVol_sexo(rs.getString("vol_sexo"));
+        v.setVol_numero(rs.getString("vol_numero"));
+        v.setVol_cpf(rs.getString("vol_cpf"));
         return v;
     }
 }

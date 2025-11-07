@@ -19,19 +19,19 @@ public class VoluntarioController {
         List<Map<String, Object>> result = new ArrayList<>();
         for (Voluntario v : lista) {
             Map<String, Object> json = new HashMap<>();
-            json.put("id", v.getVolId());
-            json.put("nome", v.getVolNome());
-            json.put("data_nasc", v.getVolDataNasc());
-            json.put("rua", v.getVolRua());
-            json.put("bairro", v.getVolBairro());
-            json.put("cidade", v.getVolCidade());
-            json.put("telefone", v.getVolTelefone());
-            json.put("cep", v.getVolCep());
-            json.put("uf", v.getVolUf());
-            json.put("email", v.getVolEmail());
-            json.put("sexo", v.getVolSexo());
-            json.put("numero", v.getVolNumero());
-            json.put("cpf", v.getVolCpf());
+            json.put("id", v.getVol_id());
+            json.put("nome", v.getVol_nome());
+            json.put("data_nasc", v.getVol_datanasc());
+            json.put("rua", v.getVol_rua());
+            json.put("bairro", v.getVol_bairro());
+            json.put("cidade", v.getVol_cidade());
+            json.put("telefone", v.getVol_telefone());
+            json.put("cep", v.getVol_cep());
+            json.put("uf", v.getVol_uf());
+            json.put("email", v.getVol_email());
+            json.put("sexo", v.getVol_sexo());
+            json.put("numero", v.getVol_numero());
+            json.put("cpf", v.getVol_cpf());
             result.add(json);
         }
         return result;
@@ -44,19 +44,19 @@ public class VoluntarioController {
         if (v == null) return Map.of("erro", "Voluntário não encontrado");
 
         Map<String, Object> json = new HashMap<>();
-        json.put("id", v.getVolId());
-        json.put("nome", v.getVolNome());
-        json.put("data_nasc", v.getVolDataNasc());
-        json.put("rua", v.getVolRua());
-        json.put("bairro", v.getVolBairro());
-        json.put("cidade", v.getVolCidade());
-        json.put("telefone", v.getVolTelefone());
-        json.put("cep", v.getVolCep());
-        json.put("uf", v.getVolUf());
-        json.put("email", v.getVolEmail());
-        json.put("sexo", v.getVolSexo());
-        json.put("numero", v.getVolNumero());
-        json.put("cpf", v.getVolCpf());
+        json.put("id", v.getVol_id());
+        json.put("nome", v.getVol_nome());
+        json.put("data_nasc", v.getVol_datanasc());
+        json.put("rua", v.getVol_rua());
+        json.put("bairro", v.getVol_bairro());
+        json.put("cidade", v.getVol_cidade());
+        json.put("telefone", v.getVol_telefone());
+        json.put("cep", v.getVol_cep());
+        json.put("uf", v.getVol_uf());
+        json.put("email", v.getVol_email());
+        json.put("sexo", v.getVol_sexo());
+        json.put("numero", v.getVol_numero());
+        json.put("cpf", v.getVol_cpf());
         return json;
     }
 
@@ -64,37 +64,37 @@ public class VoluntarioController {
                                              String cidade, String telefone, String cep, String uf,
                                              String email, String sexo, String numero, String cpf) {
         // Configura os dados na model injetada
-        voluntarioModel.setVolNome(nome);
-        voluntarioModel.setVolDataNasc(dataNasc);
-        voluntarioModel.setVolRua(rua);
-        voluntarioModel.setVolBairro(bairro);
-        voluntarioModel.setVolCidade(cidade);
-        voluntarioModel.setVolTelefone(telefone);
-        voluntarioModel.setVolCep(cep);
-        voluntarioModel.setVolUf(uf);
-        voluntarioModel.setVolEmail(email);
-        voluntarioModel.setVolSexo(sexo);
-        voluntarioModel.setVolNumero(numero);
-        voluntarioModel.setVolCpf(cpf);
+        voluntarioModel.setVol_nome(nome);
+        voluntarioModel.setVol_datanasc(dataNasc);
+        voluntarioModel.setVol_rua(rua);
+        voluntarioModel.setVol_bairro(bairro);
+        voluntarioModel.setVol_cidade(cidade);
+        voluntarioModel.setVol_telefone(telefone);
+        voluntarioModel.setVol_cep(cep);
+        voluntarioModel.setVol_uf(uf);
+        voluntarioModel.setVol_email(email);
+        voluntarioModel.setVol_sexo(sexo);
+        voluntarioModel.setVol_numero(numero);
+        voluntarioModel.setVol_cpf(cpf);
 
         // Chama o método gravar da Model (sem parâmetro - usa this)
         Voluntario gravado = voluntarioModel.gravar();
         if (gravado == null) return Map.of("erro", "Erro ao cadastrar o Voluntário");
 
         Map<String, Object> json = new HashMap<>();
-        json.put("id", gravado.getVolId());
-        json.put("nome", gravado.getVolNome());
-        json.put("data_nasc", gravado.getVolDataNasc());
-        json.put("rua", gravado.getVolRua());
-        json.put("bairro", gravado.getVolBairro());
-        json.put("cidade", gravado.getVolCidade());
-        json.put("telefone", gravado.getVolTelefone());
-        json.put("cep", gravado.getVolCep());
-        json.put("uf", gravado.getVolUf());
-        json.put("email", gravado.getVolEmail());
-        json.put("sexo", gravado.getVolSexo());
-        json.put("numero", gravado.getVolNumero());
-        json.put("cpf", gravado.getVolCpf());
+        json.put("id", gravado.getVol_id());
+        json.put("nome", gravado.getVol_nome());
+        json.put("data_nasc", gravado.getVol_datanasc());
+        json.put("rua", gravado.getVol_rua());
+        json.put("bairro", gravado.getVol_bairro());
+        json.put("cidade", gravado.getVol_cidade());
+        json.put("telefone", gravado.getVol_telefone());
+        json.put("cep", gravado.getVol_cep());
+        json.put("uf", gravado.getVol_uf());
+        json.put("email", gravado.getVol_email());
+        json.put("sexo", gravado.getVol_sexo());
+        json.put("numero", gravado.getVol_numero());
+        json.put("cpf", gravado.getVol_cpf());
         return json;
     }
 
@@ -106,37 +106,37 @@ public class VoluntarioController {
         if (existente == null) return Map.of("erro", "Voluntário não encontrado");
 
         // Configura os dados no objeto existente
-        existente.setVolNome(nome);
-        existente.setVolDataNasc(dataNasc);
-        existente.setVolRua(rua);
-        existente.setVolBairro(bairro);
-        existente.setVolCidade(cidade);
-        existente.setVolTelefone(telefone);
-        existente.setVolCep(cep);
-        existente.setVolUf(uf);
-        existente.setVolEmail(email);
-        existente.setVolSexo(sexo);
-        existente.setVolNumero(numero);
-        existente.setVolCpf(cpf);
+        existente.setVol_nome(nome);
+        existente.setVol_datanasc(dataNasc);
+        existente.setVol_rua(rua);
+        existente.setVol_bairro(bairro);
+        existente.setVol_cidade(cidade);
+        existente.setVol_telefone(telefone);
+        existente.setVol_cep(cep);
+        existente.setVol_uf(uf);
+        existente.setVol_email(email);
+        existente.setVol_sexo(sexo);
+        existente.setVol_numero(numero);
+        existente.setVol_cpf(cpf);
 
         // Chama o método alterar da Model (sem parâmetro - usa this)
         Voluntario atualizado = existente.alterar();
         if (atualizado == null) return Map.of("erro", "Erro ao atualizar o Voluntário");
 
         Map<String, Object> json = new HashMap<>();
-        json.put("id", atualizado.getVolId());
-        json.put("nome", atualizado.getVolNome());
-        json.put("data_nasc", atualizado.getVolDataNasc());
-        json.put("rua", atualizado.getVolRua());
-        json.put("bairro", atualizado.getVolBairro());
-        json.put("cidade", atualizado.getVolCidade());
-        json.put("telefone", atualizado.getVolTelefone());
-        json.put("cep", atualizado.getVolCep());
-        json.put("uf", atualizado.getVolUf());
-        json.put("email", atualizado.getVolEmail());
-        json.put("sexo", atualizado.getVolSexo());
-        json.put("numero", atualizado.getVolNumero());
-        json.put("cpf", atualizado.getVolCpf());
+        json.put("id", atualizado.getVol_id());
+        json.put("nome", atualizado.getVol_nome());
+        json.put("data_nasc", atualizado.getVol_datanasc());
+        json.put("rua", atualizado.getVol_rua());
+        json.put("bairro", atualizado.getVol_bairro());
+        json.put("cidade", atualizado.getVol_cidade());
+        json.put("telefone", atualizado.getVol_telefone());
+        json.put("cep", atualizado.getVol_cep());
+        json.put("uf", atualizado.getVol_uf());
+        json.put("email", atualizado.getVol_email());
+        json.put("sexo", atualizado.getVol_sexo());
+        json.put("numero", atualizado.getVol_numero());
+        json.put("cpf", atualizado.getVol_cpf());
         return json;
     }
 
