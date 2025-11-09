@@ -16,10 +16,31 @@ public class AcessoView {
     @Autowired
     private AcessoController acessoController;
 
+    @PostMapping("/registrar")
+    public ResponseEntity<Object> registrarVoluntario(@RequestBody Map<String, Object> dadosRegistro) {
+
+        // Passa o Map diretamente para o Controller
+        Map<String, Object> json = acessoController.registrarVoluntario(dadosRegistro);
+
+        return (boolean) json.get("sucesso")
+                ? ResponseEntity.ok(new Mensagem(json.get("mensagem").toString()))
+                : ResponseEntity.badRequest().body(new Mensagem(json.get("mensagem").toString()));
+    }
+
     // --- AUTENTICAR (POST) ---
+    // Em DOARC.mvc.view.AcessoView.java
+
     @PostMapping("/logar")
-    public ResponseEntity<Object> logar(@RequestParam String login,
-                                        @RequestParam String senha) {
+    public ResponseEntity<Object> logar(@RequestBody Map<String, Object> dadosLogin) { // 🚨 MUDANÇA AQUI
+
+        // Extrai o login e a senha do Map
+        String login = (String) dadosLogin.get("login");
+        String senha = (String) dadosLogin.get("senha");
+
+        // Verifica se os campos existem antes de chamar o Controller (opcional, mas bom)
+        if (login == null || senha == null) {
+            return ResponseEntity.badRequest().body(new Mensagem("Login e senha são obrigatórios."));
+        }
 
         Map<String, Object> json = acessoController.autenticar(login, senha);
 

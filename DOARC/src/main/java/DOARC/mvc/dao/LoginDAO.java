@@ -18,21 +18,29 @@ public class LoginDAO implements IDAO<Login> {
 
     @Override
     public Login gravar(Login entidade) {
-        String sql = String.format("INSERT INTO login (voluntario_vol_id, login, senha, nive_acesso, status) VALUES (%d, '%s', '%s', '%s', '%s') RETURNING login_id",
-                entidade.getVoluntarioId(),
-                entidade.getLogin().replace("'", "''"),
-                entidade.getSenha().replace("'", "''"),
-                entidade.getNiveAcesso().replace("'", "''"),
-                String.valueOf(entidade.getStatus()).replace("'", "''")
-        );
+        // ⚠️ CORREÇÃO DE SEGURANÇA: Usando PreparedStatement para prevenir SQL Injection
+        Connection conn = getConexao().getConnect();
+        // 🚨 CORRIGIDO: O RETURNING DEVE SER 'login_id'
+        String sql = "INSERT INTO login (voluntario_vol_id, login, senha, nive_acesso, status) VALUES (?, ?, ?, ?, ?) RETURNING login_id";
 
-        try (ResultSet rs = getConexao().consultar(sql)) {
-            if (rs != null && rs.next()) {
-                entidade.setLoginId(rs.getInt("login_id"));
-                return entidade;
+        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+            // Define os parâmetros
+            pst.setInt(1, entidade.getVoluntarioId());
+            pst.setString(2, entidade.getLogin());
+            pst.setString(3, entidade.getSenha());
+            pst.setString(4, entidade.getNiveAcesso());
+            pst.setString(5, String.valueOf(entidade.getStatus()));
+
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    // 🚨 CORRIGIDO: Lendo o 'login_id' gerado
+                    entidade.setLoginId(rs.getInt("login_id"));
+                    return entidade;
+                }
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao gravar Login (SQL): " + getConexao().getMensagemErro());
+            System.err.println("Erro ao gravar Login (SQL EXCEPTION): " + e.getMessage());
+            e.printStackTrace();
         }
         return null;
     }
@@ -89,17 +97,17 @@ public class LoginDAO implements IDAO<Login> {
         return lista;
     }
 
-    // Métodos específicos para Login
-    public Login autenticar(String login, String senha) {
-        String sql = String.format("SELECT * FROM login WHERE login = '%s' AND senha = '%s' AND status = 'A'",
-                login.replace("'", "''"), senha.replace("'", "''"));
+    // 🚨 NOVO MÉTODO: Busca de Login por nome de usuário EXATO.
+    public Login buscarPorLoginExato(String login) {
+        String sql = String.format("SELECT * FROM login WHERE login = '%s'",
+                login.replace("'", "''"));
 
         try (ResultSet rs = getConexao().consultar(sql)) {
             if (rs != null && rs.next()) {
                 return mapLogin(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao autenticar Login: " + getConexao().getMensagemErro());
+            System.err.println("Erro ao buscar Login por nome de usuário: " + getConexao().getMensagemErro());
         }
         return null;
     }

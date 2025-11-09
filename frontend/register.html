@@ -220,190 +220,198 @@
     </div>
 
     <script>
-        // Simulação das funções UI e Validator
-        const UI = {
-            showAlert: (message, type) => {
-                alert(`${type.toUpperCase()}: ${message}`);
+    // Simulação das funções UI e Validator
+    const UI = {
+        showAlert: (message, type) => {
+            // Se estiver em um ambiente web real, você usaria uma notificação mais amigável
+            console.log(`${type.toUpperCase()}: ${message}`);
+            alert(`${type.toUpperCase()}: ${message}`);
+        }
+    };
+
+    const Validator = {
+        isEmpty: (value) => !value || value.trim() === '',
+        isValidCPF: (cpf) => {
+            const cleanCPF = cpf.replace(/[^\d]/g, '');
+            return cleanCPF.length === 11;
+        },
+        isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+        isValidPhone: (phone) => {
+            const cleanPhone = phone.replace(/[^\d]/g, '');
+            return cleanPhone.length >= 10 && cleanPhone.length <= 11;
+        },
+        
+        // 🚨 NOVO MÉTODO: Validação de maior de 18 anos
+        isOver18: (dateString) => {
+            if (!dateString) return false;
+
+            const today = new Date();
+            const birthDate = new Date(dateString);
+            
+            // Calcula a diferença de anos
+            let age = today.getFullYear() - birthDate.getFullYear();
+            
+            // Ajusta se o aniversário deste ano ainda não ocorreu
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
             }
-        };
-
-        const Validator = {
-            isEmpty: (value) => !value || value.trim() === '',
-            isValidCPF: (cpf) => {
-                const cleanCPF = cpf.replace(/[^\d]/g, '');
-                return cleanCPF.length === 11;
-            },
-            isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-            isValidPhone: (phone) => {
-                const cleanPhone = phone.replace(/[^\d]/g, '');
-                return cleanPhone.length >= 10 && cleanPhone.length <= 11;
-            },
-            showError: (input, message) => {
-                let errorElement = input.nextElementSibling;
-                if (!errorElement || !errorElement.classList.contains('form-error')) {
-                    errorElement = document.createElement('div');
-                    errorElement.className = 'form-error';
-                    input.parentNode.insertBefore(errorElement, input.nextSibling);
-                }
-                errorElement.textContent = message;
-                errorElement.style.display = 'block';
-                input.style.borderColor = 'red';
-            },
-            clearAllErrors: (form) => {
-                const errors = form.querySelectorAll('.form-error');
-                const inputs = form.querySelectorAll('input, select');
-                errors.forEach(error => error.style.display = 'none');
-                inputs.forEach(input => input.style.borderColor = '');
+            return age >= 18;
+        },
+        
+        showError: (input, message) => {
+            let errorElement = input.nextElementSibling;
+            if (!errorElement || !errorElement.classList.contains('form-error')) {
+                errorElement = document.createElement('div');
+                errorElement.className = 'form-error';
+                errorElement.style.color = 'red'; // Para garantir a visibilidade do erro
+                input.parentNode.insertBefore(errorElement, input.nextSibling);
             }
-        };
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            input.style.borderColor = 'red';
+        },
+        clearAllErrors: (form) => {
+            const errors = form.querySelectorAll('.form-error');
+            const inputs = form.querySelectorAll('input, select');
+            errors.forEach(error => error.style.display = 'none');
+            inputs.forEach(input => input.style.borderColor = '');
+        }
+    };
 
-        document.getElementById('registerForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-            const nome = document.getElementById('nome');
-            const cpf = document.getElementById('cpf');
-            const email = document.getElementById('email');
-            const telefone = document.getElementById('telefone');
-            const dataNascimento = document.getElementById('dataNascimento');
-            const sexo = document.getElementById('sexo');
-            const rua = document.getElementById('rua');
-            const numero = document.getElementById('numero');
-            const bairro = document.getElementById('bairro');
-            const cidade = document.getElementById('cidade');
-            const cep = document.getElementById('cep');
-            const uf = document.getElementById('uf');
-            const password = document.getElementById('password');
-            const confirmPassword = document.getElementById('confirmPassword');
+        // 🚨 Obtendo referências aos inputs (mantido)
+        const nome = document.getElementById('nome');
+        const cpf = document.getElementById('cpf');
+        const email = document.getElementById('email');
+        const telefone = document.getElementById('telefone');
+        const dataNascimento = document.getElementById('dataNascimento');
+        const sexo = document.getElementById('sexo');
+        const rua = document.getElementById('rua');
+        const numero = document.getElementById('numero');
+        const bairro = document.getElementById('bairro');
+        const cidade = document.getElementById('cidade');
+        const cep = document.getElementById('cep');
+        const uf = document.getElementById('uf');
+        const password = document.getElementById('password');
+        const confirmPassword = document.getElementById('confirmPassword');
 
-            // Limpa erros anteriores
-            Validator.clearAllErrors(this);
+        // Limpa erros anteriores
+        Validator.clearAllErrors(this);
 
-            // Validações
-            let isValid = true;
+        // Validações
+        let isValid = true;
 
-            if (Validator.isEmpty(nome.value)) {
-                Validator.showError(nome, 'Nome é obrigatório');
-                isValid = false;
+        // --- Validações Existentes ---
+        if (Validator.isEmpty(nome.value)) { Validator.showError(nome, 'Nome é obrigatório'); isValid = false; }
+        if (Validator.isEmpty(cpf.value)) { Validator.showError(cpf, 'CPF é obrigatório'); isValid = false; } else if (!Validator.isValidCPF(cpf.value)) { Validator.showError(cpf, 'CPF inválido'); isValid = false; }
+        if (Validator.isEmpty(email.value)) { Validator.showError(email, 'E-mail é obrigatório'); isValid = false; } else if (!Validator.isValidEmail(email.value)) { Validator.showError(email, 'E-mail inválido'); isValid = false; }
+        if (Validator.isEmpty(telefone.value)) { Validator.showError(telefone, 'Telefone é obrigatório'); isValid = false; } else if (!Validator.isValidPhone(telefone.value)) { Validator.showError(telefone, 'Telefone inválido'); isValid = false; }
+        
+        // 🚨 VALIDAÇÃO DE DATA DE NASCIMENTO E IDADE (CORRIGIDO)
+        if (Validator.isEmpty(dataNascimento.value)) {
+            Validator.showError(dataNascimento, 'Data de nascimento é obrigatória');
+            isValid = false;
+        } else if (!Validator.isOver18(dataNascimento.value)) {
+            Validator.showError(dataNascimento, 'É necessário ter 18 anos ou mais para se registrar.');
+            isValid = false;
+        }
+        
+        if (Validator.isEmpty(sexo.value)) { Validator.showError(sexo, 'Sexo é obrigatório'); isValid = false; }
+        
+        // --- Validações de Endereço (adicionando para garantir campos no envio) ---
+        if (Validator.isEmpty(rua.value)) { Validator.showError(rua, 'Rua é obrigatória'); isValid = false; }
+        if (Validator.isEmpty(bairro.value)) { Validator.showError(bairro, 'Bairro é obrigatório'); isValid = false; }
+        if (Validator.isEmpty(cidade.value)) { Validator.showError(cidade, 'Cidade é obrigatória'); isValid = false; }
+        if (Validator.isEmpty(cep.value)) { Validator.showError(cep, 'CEP é obrigatório'); isValid = false; }
+        if (Validator.isEmpty(uf.value)) { Validator.showError(uf, 'UF é obrigatória'); isValid = false; }
+
+
+        // --- Validações de Senha ---
+        if (Validator.isEmpty(password.value)) { Validator.showError(password, 'Senha é obrigatória'); isValid = false; } 
+        else if (password.value.length < 6) { Validator.showError(password, 'Senha deve ter no mínimo 6 caracteres'); isValid = false; }
+
+        if (password.value !== confirmPassword.value) { Validator.showError(confirmPassword, 'As senhas não coincidem'); isValid = false; }
+
+        if (!isValid) return;
+
+        try {
+            // 🚨 CORREÇÃO NA FETCH API
+            const response = await fetch('http://localhost:8080/apis/acesso/registrar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // O Spring no backend espera JSON
+                },
+                body: JSON.stringify({
+                    // Dados do Voluntário (com dados limpos)
+                    nome: nome.value,
+                    cpf: cpf.value.replace(/[^\d]/g, ''),
+                    email: email.value,
+                    telefone: telefone.value.replace(/[^\d]/g, ''),
+                    dataNascimento: dataNascimento.value,
+                    sexo: sexo.value,
+                    rua: rua.value,
+                    numero: numero.value,
+                    bairro: bairro.value,
+                    cidade: cidade.value,
+                    cep: cep.value.replace(/[^\d]/g, ''), // Limpa o CEP
+                    uf: uf.value,
+                    
+                    // Dados de Acesso (Login/Credenciais)
+                    login: email.value, // 🚨 Adicionamos o campo 'login' usando o email
+                    senha: password.value 
+                })
+            });
+
+            const resultado = await response.json();
+
+            if (response.ok) {
+                UI.showAlert(resultado.mensagem || 'Cadastro realizado com sucesso!', 'success');
+
+                // Redireciona após 2 segundos
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } else {
+                UI.showAlert('Erro: ' + (resultado.mensagem || 'Erro desconhecido ao realizar cadastro'), 'error');
             }
 
-            if (Validator.isEmpty(cpf.value)) {
-                Validator.showError(cpf, 'CPF é obrigatório');
-                isValid = false;
-            } else if (!Validator.isValidCPF(cpf.value)) {
-                Validator.showError(cpf, 'CPF inválido');
-                isValid = false;
-            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            UI.showAlert('Erro ao realizar cadastro. Verifique a conexão com a API.', 'error');
+        }
+    });
 
-            if (Validator.isEmpty(email.value)) {
-                Validator.showError(email, 'E-mail é obrigatório');
-                isValid = false;
-            } else if (!Validator.isValidEmail(email.value)) {
-                Validator.showError(email, 'E-mail inválido');
-                isValid = false;
-            }
+    // --- Máscaras Simples (Mantidas) ---
+    
+    document.getElementById('cpf').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+            value = value.replace(/(\d{3})(\d)/, '$1.$2')
+                        .replace(/(\d{3})(\d)/, '$1.$2')
+                        .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        }
+        e.target.value = value;
+    });
 
-            if (Validator.isEmpty(telefone.value)) {
-                Validator.showError(telefone, 'Telefone é obrigatório');
-                isValid = false;
-            } else if (!Validator.isValidPhone(telefone.value)) {
-                Validator.showError(telefone, 'Telefone inválido');
-                isValid = false;
-            }
+    document.getElementById('telefone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 11) {
+            value = value.replace(/(\d{2})(\d)/, '($1) $2')
+                        .replace(/(\d{5})(\d)/, '$1-$2');
+        }
+        e.target.value = value;
+    });
 
-            if (Validator.isEmpty(dataNascimento.value)) {
-                Validator.showError(dataNascimento, 'Data de nascimento é obrigatória');
-                isValid = false;
-            }
-
-            if (Validator.isEmpty(sexo.value)) {
-                Validator.showError(sexo, 'Sexo é obrigatório');
-                isValid = false;
-            }
-
-            if (Validator.isEmpty(password.value)) {
-                Validator.showError(password, 'Senha é obrigatória');
-                isValid = false;
-            } else if (password.value.length < 6) {
-                Validator.showError(password, 'Senha deve ter no mínimo 6 caracteres');
-                isValid = false;
-            }
-
-            if (password.value !== confirmPassword.value) {
-                Validator.showError(confirmPassword, 'As senhas não coincidem');
-                isValid = false;
-            }
-
-            if (!isValid) return;
-
-            try {
-                const response = await fetch('http://localhost:8080/apis/acesso/registrar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        nome: nome.value,
-                        cpf: cpf.value.replace(/[^\d]/g, ''),
-                        email: email.value,
-                        telefone: telefone.value.replace(/[^\d]/g, ''),
-                        dataNascimento: dataNascimento.value,
-                        sexo: sexo.value,
-                        rua: rua.value,
-                        numero: numero.value,
-                        bairro: bairro.value,
-                        cidade: cidade.value,
-                        cep: cep.value,
-                        uf: uf.value,
-                        senha: password.value
-                    })
-                });
-
-                const resultado = await response.json();
-
-                if (response.ok) {
-                    UI.showAlert(resultado.mensagem || 'Cadastro realizado com sucesso! Redirecionando...', 'success');
-
-                    // Redireciona após 2 segundos
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 2000);
-                } else {
-                    UI.showAlert('Erro: ' + (resultado.mensagem || 'Erro ao realizar cadastro'), 'error');
-                }
-
-            } catch (error) {
-                console.error('Erro:', error);
-                UI.showAlert('Erro ao realizar cadastro. Tente novamente.', 'error');
-            }
-        });
-
-        // Máscaras simples
-        document.getElementById('cpf').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 11) {
-                value = value.replace(/(\d{3})(\d)/, '$1.$2')
-                           .replace(/(\d{3})(\d)/, '$1.$2')
-                           .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-            }
-            e.target.value = value;
-        });
-
-        document.getElementById('telefone').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 11) {
-                value = value.replace(/(\d{2})(\d)/, '($1) $2')
-                           .replace(/(\d{5})(\d)/, '$1-$2');
-            }
-            e.target.value = value;
-        });
-
-        document.getElementById('cep').addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length <= 8) {
-                value = value.replace(/(\d{5})(\d)/, '$1-$2');
-            }
-            e.target.value = value;
-        });
-    </script>
+    document.getElementById('cep').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length <= 8) {
+            value = value.replace(/(\d{5})(\d)/, '$1-$2');
+        }
+        e.target.value = value;
+    });
+</script>
 </body>
 </html>

@@ -53,9 +53,9 @@ public class Login {
         return dao.apagar(this);
     }
 
-    // Método específico para autenticação
-    public Login autenticar(String login, String senha) {
-        return dao.autenticar(login, senha);
+    // 🚨 NOVO MÉTODO: Busca credencial por nome de usuário (login) exato.
+    public Login buscarPorLogin(String login) {
+        return dao.buscarPorLoginExato(login);
     }
 
     // --- GETTERS E SETTERS ---
