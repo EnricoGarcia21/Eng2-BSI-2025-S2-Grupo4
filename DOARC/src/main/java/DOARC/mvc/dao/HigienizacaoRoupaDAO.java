@@ -2,97 +2,87 @@ package DOARC.mvc.dao;
 
 import DOARC.mvc.model.HigienizacaoRoupa;
 import DOARC.mvc.util.Conexao;
-import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat; // Adicionado
-import java.text.DecimalFormatSymbols; // Adicionado
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale; // Adicionado
+import java.util.Locale;
 
 @Repository
 public class HigienizacaoRoupaDAO implements IDAO<HigienizacaoRoupa> {
 
-    private Conexao getConexao() {
-        return SingletonDB.conectar();
-    }
-
     @Override
-    public HigienizacaoRoupa gravar(HigienizacaoRoupa entidade) {
-        // Objeto para garantir o formato de número com ponto decimal (padrão SQL)
+    public HigienizacaoRoupa gravar(HigienizacaoRoupa entidade, Conexao conexao) { // Recebe Conexao
         DecimalFormat df = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.US));
         String valorFormatado = df.format(entidade.getHigValorPago());
 
         String sql = String.format(
                 "INSERT INTO higienizacao_roupas (hig_data_agendada, hig_descricao_roupa, vol_id, hig_local, hig_hora, hig_valorpago) " +
-                        "VALUES ('%s', '%s', %d, '%s', '%s', %s) RETURNING hig_id", // %s para valorPago formatado
+                        "VALUES ('%s', '%s', %d, '%s', '%s', %s) RETURNING hig_id",
                 entidade.getHigDataAgendada().replace("'", "''"),
                 entidade.getHigDescricaoRoupa().replace("'", "''"),
                 entidade.getVolId(),
                 entidade.getHigLocal().replace("'", "''"),
                 entidade.getHigHora().replace("'", "''"),
-                valorFormatado // Usando o valor formatado
+                valorFormatado
         );
 
-        try (ResultSet rs = getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) { // Usa Conexao do parâmetro
             if (rs != null && rs.next()) {
                 entidade.setHigId(rs.getInt("hig_id"));
                 return entidade;
             }
         } catch (SQLException e) {
-            // Se o erro for de formato numérico, será pego aqui.
-            System.err.println("Erro ao gravar Higienização (SQL): " + getConexao().getMensagemErro());
+            System.err.println("Erro ao gravar Higienização (SQL): " + conexao.getMensagemErro());
         }
         return null;
     }
 
     @Override
-    public HigienizacaoRoupa alterar(HigienizacaoRoupa entidade) {
-        // Objeto para garantir o formato de número com ponto decimal (padrão SQL)
+    public HigienizacaoRoupa alterar(HigienizacaoRoupa entidade, Conexao conexao) { // Recebe Conexao
         DecimalFormat df = new DecimalFormat("0.00", new DecimalFormatSymbols(Locale.US));
         String valorFormatado = df.format(entidade.getHigValorPago());
 
         String sql = String.format(
-                "UPDATE higienizacao_roupas SET hig_data_agendada='%s', hig_descricao_roupa='%s', vol_id=%d, hig_local='%s', hig_hora='%s', hig_valorpago=%s " + // %s para valorPago formatado
+                "UPDATE higienizacao_roupas SET hig_data_agendada='%s', hig_descricao_roupa='%s', vol_id=%d, hig_local='%s', hig_hora='%s', hig_valorpago=%s " +
                         "WHERE hig_id=%d",
                 entidade.getHigDataAgendada().replace("'", "''"),
                 entidade.getHigDescricaoRoupa().replace("'", "''"),
                 entidade.getVolId(),
                 entidade.getHigLocal().replace("'", "''"),
                 entidade.getHigHora().replace("'", "''"),
-                valorFormatado, // Usando o valor formatado
+                valorFormatado,
                 entidade.getHigId()
         );
 
-        return getConexao().manipular(sql) ? entidade : null;
+        return conexao.manipular(sql) ? entidade : null; // Usa Conexao do parâmetro
     }
 
-    // --- Métodos get, apagar e mapHigienizacaoRoupa permanecem inalterados ---
-
     @Override
-    public boolean apagar(HigienizacaoRoupa entidade) {
+    public boolean apagar(HigienizacaoRoupa entidade, Conexao conexao) { // Recebe Conexao
         String sql = "DELETE FROM higienizacao_roupas WHERE hig_id=" + entidade.getHigId();
-        return getConexao().manipular(sql);
+        return conexao.manipular(sql); // Usa Conexao do parâmetro
     }
 
     @Override
-    public HigienizacaoRoupa get(int id) {
+    public HigienizacaoRoupa get(int id, Conexao conexao) { // Recebe Conexao
         String sql = "SELECT * FROM higienizacao_roupas WHERE hig_id=" + id;
-        try (ResultSet rs = getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) { // Usa Conexao do parâmetro
             if (rs != null && rs.next()) {
                 return mapHigienizacaoRoupa(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar Higienização por ID: " + getConexao().getMensagemErro());
+            System.err.println("Erro ao buscar Higienização por ID: " + conexao.getMensagemErro());
         }
         return null;
     }
 
     @Override
-    public List<HigienizacaoRoupa> get(String filtro) {
+    public List<HigienizacaoRoupa> get(String filtro, Conexao conexao) { // Recebe Conexao
         List<HigienizacaoRoupa> lista = new ArrayList<>();
         String sql = "SELECT * FROM higienizacao_roupas";
         if (filtro != null && !filtro.isEmpty()) {
@@ -100,12 +90,12 @@ public class HigienizacaoRoupaDAO implements IDAO<HigienizacaoRoupa> {
                     filtro.replace("'", "''"), filtro.replace("'", "''"));
         }
 
-        try (ResultSet rs = getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) { // Usa Conexao do parâmetro
             while (rs != null && rs.next()) {
                 lista.add(mapHigienizacaoRoupa(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao listar Higienizações: " + getConexao().getMensagemErro());
+            System.err.println("Erro ao listar Higienizações: " + conexao.getMensagemErro());
         }
         return lista;
     }

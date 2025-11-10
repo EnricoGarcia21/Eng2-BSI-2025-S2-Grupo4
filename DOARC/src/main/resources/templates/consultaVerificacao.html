@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Consulta de Verificação de Necessidades</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        /* Estilos básicos para botões e tabela, replicando o estilo do seu código */
+        .edit-btn, .delete-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .edit-btn { background-color: #28A745; } 
+        .delete-btn { background-color: #DC3545; }
+        .header, .container { max-width: 1200px; margin: 0 auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .filtro-container { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .form-control { padding: 8px; border: 1px solid #ccc; flex-grow: 1; }
+    </style>
+</head>
+<body>
+<header class="header">
+    <nav>
+        <a href="menu.html" class="nav-link">Voltar para o Menu Principal</a>
+    </nav>
+</header>
+
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>Consulta de Verificação de Necessidades</h1>
+        <div style="display: flex; gap: 10px;">
+            <a href="cadastroVerificacao.html">
+                <button id="btn-novo" class="edit-btn" style="background-color: #17A2B8;">Nova Verificação</button>
+            </a>
+            <a href="menu.html">
+                <button class="edit-btn" style="background-color: #6C757D;">Menu</button>
+            </a>
+        </div>
+    </div>
+
+    <div class="filtro-container">
+        <input type="text" id="filtro-input" class="form-control" placeholder="Digite observação ou resultado..." />
+
+        <button class="edit-btn" id="filtrar-obs" style="background-color: #6C757D;">Filtrar por Observação</button>
+        <button class="edit-btn" id="filtrar-resultado" style="background-color: #6C757D;">Filtrar por Resultado</button>
+
+        <p id="filtro-status" style="margin-left: 10px; font-style: italic; color: #999;">Filtrando por Observação</p>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Data</th>
+            <th>Observação</th>
+            <th>Resultado</th>
+            <th>Vol. ID</th>
+            <th>Doa. ID</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody id="tabela-verificacao">
+        <tr><td colspan="7">Carregando verificações...</td></tr>
+        </tbody>
+    </table>
+
+    <div id="message-consulta"></div>
+</div>
+
+<script src="gerenciarVerificacao.js"></script>
+</body>
+</html>

@@ -56,12 +56,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function validarIdNumerico(valor) { return validarValorNumerico(valor) && parseInt(valor) > 0; }
     function validarDataFuturaOuHoje(valor) {
         if (!valor) return false;
-        const dataInput = new Date(valor);
+        const dataInput = new Date(valor + 'T00:00:00'); // Adiciona T00 para garantir que a comparação seja feita no fuso correto (meia-noite)
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0); 
-        return !(isNaN(dataInput) || dataInput < hoje);
+        return !(isNaN(dataInput.getTime()) || dataInput.getTime() < hoje.getTime());
     }
-    // Obs: Máscaras não são necessárias para date, time e number.
 
     // ---------------- FUNÇÕES DE FEEDBACK ----------------
     function showMessage(element, message, type) {
@@ -86,14 +85,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function mostrarExemplo(element, exemplo) {
-        // Remove exemplo anterior, se existir
         esconderExemplo(element);
         
         const exemploDiv = document.createElement('div');
         exemploDiv.classList.add('exemplo-message');
         exemploDiv.style.color = 'red';
         exemploDiv.textContent = `Exemplo: ${exemplo}`;
-        element.parentElement.insertBefore(exemploDiv, element.nextSibling); // Insere após o input
+        element.parentElement.insertBefore(exemploDiv, element.nextSibling); 
     }
 
     function esconderExemplo(element) {
@@ -105,9 +103,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ---------------- INICIALIZAÇÃO E EVENTOS ----------------
     function inicializarCampos() {
+        // --- NOVIDADE: Pré-preencher a data da URL ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataUrl = urlParams.get('data_agendada');
+
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
             campo.element = document.getElementById(campo.id);
+            
+            // Pré-preenche se o parâmetro de URL 'data_agendada' existir
+            if (campo.id === 'hig_data_agendada' && dataUrl) {
+                // O valor da URL está no formato YYYY-MM-DD
+                campo.element.value = dataUrl;
+                // Executa a validação após pré-preencher
+                const isValid = campo.validate(dataUrl);
+                if (isValid) {
+                    campo.element.classList.add('success');
+                } else {
+                    campo.element.classList.add('error');
+                    mostrarExemplo(campo.element, `A data selecionada ${dataUrl} é passada. ${campo.exemplo}`);
+                }
+            }
             
             // Adiciona asterisco para campos obrigatórios
             if (campo.required) {
@@ -163,7 +179,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  esconderExemplo(campoElement);
             }
 
-            // O nome do parâmetro deve ser o nome esperado pelo Controller/View: data_agendada, vol_id, etc.
+            // O nome do parâmetro deve ser o nome esperado pelo Controller/View
             params.append(campo.name, valor); 
         }
 

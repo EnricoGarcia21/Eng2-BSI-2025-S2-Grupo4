@@ -1,6 +1,7 @@
 package DOARC.mvc.model;
 
-import DOARC.mvc.dao.HigienizacaoRoupaDAO; // Novo DAO
+import DOARC.mvc.dao.HigienizacaoRoupaDAO;
+import DOARC.mvc.util.Conexao; // Importação necessária
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,19 +13,19 @@ public class HigienizacaoRoupa {
     private int higId;
     private String higDataAgendada;
     private String higDescricaoRoupa;
-    private int volId; // Chave estrangeira para Voluntário/Doador
+    private int volId;
     private String higLocal;
     private String higHora;
     private double higValorPago;
 
-    @Autowired // Model Instancia (recebe) o DAO
+    @Autowired
     private HigienizacaoRoupaDAO dao;
 
-    // --- CONSTRUTORES ---
+    // --- CONSTRUTORES --- (Inalterados)
+
     public HigienizacaoRoupa() {
     }
 
-    // Construtor para gravação (sem ID)
     public HigienizacaoRoupa(String higDataAgendada, String higDescricaoRoupa, int volId,
                              String higLocal, String higHora, double higValorPago) {
         this.higDataAgendada = higDataAgendada;
@@ -35,28 +36,28 @@ public class HigienizacaoRoupa {
         this.higValorPago = higValorPago;
     }
 
-    // --- MÉTODOS DE DELEGAÇÃO PARA O DAO ---
-    public List<HigienizacaoRoupa> consultar(String filtro) {
-        return dao.get(filtro);
+    // --- MÉTODOS DE DELEGAÇÃO PARA O DAO (ALTERADOS) ---
+    public List<HigienizacaoRoupa> consultar(String filtro, Conexao conexao) { // Recebe e repassa
+        return dao.get(filtro, conexao);
     }
 
-    public HigienizacaoRoupa consultar(int id) {
-        return dao.get(id);
+    public HigienizacaoRoupa consultar(int id, Conexao conexao) { // Recebe e repassa
+        return dao.get(id, conexao);
     }
 
-    public HigienizacaoRoupa gravar(HigienizacaoRoupa higienizacao) {
-        return dao.gravar(higienizacao);
+    public HigienizacaoRoupa gravar(HigienizacaoRoupa higienizacao, Conexao conexao) { // Recebe e repassa
+        return dao.gravar(higienizacao, conexao);
     }
 
-    public HigienizacaoRoupa alterar(HigienizacaoRoupa higienizacao) {
-        return dao.alterar(higienizacao);
+    public HigienizacaoRoupa alterar(HigienizacaoRoupa higienizacao, Conexao conexao) { // Recebe e repassa
+        return dao.alterar(higienizacao, conexao);
     }
 
-    public boolean apagar(HigienizacaoRoupa higienizacao) {
-        return dao.apagar(higienizacao);
+    public boolean apagar(HigienizacaoRoupa higienizacao, Conexao conexao) { // Recebe e repassa
+        return dao.apagar(higienizacao, conexao);
     }
 
-    // --- GETTERS E SETTERS ---
+    // --- GETTERS E SETTERS --- (Inalterados)
     public int getHigId() { return higId; }
     public void setHigId(int higId) { this.higId = higId; }
     public String getHigDataAgendada() { return higDataAgendada; }

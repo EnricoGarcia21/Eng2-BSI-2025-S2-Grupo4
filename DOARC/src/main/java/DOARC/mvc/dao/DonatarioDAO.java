@@ -1,8 +1,8 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Donatario;
-import DOARC.mvc.util.Conexao; // Adicionado para referência, mas SingletonDB é o ponto de acesso
-import DOARC.mvc.util.SingletonDB; // Reintroduzido
+import DOARC.mvc.util.Conexao; // Importação da Conexao
+import DOARC.mvc.util.SingletonDB; // Reintroduzido, mas não usado diretamente nos métodos de acesso ao DB
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -12,20 +12,15 @@ import java.util.List;
 @Repository
 public class DonatarioDAO implements IDAO<Donatario> {
 
-    // A DAO não precisa mais do @Autowired DataSource, nem da lógica de pool.
-
     public DonatarioDAO() {
-        // Construtor vazio. A conexão é gerenciada pelo SingletonDB/Conexao.
+        // Construtor vazio.
     }
 
-    // Método auxiliar para obter a instância da Conexao
-    private Conexao getConexao() {
-        // Chama o método estático para garantir a conexão única
-        return SingletonDB.conectar();
-    }
+    // O método getConexao() e a chamada ao SingletonDB foram removidos/não são mais necessários aqui
+    // pois a Conexao será passada por parâmetro.
 
     @Override
-    public Donatario gravar(Donatario entidade) {
+    public Donatario gravar(Donatario entidade, Conexao conexao) { // Adicionado Conexao
         // Usamos String.format e a classe Conexao.manipular para refletir o novo padrão
 
         String sql = String.format("INSERT INTO donatario (don_nome, don_data_nasc, don_rua, don_bairro, don_cidade, don_telefone, don_cep, don_uf, don_email, don_sexo) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s') RETURNING don_id",
@@ -41,23 +36,21 @@ public class DonatarioDAO implements IDAO<Donatario> {
                 entidade.getDonSexo().replace("'", "''")
         );
 
-        // A Conexao não possui um método direto 'manipular com returning'.
-        // Devemos usar o consultar para obter o ID gerado.
-        try (ResultSet rs = getConexao().consultar(sql)) {
+        // Uso de conexao.consultar para obter o ID gerado (RETURNING)
+        try (ResultSet rs = conexao.consultar(sql)) {
             if (rs != null && rs.next()) {
-                // Se a Conexão estiver usando um Statement que não é fechado no consultar(), pode haver problema.
-                // Assumindo que o ID é obtido corretamente aqui.
                 entidade.setDonId(rs.getInt("don_id"));
                 return entidade;
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao gravar Donatário (SQL): " + getConexao().getMensagemErro());
+            // Uso de conexao.getMensagemErro()
+            System.err.println("Erro ao gravar Donatário (SQL): " + conexao.getMensagemErro());
         }
         return null;
     }
 
     @Override
-    public Donatario alterar(Donatario entidade) {
+    public Donatario alterar(Donatario entidade, Conexao conexao) { // Adicionado Conexao
         String sql = String.format("UPDATE donatario SET don_nome='%s', don_data_nasc='%s', don_rua='%s', don_bairro='%s', don_cidade='%s', don_telefone='%s', don_cep='%s', don_uf='%s', don_email='%s', don_sexo='%s' WHERE don_id=%d",
                 entidade.getDonNome().replace("'", "''"),
                 entidade.getDonDataNasc().replace("'", "''"),
@@ -72,46 +65,47 @@ public class DonatarioDAO implements IDAO<Donatario> {
                 entidade.getDonId()
         );
 
-        // Uso de Conexao.manipular(sql)
-        return getConexao().manipular(sql) ? entidade : null;
+        // Uso de conexao.manipular(sql)
+        return conexao.manipular(sql) ? entidade : null;
     }
 
     @Override
-    public boolean apagar(Donatario entidade) {
+    public boolean apagar(Donatario entidade, Conexao conexao) { // Adicionado Conexao
         String sql = "DELETE FROM donatario WHERE don_id=" + entidade.getDonId();
-        // Uso de Conexao.manipular(sql)
-        return getConexao().manipular(sql);
+        // Uso de conexao.manipular(sql)
+        return conexao.manipular(sql);
     }
 
     @Override
-    public Donatario get(int id) {
+    public Donatario get(int id, Conexao conexao) { // Adicionado Conexao
         String sql = "SELECT * FROM donatario WHERE don_id=" + id;
-        try (ResultSet rs = getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) { // Uso de conexao.consultar
             if (rs != null && rs.next()) {
                 return mapDonatario(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar Donatário por ID: " + getConexao().getMensagemErro());
+            // Uso de conexao.getMensagemErro()
+            System.err.println("Erro ao buscar Donatário por ID: " + conexao.getMensagemErro());
         }
         return null;
     }
 
     @Override
-    public List<Donatario> get(String filtro) {
+    public List<Donatario> get(String filtro, Conexao conexao) { // Adicionado Conexao
         List<Donatario> lista = new ArrayList<>();
         String sql = "SELECT * FROM donatario";
         if (filtro != null && !filtro.isEmpty()) {
-            // Aplicando o filtro simples conforme o método do FornecedorDAO anterior
             sql += String.format(" WHERE don_nome ILIKE '%%%s%%' OR don_email ILIKE '%%%s%%'",
                     filtro.replace("'", "''"), filtro.replace("'", "''"));
         }
 
-        try (ResultSet rs = getConexao().consultar(sql)) {
+        try (ResultSet rs = conexao.consultar(sql)) { // Uso de conexao.consultar
             while (rs != null && rs.next()) {
                 lista.add(mapDonatario(rs));
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao listar Donatários: " + getConexao().getMensagemErro());
+            // Uso de conexao.getMensagemErro()
+            System.err.println("Erro ao listar Donatários: " + conexao.getMensagemErro());
         }
         return lista;
     }

@@ -1,6 +1,7 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.DonatarioDAO;
+import DOARC.mvc.util.Conexao; // Importação necessária para a Conexao
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -43,28 +44,28 @@ public class Donatario {
         this.donSexo = donSexo;
     }
 
-    // --- MÉTODOS DE DELEGAÇÃO PARA O DAO ---
-    public List<Donatario> consultar(String filtro) {
-        return dao.get(filtro);
+    // --- MÉTODOS DE DELEGAÇÃO PARA O DAO (ALTERADOS) ---
+    public List<Donatario> consultar(String filtro, Conexao conexao) { // Recebe e repassa Conexao
+        return dao.get(filtro, conexao);
     }
 
-    public Donatario consultar(int id) {
-        return dao.get(id);
+    public Donatario consultar(int id, Conexao conexao) { // Recebe e repassa Conexao
+        return dao.get(id, conexao);
     }
 
-    public Donatario gravar(Donatario donatario) {
-        return dao.gravar(donatario);
+    public Donatario gravar(Donatario donatario, Conexao conexao) { // Recebe e repassa Conexao
+        return dao.gravar(donatario, conexao);
     }
 
-    public Donatario alterar(Donatario donatario) {
-        return dao.alterar(donatario);
+    public Donatario alterar(Donatario donatario, Conexao conexao) { // Recebe e repassa Conexao
+        return dao.alterar(donatario, conexao);
     }
 
-    public boolean apagar(Donatario donatario) {
-        return dao.apagar(donatario);
+    public boolean apagar(Donatario donatario, Conexao conexao) { // Recebe e repassa Conexao
+        return dao.apagar(donatario, conexao);
     }
 
-    // --- GETTERS E SETTERS ---
+    // --- GETTERS E SETTERS --- (Inalterados)
     public int getDonId() { return donId; }
     public void setDonId(int donId) { this.donId = donId; }
     public String getDonNome() { return donNome; }
