@@ -2,97 +2,197 @@ package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Campanha;
 import DOARC.mvc.util.Conexao;
-import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Repository
 public class CampanhaDAO implements IDAO<Campanha> {
 
-    private Conexao getConexao() {
-        return SingletonDB.conectar();
-    }
+    public CampanhaDAO() {}
 
     @Override
-    public Campanha gravar(Campanha entidade) {
-        String sql = String.format("INSERT INTO campanha (cam_data_ini, cam_data_fim, voluntario_vol_id, cam_desc, cam_meta_arrecadacao, cam_valor_arrecadado) VALUES ('%s', '%s', %d, '%s', %.2f, %.2f) RETURNING cam_id",
-                entidade.getCam_data_ini().replace("'", "''"),
-                entidade.getCam_data_fim().replace("'", "''"),
-                entidade.getVoluntario_vol_id(),
-                entidade.getCam_desc().replace("'", "''"),
-                entidade.getCam_meta_arrecadacao(),
-                entidade.getCam_valor_arrecadado()
-        );
+    public Campanha gravar(Campanha c, Conexao conexao) {
+        String sql = """
+            INSERT INTO campanha 
+            (cam_data_ini, cam_data_fim, voluntario_vol_id, cam_desc, 
+             cam_meta_arrecadacao, cam_valor_arrecadado)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """;
 
-        try (ResultSet rs = getConexao().consultar(sql)) {
-            if (rs != null && rs.next()) {
-                entidade.setCam_id(rs.getInt("cam_id"));
-                return entidade;
+        try {
+            // Obtém a conexão JDBC
+            Connection conn = conexao.getConnect();
+            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+
+            stmt.setString(1, c.getCam_data_ini());
+            stmt.setString(2, c.getCam_data_fim());
+            stmt.setInt(3, c.getVoluntario_vol_id());
+            stmt.setString(4, c.getCam_desc());
+            stmt.setDouble(5, c.getCam_meta_arrecadacao());
+            stmt.setDouble(6, c.getCam_valor_arrecadado());
+
+            // Usa executeUpdate() para INSERT
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                // Obtém o ID gerado
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    c.setCam_id(rs.getInt(1));
+                    rs.close();
+                    stmt.close();
+                    return c;
+                }
+                rs.close();
             }
+
+            stmt.close();
+
         } catch (SQLException e) {
-            System.err.println("Erro ao gravar Campanha (SQL): " + getConexao().getMensagemErro());
+            System.err.println("Erro ao gravar Campanha: " + e.getMessage());
+            e.printStackTrace();
         }
+
         return null;
     }
 
     @Override
-    public Campanha alterar(Campanha entidade) {
-        String sql = String.format("UPDATE campanha SET cam_data_ini='%s', cam_data_fim='%s', voluntario_vol_id=%d, cam_desc='%s', cam_meta_arrecadacao=%.2f, cam_valor_arrecadado=%.2f WHERE cam_id=%d",
-                entidade.getCam_data_ini().replace("'", "''"),
-                entidade.getCam_data_fim().replace("'", "''"),
-                entidade.getVoluntario_vol_id(),
-                entidade.getCam_desc().replace("'", "''"),
-                entidade.getCam_meta_arrecadacao(),
-                entidade.getCam_valor_arrecadado(),
-                entidade.getCam_id()
-        );
+    public Campanha alterar(Campanha c, Conexao conexao) {
+        String sql = """
+            UPDATE campanha SET
+                cam_data_ini = ?,
+                cam_data_fim = ?,
+                voluntario_vol_id = ?,
+                cam_desc = ?,
+                cam_meta_arrecadacao = ?,
+                cam_valor_arrecadado = ?
+            WHERE cam_id = ?
+        """;
 
-        return getConexao().manipular(sql) ? entidade : null;
-    }
+        try {
+            Connection conn = conexao.getConnect();
+            PreparedStatement stmt = conn.prepareStatement(sql);
 
-    @Override
-    public boolean apagar(Campanha entidade) {
-        String sql = "DELETE FROM campanha WHERE cam_id=" + entidade.getCam_id();
-        return getConexao().manipular(sql);
-    }
+            stmt.setString(1, c.getCam_data_ini());
+            stmt.setString(2, c.getCam_data_fim());
+            stmt.setInt(3, c.getVoluntario_vol_id());
+            stmt.setString(4, c.getCam_desc());
+            stmt.setDouble(5, c.getCam_meta_arrecadacao());
+            stmt.setDouble(6, c.getCam_valor_arrecadado());
+            stmt.setInt(7, c.getCam_id());
 
-    @Override
-    public Campanha get(int id) {
-        String sql = "SELECT * FROM campanha WHERE cam_id=" + id;
-        try (ResultSet rs = getConexao().consultar(sql)) {
-            if (rs != null && rs.next()) {
-                return mapCampanha(rs);
-            }
+            int rowsAffected = stmt.executeUpdate();
+            stmt.close();
+
+            return rowsAffected > 0 ? c : null;
+
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar Campanha por ID: " + getConexao().getMensagemErro());
+            System.err.println("Erro ao alterar Campanha: " + e.getMessage());
+            e.printStackTrace();
         }
+
         return null;
     }
 
     @Override
-    public List<Campanha> get(String filtro) {
+    public boolean apagar(Campanha c, Conexao conexao) {
+        String sql = "DELETE FROM campanha WHERE cam_id = ?";
+
+        try {
+            Connection conn = conexao.getConnect();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, c.getCam_id());
+
+            int rowsAffected = stmt.executeUpdate();
+            stmt.close();
+
+            return rowsAffected > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao apagar Campanha: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    @Override
+    public Campanha get(int id, Conexao conexao) {
+        String sql = "SELECT * FROM campanha WHERE cam_id = ?";
+
+        try {
+            Connection conn = conexao.getConnect();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, id);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Campanha c = mapCampanha(rs);
+                rs.close();
+                stmt.close();
+                return c;
+            }
+
+            rs.close();
+            stmt.close();
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar Campanha: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    public List<Campanha> get(String filtro, Conexao conexao) {
         List<Campanha> lista = new ArrayList<>();
         String sql = "SELECT * FROM campanha";
-        if (filtro != null && !filtro.isEmpty()) {
-            sql += String.format(" WHERE cam_desc ILIKE '%%%s%%'",
-                    filtro.replace("'", "''"));
-        }
 
-        try (ResultSet rs = getConexao().consultar(sql)) {
-            while (rs != null && rs.next()) {
+        try {
+            Connection conn = conexao.getConnect();
+            PreparedStatement stmt;
+
+            if (filtro != null && !filtro.isBlank()) {
+                sql += " WHERE cam_desc ILIKE ? OR CAST(cam_data_ini AS TEXT) ILIKE ? OR CAST(cam_data_fim AS TEXT) ILIKE ?";
+                stmt = conn.prepareStatement(sql);
+                String filtroLike = "%" + filtro + "%";
+                stmt.setString(1, filtroLike);
+                stmt.setString(2, filtroLike);
+                stmt.setString(3, filtroLike);
+            } else {
+                stmt = conn.prepareStatement(sql);
+            }
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
                 lista.add(mapCampanha(rs));
             }
+
+            rs.close();
+            stmt.close();
+
         } catch (SQLException e) {
-            System.err.println("Erro ao listar Campanhas: " + getConexao().getMensagemErro());
+            System.err.println("Erro ao listar Campanhas: " + e.getMessage());
+            e.printStackTrace();
         }
+
         return lista;
     }
 
     private Campanha mapCampanha(ResultSet rs) throws SQLException {
         Campanha c = new Campanha();
+
         c.setCam_id(rs.getInt("cam_id"));
         c.setCam_data_ini(rs.getString("cam_data_ini"));
         c.setCam_data_fim(rs.getString("cam_data_fim"));
@@ -100,32 +200,33 @@ public class CampanhaDAO implements IDAO<Campanha> {
         c.setCam_desc(rs.getString("cam_desc"));
         c.setCam_meta_arrecadacao(rs.getDouble("cam_meta_arrecadacao"));
         c.setCam_valor_arrecadado(rs.getDouble("cam_valor_arrecadado"));
+
         return c;
     }
 
-    // Método adicional para buscar campanhas por voluntário
-    public List<Campanha> getCampanhasPorVoluntario(int voluntarioId) {
+    public List<Campanha> getCampanhasPorVoluntario(int voluntarioId, Conexao conexao) {
         List<Campanha> lista = new ArrayList<>();
-        String sql = "SELECT * FROM campanha WHERE voluntario_vol_id=" + voluntarioId;
+        String sql = "SELECT * FROM campanha WHERE voluntario_vol_id = ?";
 
-        try (ResultSet rs = getConexao().consultar(sql)) {
-            while (rs != null && rs.next()) {
+        try {
+            Connection conn = conexao.getConnect();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setInt(1, voluntarioId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
                 lista.add(mapCampanha(rs));
             }
-        } catch (SQLException e) {
-            System.err.println("Erro ao buscar Campanhas por Voluntário: " + getConexao().getMensagemErro());
-        }
-        return lista;
-    }
 
-    // Método para verificar se o voluntário existe
-    private boolean voluntarioExiste(int voluntarioId) {
-        String sql = "SELECT 1 FROM voluntario WHERE vol_id=" + voluntarioId;
-        try (ResultSet rs = getConexao().consultar(sql)) {
-            return rs != null && rs.next();
+            rs.close();
+            stmt.close();
+
         } catch (SQLException e) {
-            System.err.println("Erro ao verificar Voluntário: " + getConexao().getMensagemErro());
-            return false;
+            System.err.println("Erro ao buscar campanhas por voluntário: " + e.getMessage());
+            e.printStackTrace();
         }
+
+        return lista;
     }
 }

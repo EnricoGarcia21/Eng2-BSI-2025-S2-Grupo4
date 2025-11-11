@@ -2,156 +2,151 @@ package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Voluntario;
 import DOARC.mvc.util.Conexao;
-import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Repository;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 public class VoluntarioDAO implements IDAO<Voluntario> {
 
-    private Conexao getConexao() {
-        return SingletonDB.conectar();
+    public VoluntarioDAO() {
     }
 
+    // =====================================================
+    // ✅ GRAVAR
+    // =====================================================
     @Override
-    public Voluntario gravar(Voluntario entidade) {
-        Connection conn = getConexao().getConnect();
-        String sql = "INSERT INTO voluntario (vol_nome, vol_datanasc, vol_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf, vol_email, vol_sexo, vol_numero, vol_cpf) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING vol_id";
+    public Voluntario gravar(Voluntario v, Conexao conexao) {
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, entidade.getVol_nome());
-            pst.setString(2, entidade.getVol_datanasc());
-            pst.setString(3, entidade.getVol_rua());
-            pst.setString(4, entidade.getVol_bairro());
-            pst.setString(5, entidade.getVol_cidade());
-            pst.setString(6, entidade.getVol_telefone());
-            pst.setString(7, entidade.getVol_cep());
-            pst.setString(8, entidade.getVol_uf());
-            pst.setString(9, entidade.getVol_email());
-            pst.setString(10, entidade.getVol_sexo());
-            pst.setString(11, entidade.getVol_numero());
-            pst.setString(12, entidade.getVol_cpf());
+        String sql = String.format("""
+            INSERT INTO voluntario 
+            (vol_nome, vol_datanasc, vol_rua, vol_bairro, vol_cidade, vol_telefone, vol_cep, vol_uf,
+             vol_email, vol_sexo, vol_numero, vol_cpf)
+            VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')
+            RETURNING vol_id
+        """,
+                v.getVol_nome().replace("'", "''"),
+                v.getVol_datanasc().replace("'", "''"),
+                v.getVol_rua().replace("'", "''"),
+                v.getVol_bairro().replace("'", "''"),
+                v.getVol_cidade().replace("'", "''"),
+                v.getVol_telefone().replace("'", "''"),
+                v.getVol_cep().replace("'", "''"),
+                v.getVol_uf().replace("'", "''"),
+                v.getVol_email().replace("'", "''"),
+                v.getVol_sexo().replace("'", "''"),
+                v.getVol_numero().replace("'", "''"),
+                v.getVol_cpf().replace("'", "''")
+        );
 
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    entidade.setVol_id(rs.getInt("vol_id"));
-                    return entidade;
-                }
+        try (ResultSet rs = conexao.consultar(sql)) {
+            if (rs != null && rs.next()) {
+                v.setVol_id(rs.getInt("vol_id"));
+                return v;
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao gravar Voluntário: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Erro ao gravar Voluntário: " + conexao.getMensagemErro());
         }
+
         return null;
     }
 
+    // =====================================================
+    // ✅ ALTERAR
+    // =====================================================
     @Override
-    public Voluntario alterar(Voluntario entidade) {
-        Connection conn = getConexao().getConnect();
-        String sql = "UPDATE voluntario SET vol_nome=?, vol_datanasc=?, vol_rua=?, vol_bairro=?, vol_cidade=?, vol_telefone=?, vol_cep=?, vol_uf=?, vol_email=?, vol_sexo=?, vol_numero=?, vol_cpf=? WHERE vol_id=?";
+    public Voluntario alterar(Voluntario v, Conexao conexao) {
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setString(1, entidade.getVol_nome());
-            pst.setString(2, entidade.getVol_datanasc());
-            pst.setString(3, entidade.getVol_rua());
-            pst.setString(4, entidade.getVol_bairro());
-            pst.setString(5, entidade.getVol_cidade());
-            pst.setString(6, entidade.getVol_telefone());
-            pst.setString(7, entidade.getVol_cep());
-            pst.setString(8, entidade.getVol_uf());
-            pst.setString(9, entidade.getVol_email());
-            pst.setString(10, entidade.getVol_sexo());
-            pst.setString(11, entidade.getVol_numero());
-            pst.setString(12, entidade.getVol_cpf());
-            pst.setInt(13, entidade.getVol_id());
+        String sql = String.format("""
+            UPDATE voluntario SET
+            vol_nome='%s', vol_datanasc='%s', vol_rua='%s', vol_bairro='%s', vol_cidade='%s',
+            vol_telefone='%s', vol_cep='%s', vol_uf='%s', vol_email='%s', vol_sexo='%s',
+            vol_numero='%s', vol_cpf='%s'
+            WHERE vol_id=%d
+        """,
+                v.getVol_nome().replace("'", "''"),
+                v.getVol_datanasc().replace("'", "''"),
+                v.getVol_rua().replace("'", "''"),
+                v.getVol_bairro().replace("'", "''"),
+                v.getVol_cidade().replace("'", "''"),
+                v.getVol_telefone().replace("'", "''"),
+                v.getVol_cep().replace("'", "''"),
+                v.getVol_uf().replace("'", "''"),
+                v.getVol_email().replace("'", "''"),
+                v.getVol_sexo().replace("'", "''"),
+                v.getVol_numero().replace("'", "''"),
+                v.getVol_cpf().replace("'", "''"),
+                v.getVol_id()
+        );
 
-            int updated = pst.executeUpdate();
-            return (updated > 0) ? entidade : null;
-        } catch (SQLException e) {
-            System.err.println("Erro ao alterar Voluntário: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return null;
+        return conexao.manipular(sql) ? v : null;
     }
 
+    // =====================================================
+    // ✅ APAGAR
+    // =====================================================
     @Override
-    public boolean apagar(Voluntario entidade) {
-        Connection conn = getConexao().getConnect();
-        String sql = "DELETE FROM voluntario WHERE vol_id=?";
-
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, entidade.getVol_id());
-            return pst.executeUpdate() > 0;
-        } catch (SQLException e) {
-            System.err.println("Erro ao apagar Voluntário: " + e.getMessage());
-            e.printStackTrace();
-        }
-        return false;
+    public boolean apagar(Voluntario v, Conexao conexao) {
+        String sql = "DELETE FROM voluntario WHERE vol_id=" + v.getVol_id();
+        return conexao.manipular(sql);
     }
 
+    // =====================================================
+    // ✅ GET POR ID
+    // =====================================================
     @Override
-    public Voluntario get(int id) {
-        Connection conn = getConexao().getConnect();
-        String sql = "SELECT * FROM voluntario WHERE vol_id=?";
+    public Voluntario get(int id, Conexao conexao) {
+        String sql = "SELECT * FROM voluntario WHERE vol_id=" + id;
 
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
-            pst.setInt(1, id);
-
-            try (ResultSet rs = pst.executeQuery()) {
-                if (rs.next()) {
-                    return mapVoluntario(rs);
-                }
+        try (ResultSet rs = conexao.consultar(sql)) {
+            if (rs != null && rs.next()) {
+                return mapVoluntario(rs);
             }
         } catch (SQLException e) {
-            System.err.println("Erro ao buscar Voluntário por ID: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Erro ao buscar Voluntário: " + conexao.getMensagemErro());
         }
+
         return null;
     }
 
+    // =====================================================
+    // ✅ LISTAR / BUSCAR FILTRADO
+    // =====================================================
     @Override
-    public List<Voluntario> get(String filtro) {
+    public List<Voluntario> get(String filtro, Conexao conexao) {
         List<Voluntario> lista = new ArrayList<>();
-        Connection conn = getConexao().getConnect();
+
         String sql = "SELECT * FROM voluntario";
 
-        if (filtro != null && !filtro.isEmpty()) {
-            // Usando PreparedStatement para o filtro também
-            sql += " WHERE vol_nome ILIKE ? OR vol_email ILIKE ? OR vol_cpf ILIKE ?";
-
-            try (PreparedStatement pst = conn.prepareStatement(sql)) {
-                String likePattern = "%" + filtro + "%";
-                pst.setString(1, likePattern);
-                pst.setString(2, likePattern);
-                pst.setString(3, likePattern);
-
-                try (ResultSet rs = pst.executeQuery()) {
-                    while (rs.next()) {
-                        lista.add(mapVoluntario(rs));
-                    }
-                }
-            } catch (SQLException e) {
-                System.err.println("Erro ao listar Voluntários com filtro: " + e.getMessage());
-                e.printStackTrace();
-            }
-        } else {
-            // Sem filtro, usa consulta simples
-            try (ResultSet rs = getConexao().consultar(sql)) {
-                while (rs != null && rs.next()) {
-                    lista.add(mapVoluntario(rs));
-                }
-            } catch (SQLException e) {
-                System.err.println("Erro ao listar Voluntários: " + getConexao().getMensagemErro());
-            }
+        if (filtro != null && !filtro.isBlank()) {
+            filtro = filtro.replace("'", "''");
+            sql += String.format("""
+                WHERE vol_nome ILIKE '%%%s%%'
+                OR vol_email ILIKE '%%%s%%'
+                OR vol_cpf ILIKE '%%%s%%'
+            """, filtro, filtro, filtro);
         }
+
+        try (ResultSet rs = conexao.consultar(sql)) {
+            while (rs != null && rs.next()) {
+                lista.add(mapVoluntario(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Erro ao listar Voluntários: " + conexao.getMensagemErro());
+        }
+
         return lista;
     }
 
+    // =====================================================
+    // ✅ MAPEAMENTO
+    // =====================================================
     private Voluntario mapVoluntario(ResultSet rs) throws SQLException {
         Voluntario v = new Voluntario();
+
         v.setVol_id(rs.getInt("vol_id"));
         v.setVol_nome(rs.getString("vol_nome"));
         v.setVol_datanasc(rs.getString("vol_datanasc"));
@@ -165,6 +160,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         v.setVol_sexo(rs.getString("vol_sexo"));
         v.setVol_numero(rs.getString("vol_numero"));
         v.setVol_cpf(rs.getString("vol_cpf"));
+
         return v;
     }
 }

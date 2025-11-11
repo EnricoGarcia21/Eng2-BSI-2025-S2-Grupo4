@@ -1,6 +1,8 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.CampanhaDAO;
+import DOARC.mvc.util.Conexao;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,16 +19,16 @@ public class Campanha {
     private Double cam_meta_arrecadacao;
     private Double cam_valor_arrecadado;
 
-    @Autowired // Model Instancia (recebe) o DAO
+    // ✅ CORREÇÃO: Injeção de Dependência
+    @Autowired
     private CampanhaDAO dao;
 
     // --- CONSTRUTORES ---
-    public Campanha() {
-        // Construtor vazio
-    }
+    public Campanha() {}
 
     public Campanha(String cam_data_ini, String cam_data_fim, int voluntario_vol_id,
                     String cam_desc, Double cam_meta_arrecadacao, Double cam_valor_arrecadado) {
+
         this.cam_data_ini = cam_data_ini;
         this.cam_data_fim = cam_data_fim;
         this.voluntario_vol_id = voluntario_vol_id;
@@ -35,28 +37,41 @@ public class Campanha {
         this.cam_valor_arrecadado = cam_valor_arrecadado;
     }
 
-    // --- MÉTODOS DE DELEGAÇÃO PARA O DAO ---
-    public List<Campanha> consultar(String filtro) {
-        return dao.get(filtro);
+    // =============================
+    // ✅ MÉTODOS DE DELEGAÇÃO (Todos exigem Conexao)
+    // =============================
+    private Conexao getConexao() {
+        return SingletonDB.conectar();
+    }
+    public List<Campanha> consultar(String filtro, Conexao conexao) {
+        return dao.get(filtro, conexao);
     }
 
-    public Campanha consultar(int id) {
-        return dao.get(id);
+    public Campanha consultar(int id, Conexao conexao) {
+        return dao.get(id, conexao);
     }
 
-    public Campanha gravar() {
-        return dao.gravar(this);
+    public Campanha gravar(Campanha c, Conexao conexao) {
+        return dao.gravar(c, conexao);
     }
 
-    public Campanha alterar() {
-        return dao.alterar(this);
+    public Campanha alterar(Campanha c, Conexao conexao) {
+        return dao.alterar(c, conexao);
     }
 
-    public boolean apagar() {
-        return dao.apagar(this);
+    public boolean apagar(Campanha c, Conexao conexao) {
+        return dao.apagar(c, conexao);
     }
 
-    // --- GETTERS E SETTERS ---
+    public List<Campanha> getCampanhasPorVoluntario(int voluntarioId, Conexao conexao) {
+        return dao.getCampanhasPorVoluntario(voluntarioId, conexao);
+    }
+
+
+    // =============================
+    // ✅ GETTERS / SETTERS
+    // =============================
+
     public int getCam_id() { return cam_id; }
     public void setCam_id(int cam_id) { this.cam_id = cam_id; }
 
