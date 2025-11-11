@@ -1,7 +1,6 @@
 package DOARC.mvc.view;
 
 import DOARC.mvc.controller.DonatarioController;
-import DOARC.mvc.model.Donatario;
 import DOARC.mvc.util.Mensagem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,9 +33,10 @@ public class DonatarioView {
                 don_cidade, don_telefone, don_cep, don_uf,
                 don_email, don_sexo);
 
-        return json.get("erro") == null
-                ? ResponseEntity.ok(new Mensagem("Donatário cadastrado com sucesso!"))
-                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
+        if (json.get("erro") == null) {
+            return ResponseEntity.ok(new Mensagem("Donatário cadastrado com sucesso!"));
+        }
+        return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
     @PutMapping
@@ -55,32 +55,33 @@ public class DonatarioView {
         Map<String, Object> json = donatarioController.updtDonatario(don_id, don_nome, don_data_nasc, don_rua, don_bairro,
                 don_cidade, don_telefone, don_cep, don_uf, don_email, don_sexo);
 
-        return json.get("erro") == null
-                ? ResponseEntity.ok(new Mensagem("Donatário alterado com sucesso!"))
-                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
+        if (json.get("erro") == null) {
+            return ResponseEntity.ok(new Mensagem("Donatário alterado com sucesso!"));
+        }
+        return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
     @GetMapping
     public ResponseEntity<Object> getAll() {
         List<Map<String, Object>> lista = donatarioController.getDonatario();
-        return (lista != null && !lista.isEmpty())
-                ? ResponseEntity.ok(lista)
-                : ResponseEntity.badRequest().body(new Mensagem("Nenhum donatário encontrado."));
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getDonatarioId(@PathVariable int id) {
         Map<String, Object> json = donatarioController.getDonatario(id);
-        return (json.get("erro") == null)
-                ? ResponseEntity.ok(json)
-                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
+        if (json.get("erro") == null) {
+            return ResponseEntity.ok(json);
+        }
+        return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deletarDonatario(@PathVariable int id) {
         Map<String, Object> json = donatarioController.deletarDonatario(id);
-        return (json.get("erro") == null)
-                ? ResponseEntity.ok(new Mensagem("Donatário excluído com sucesso!"))
-                : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
+        if (json.get("erro") == null) {
+            return ResponseEntity.ok(new Mensagem(json.get("sucesso").toString()));
+        }
+        return ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
 }

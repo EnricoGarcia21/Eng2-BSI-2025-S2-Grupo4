@@ -5,493 +5,626 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOARC - Agendar Doação</title>
     <link rel="stylesheet" href="../css/style.css">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+
+    <style>
+        .calendar-container {
+            position: relative;
+            width: 100%;
+            min-height: 80vh;
+        }
+        .sidebar-form {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100%;
+            background-color: #f8f9fa;
+            box-shadow: -4px 0 10px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1050; 
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .sidebar-form.open {
+            transform: translateX(0);
+        }
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .sidebar-close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--danger-color);
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <a href="dashboard.html" class="logo">DOARC</a>
-            <div class="user-menu">
-                <span class="user-name" id="userName">Voluntário</span>
-                <button class="btn-logout" id="logoutBtn">Sair</button>
-            </div>
+<header class="header">
+    <div class="header-content">
+        <a href="dashboard.html" class="logo">DOARC</a>
+        <div class="user-menu">
+            <span class="user-name" id="userName">Voluntário</span>
+            <button class="btn-logout" id="logoutBtn">Sair</button>
         </div>
-    </header>
+    </div>
+</header>
 
-    <!-- Navigation -->
-    <nav class="nav">
-        <ul class="nav-list">
-            <li class="nav-item">
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">Gerenciar</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
-                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
-                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
-                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
-                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
-                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
-                </ul>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link active">Doações</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
-                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
-                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
-                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
-                </ul>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">Estoque</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
-                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
-                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
-                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
-                </ul>
-            </li>
-            <li class="nav-item">
-                <a href="relatorios.html" class="nav-link">Relatórios</a>
-            </li>
-        </ul>
-    </nav>
+<nav class="nav">
+    <ul class="nav-list">
+        <li class="nav-item">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">Gerenciar</a>
+            <ul class="submenu">
+                <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link active">Doações</a>
+            <ul class="submenu">
+                <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">Estoque</a>
+            <ul class="submenu">
+                <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="relatorios.html" class="nav-link">Relatórios</a>
+        </li>
+    </ul>
+</nav>
 
-    <!-- Main Content -->
-    <main class="container">
-        <div class="breadcrumb">
-            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
-            <div class="breadcrumb-item">Doações</div>
-            <div class="breadcrumb-item active">Agendar Doação</div>
+<main class="container calendar-main">
+    <div class="breadcrumb">
+        <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+        <div class="breadcrumb-item">Doações</div>
+        <div class="breadcrumb-item active">Agendar Doação</div>
+    </div>
+
+    <div class="card" style="margin-top: 0;">
+        <div class="card-header">
+            <h2 class="card-title">Calendário de Agendamentos</h2>
+            <p class="card-subtitle">Clique em um evento existente para Modificar ou Apagar.</p>
+        </div>
+        <div class="card-body calendar-container">
+            <div id='calendar'></div>
+        </div>
+    </div>
+</main>
+
+<div id="formSidebar" class="sidebar-form">
+    <div class="sidebar-header">
+        <h1 class="card-title" id="formTitle">Detalhes do Agendamento</h1>
+        <button class="sidebar-close-btn" onclick="closeSidebar()">✕</button>
+    </div>
+
+    <form id="formAgendarDoacao">
+        <input type="hidden" id="agendamentoId" value="">
+
+        <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Tipo de Agendamento</h3>
+
+        <div class="form-group">
+            <label for="tipoAgendamento" class="form-label required">Tipo</label>
+            <select id="tipoAgendamento" name="tipoAgendamento" class="form-control form-select" required onchange="toggleTipoAgendamento()">
+                <option value="">Selecione o tipo</option>
+                <option value="entrega">Entrega (levar para o donatário)</option>
+                <option value="retirada">Retirada (buscar do doador)</option>
+            </select>
+            <div class="form-error">Selecione o tipo de agendamento</div>
         </div>
 
-        <div class="card">
-            <div class="card-header">
-                <h1 class="card-title">Agendar Doação</h1>
-                <p class="card-subtitle">Agende entregas ou retiradas de doações</p>
+        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Data e Horário</h3>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="dataAgendamento" class="form-label required">Data</label>
+                <input type="date" id="dataAgendamento" name="agData" class="form-control" required>
+                <div class="form-error">Data é obrigatória</div>
             </div>
-            <div class="card-body">
-                <form id="formAgendarDoacao">
-                    <!-- Tipo de Agendamento -->
-                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Tipo de Agendamento</h3>
 
-                    <div class="form-group">
-                        <label for="tipoAgendamento" class="form-label required">Tipo</label>
-                        <select id="tipoAgendamento" class="form-control form-select" required onchange="toggleTipoAgendamento()">
-                            <option value="">Selecione o tipo</option>
-                            <option value="entrega">Entrega (levar para o donatário)</option>
-                            <option value="retirada">Retirada (buscar do doador)</option>
-                        </select>
-                        <div class="form-error">Selecione o tipo de agendamento</div>
-                    </div>
-
-                    <!-- Informações de Data e Hora -->
-                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Data e Horário</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dataAgendamento" class="form-label required">Data</label>
-                            <input type="date" id="dataAgendamento" class="form-control" required>
-                            <div class="form-error">Data é obrigatória</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="horaAgendamento" class="form-label required">Horário</label>
-                            <input type="time" id="horaAgendamento" class="form-control" required>
-                            <div class="form-error">Horário é obrigatório</div>
-                        </div>
-                    </div>
-
-                    <!-- Seção Entrega -->
-                    <div id="secaoEntrega" style="display: none;">
-                        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações da Entrega</h3>
-
-                        <div class="form-group">
-                            <label for="donatarioEntrega" class="form-label required">Donatário</label>
-                            <select id="donatarioEntrega" class="form-control form-select">
-                                <option value="">Selecione um donatário</option>
-                                <option value="1">Ana Paula Silva - 111.222.333-44</option>
-                                <option value="2">Carlos Oliveira - 555.666.777-88</option>
-                                <option value="3">Família Santos - 999.888.777-66</option>
-                            </select>
-                            <div class="form-error">Selecione um donatário</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="enderecoEntrega" class="form-label required">Endereço de Entrega</label>
-                            <textarea id="enderecoEntrega" class="form-control" rows="2" placeholder="Rua, número, bairro, cidade..."></textarea>
-                            <div class="form-error">Endereço é obrigatório</div>
-                        </div>
-                    </div>
-
-                    <!-- Seção Retirada -->
-                    <div id="secaoRetirada" style="display: none;">
-                        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações da Retirada</h3>
-
-                        <div class="form-group">
-                            <label for="doadorRetirada" class="form-label required">Doador</label>
-                            <select id="doadorRetirada" class="form-control form-select">
-                                <option value="">Selecione um doador</option>
-                                <option value="1">João da Silva - 123.456.789-00</option>
-                                <option value="2">Maria Santos - 987.654.321-00</option>
-                                <option value="3">Empresa ABC - 12.345.678/0001-90</option>
-                            </select>
-                            <div class="form-error">Selecione um doador</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="enderecoRetirada" class="form-label required">Local de Retirada</label>
-                            <textarea id="enderecoRetirada" class="form-control" rows="2" placeholder="Rua, número, bairro, cidade..."></textarea>
-                            <div class="form-error">Local é obrigatório</div>
-                        </div>
-                    </div>
-
-                    <!-- Voluntário Responsável -->
-                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Responsável</h3>
-
-                    <div class="form-group">
-                        <label for="voluntarioResponsavel" class="form-label required">Voluntário Responsável</label>
-                        <select id="voluntarioResponsavel" class="form-control form-select" required>
-                            <option value="">Selecione um voluntário</option>
-                            <option value="1">João Silva</option>
-                            <option value="2">Maria Santos</option>
-                            <option value="3">Pedro Oliveira</option>
-                            <option value="4">Ana Costa</option>
-                        </select>
-                        <div class="form-error">Selecione um voluntário</div>
-                    </div>
-
-                    <!-- Produtos (Pré-seleção Opcional) -->
-                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Produtos (Opcional)</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="categoriaAgendamento" class="form-label">Categoria</label>
-                            <select id="categoriaAgendamento" class="form-control form-select" onchange="carregarProdutosAgendamento()">
-                                <option value="">Selecione uma categoria</option>
-                                <option value="1">Alimentos</option>
-                                <option value="2">Roupas</option>
-                                <option value="3">Higiene</option>
-                                <option value="4">Móveis</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="produtoAgendamento" class="form-label">Produto</label>
-                            <select id="produtoAgendamento" class="form-control form-select">
-                                <option value="">Selecione um produto</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn btn-secondary" onclick="adicionarProdutoAgendamento()">
-                        ➕ Adicionar Produto
-                    </button>
-
-                    <!-- Lista de Produtos Selecionados -->
-                    <div id="listaProdutosAgendamento" style="margin-top: 1.5rem; display: none;">
-                        <h4>Produtos Selecionados:</h4>
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Produto</th>
-                                        <th>Categoria</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaProdutosAgendamento"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Observações -->
-                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações Adicionais</h3>
-
-                    <div class="form-group">
-                        <label for="observacoesAgendamento" class="form-label">Observações</label>
-                        <textarea id="observacoesAgendamento" class="form-control" rows="3" placeholder="Informações importantes sobre o agendamento..."></textarea>
-                    </div>
-
-                    <div class="card-footer">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-outline" onclick="window.location.href='dashboard.html'">
-                                Cancelar
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                ✓ Confirmar Agendamento
-                            </button>
-                        </div>
-                    </div>
-                </form>
+            <div class="form-group">
+                <label for="horaAgendamento" class="form-label required">Horário</label>
+                <input type="time" id="horaAgendamento" name="agHora" class="form-control" required>
+                <div class="form-error">Horário é obrigatório</div>
             </div>
         </div>
 
-        <!-- Lista de Agendamentos -->
-        <div class="card" style="margin-top: 2rem;">
-            <div class="card-header">
-                <h2 class="card-title">Agendamentos Recentes</h2>
+        <div id="secaoEntrega" style="display: none;">
+            <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações da Entrega</h3>
+
+            <div class="form-group">
+                <label for="donatarioEntrega" class="form-label required">Donatário</label>
+                <select id="donatarioEntrega" name="donatarioId" class="form-control form-select" required>
+                    <option value="">Carregando...</option>
+                </select>
+                <div class="form-error">Selecione um donatário</div>
             </div>
-            <div class="card-body">
-                <div class="table-container">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Tipo</th>
-                                <th>Pessoa</th>
-                                <th>Responsável</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaAgendamentos">
-                            <tr>
-                                <td>15/10/2025 14:00</td>
-                                <td><span class="badge badge-info">Entrega</span></td>
-                                <td>Ana Paula Silva</td>
-                                <td>João Silva</td>
-                                <td><span class="badge badge-warning">Agendado</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="verDetalhes(1)">👁️</button>
-                                    <button class="btn btn-sm btn-success" onclick="concluir(1)">✓</button>
-                                    <button class="btn btn-sm btn-danger" onclick="cancelar(1)">✗</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>16/10/2025 10:00</td>
-                                <td><span class="badge badge-secondary">Retirada</span></td>
-                                <td>Empresa ABC</td>
-                                <td>Maria Santos</td>
-                                <td><span class="badge badge-warning">Agendado</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="verDetalhes(2)">👁️</button>
-                                    <button class="btn btn-sm btn-success" onclick="concluir(2)">✓</button>
-                                    <button class="btn btn-sm btn-danger" onclick="cancelar(2)">✗</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+
+            <div class="form-group">
+                <label for="enderecoEntrega" class="form-label">Endereço de Entrega</label>
+                <textarea id="enderecoEntrega" class="form-control" rows="2" placeholder="Endereço preenchido automaticamente" readonly></textarea>
+                <div class="form-error">Endereço é obrigatório</div>
             </div>
         </div>
-    </main>
 
-    <script src="../js/app.js"></script>
-    <script>
-        // Definir data mínima como hoje
-        const hoje = new Date().toISOString().split('T')[0];
-        document.getElementById('dataAgendamento').min = hoje;
-        document.getElementById('dataAgendamento').value = hoje;
+        <div id="secaoRetirada" style="display: none;">
+            <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações da Retirada</h3>
 
-        // Array para produtos selecionados
-        let produtosSelecionados = [];
+            <div class="form-group">
+                <label for="doadorRetirada" class="form-label required">Doador</label>
+                <select id="doadorRetirada" name="doadorId" class="form-control form-select" required>
+                    <option value="">Carregando...</option>
+                </select>
+                <div class="form-error">Selecione um doador</div>
+            </div>
 
-        function toggleTipoAgendamento() {
-            const tipo = document.getElementById('tipoAgendamento').value;
-            const secaoEntrega = document.getElementById('secaoEntrega');
-            const secaoRetirada = document.getElementById('secaoRetirada');
+            <div class="form-group">
+                <label for="enderecoRetirada" class="form-label">Local de Retirada</label>
+                <textarea id="enderecoRetirada" class="form-control" rows="2" placeholder="Local preenchido automaticamente" readonly></textarea>
+                <div class="form-error">Local é obrigatório</div>
+            </div>
+        </div>
 
-            secaoEntrega.style.display = tipo === 'entrega' ? 'block' : 'none';
-            secaoRetirada.style.display = tipo === 'retirada' ? 'block' : 'none';
+        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Responsável</h3>
+
+        <div class="form-group">
+            <label for="voluntarioResponsavel" class="form-label required">Voluntário Responsável</label>
+            <select id="voluntarioResponsavel" name="voluntarioId" class="form-control form-select" required>
+                <option value="">Carregando...</option>
+            </select>
+            <div class="form-error">Selecione um voluntário</div>
+        </div>
+
+        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Doação Relacionada</h3>
+
+        <div class="form-group">
+            <label for="doacaoDisponivel" class="form-label required">Doação (ID)</label>
+            <select id="doacaoDisponivel" name="doaId" class="form-control form-select" required>
+                <option value="">Selecione Tipo e Pessoa</option>
+            </select>
+            <div class="form-error">Selecione a doação a ser entregue/retirada</div>
+        </div>
+
+        <div id="listaProdutosAgendamento" style="margin-top: 1.5rem; display: none;">
+            <h4>Produtos na Doação Selecionada:</h4>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade</th>
+                        <th>Observação</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tabelaProdutosAgendamento">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações Adicionais</h3>
+
+        <div class="form-group">
+            <label for="observacoesAgendamento" class="form-label">Observações</label>
+            <textarea id="observacoesAgendamento" name="agObs" class="form-control" rows="3" placeholder="Informações importantes sobre o agendamento..."></textarea>
+        </div>
+
+        <div class="card-footer" style="padding: 0; margin-top: 1rem;">
+            <div class="btn-group" style="width: 100%;">
+                <button type="button" class="btn btn-danger" id="btnApagar" style="flex: 1;" onclick="confirmarApagar()">
+                    🗑️ Apagar Agendamento
+                </button>
+                <button type="submit" class="btn btn-success" id="btnModificar" style="flex: 1;">
+                    💾 Modificar Agendamento
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/pt-br.js'></script>
+<script src="../js/app.js"></script>
+<script>
+    const API_BASE_URL = 'http://localhost:8080/apis';
+    const hoje = new Date().toISOString().split('T')[0];
+    document.getElementById('dataAgendamento').min = hoje;
+
+    let dadosLookups = {
+        voluntarios: [],
+        donatarios: [],
+        doadores: []
+    };
+    let calendarInstance;
+
+    const getValue = (id) => {
+        const value = document.getElementById(id).value;
+        return (value === '' || value === null || value === '0') ? 0 : parseInt(value);
+    };
+
+
+    async function openSidebar(eventId) {
+        const sidebar = document.getElementById('formSidebar');
+        const form = document.getElementById('formAgendarDoacao');
+        const agendamentoIdInput = document.getElementById('agendamentoId');
+
+        const numericEventId = parseInt(eventId);
+
+        form.reset();
+        agendamentoIdInput.value = numericEventId;
+        document.getElementById('formTitle').textContent = 'Carregando Detalhes...';
+        sidebar.classList.add('open');
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/agendamento/${numericEventId}`);
+            if (!response.ok) throw new Error('Falha ao buscar agendamento');
+            const dadosAgendamento = await response.json();
+
+            document.getElementById('formTitle').textContent = `Editar: ID ${dadosAgendamento.id}`;
+
+            document.getElementById('tipoAgendamento').value = dadosAgendamento.tipo || (dadosAgendamento.donatarioDonId ? 'entrega' : 'retirada');
+            toggleTipoAgendamento(); 
+
+            document.getElementById('dataAgendamento').value = dadosAgendamento.agData;
+            document.getElementById('horaAgendamento').value = dadosAgendamento.agHora;
+
+            document.getElementById('voluntarioResponsavel').value = dadosAgendamento.volId;
+            document.getElementById('observacoesAgendamento').value = dadosAgendamento.agObs;
+
+            if (dadosAgendamento.donatarioDonId) {
+                document.getElementById('donatarioEntrega').value = dadosAgendamento.donatarioDonId;
+                preencherEndereco('donatarioEntrega', 'enderecoEntrega', 'endereco');
+            } else if (dadosAgendamento.doadorDoaId) {
+                document.getElementById('doadorRetirada').value = dadosAgendamento.doadorDoaId;
+                preencherEndereco('doadorRetirada', 'enderecoRetirada', 'local');
+            }
+
+            await carregarDoacoesDisponiveis(dadosAgendamento.doaId);
+            document.getElementById('doacaoDisponivel').value = dadosAgendamento.doaId;
+            atualizarDetalhesProdutos(dadosAgendamento.doaId);
+
+        } catch (error) {
+            console.error("Erro ao carregar agendamento:", error);
+            UI.showAlert('Falha ao carregar detalhes do agendamento. Verifique se a rota /apis/agendamento/{id} está ativa.', 'danger');
+            closeSidebar();
         }
+    }
 
-        function carregarProdutosAgendamento() {
-            const categoriaId = document.getElementById('categoriaAgendamento').value;
-            const selectProduto = document.getElementById('produtoAgendamento');
+    function closeSidebar() {
+        document.getElementById('formSidebar').classList.remove('open');
+        document.getElementById('agendamentoId').value = '';
+    }
 
-            selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
+    function toggleTipoAgendamento() {
+        const tipo = document.getElementById('tipoAgendamento').value;
+        document.getElementById('secaoEntrega').style.display = tipo === 'entrega' ? 'block' : 'none';
+        document.getElementById('secaoRetirada').style.display = tipo === 'retirada' ? 'block' : 'none';
+        document.getElementById('doacaoDisponivel').innerHTML = '<option value="0">Selecione Tipo e Pessoa</option>';
+        document.getElementById('listaProdutosAgendamento').style.display = 'none';
+    }
 
-            if (!categoriaId) return;
-
-            // TODO: Carregar produtos da API
-            const produtos = {
-                '1': ['Arroz', 'Feijão', 'Macarrão', 'Óleo', 'Açúcar'],
-                '2': ['Camiseta', 'Calça', 'Agasalho', 'Sapatos'],
-                '3': ['Sabonete', 'Shampoo', 'Pasta de Dente', 'Desodorante'],
-                '4': ['Mesa', 'Cadeira', 'Cama', 'Guarda-roupa']
-            };
-
-            if (produtos[categoriaId]) {
-                produtos[categoriaId].forEach((produto, index) => {
+    async function carregarLookups() {
+        const popularSelect = (id, lista, nomeProp, endProp) => {
+            const select = document.getElementById(id);
+            select.innerHTML = '<option value="0">Selecione</option>'; 
+            
+            if (lista && lista.length > 0) {
+                lista.forEach(item => {
                     const option = document.createElement('option');
-                    option.value = `${categoriaId}_${index}`;
-                    option.textContent = produto;
-                    selectProduto.appendChild(option);
+                    option.value = item.id;
+                    option.textContent = item[nomeProp];
+                    if (endProp) {
+                        option.setAttribute('data-endereco', item[endProp]);
+                    }
+                    select.appendChild(option);
                 });
             }
+        };
+
+        try {
+            const [volResponse, donResponse, doaResponse] = await Promise.all([
+                fetch(`${API_BASE_URL}/voluntario`).then(res => res.json()),
+                fetch(`${API_BASE_URL}/donatario`).then(res => res.json()),
+                fetch(`${API_BASE_URL}/doador`).then(res => res.json())
+            ]);
+
+            dadosLookups.voluntarios = Array.isArray(volResponse) ? volResponse.filter(v => v.nome && v.id) : [];
+            dadosLookups.donatarios = Array.isArray(donResponse) ? donResponse.map(d => ({
+                id: d.id,
+                nome: d.nome,
+                endereco: `${d.rua}, ${d.bairro}, ${d.cidade} - ${d.uf}`
+            })).filter(d => d.nome && d.id) : [];
+
+            dadosLookups.doadores = Array.isArray(doaResponse) ? doaResponse.map(d => ({
+                id: d.id,
+                nome: d.nome,
+                local: `${d.rua}, ${d.bairro}, ${d.cidade} - ${d.uf}`
+            })).filter(d => d.nome && d.id) : [];
+
+        } catch (error) {
+            console.error("Erro ao carregar lookups:", error);
+            UI.showAlert('Falha ao carregar listas de Voluntários/Doadores/Donatários. Verifique se as rotas estão ativas e retornam 200 OK.', 'danger');
+            
+            document.getElementById('voluntarioResponsavel').innerHTML = '<option value="0">Erro de carregamento</option>';
+            document.getElementById('donatarioEntrega').innerHTML = '<option value="0">Erro de carregamento</option>';
+            document.getElementById('doadorRetirada').innerHTML = '<option value="0">Erro de carregamento</option>';
+            return;
         }
 
-        function adicionarProdutoAgendamento() {
-            const categoria = document.getElementById('categoriaAgendamento');
-            const produto = document.getElementById('produtoAgendamento');
+        popularSelect('voluntarioResponsavel', dadosLookups.voluntarios, 'nome');
+        popularSelect('donatarioEntrega', dadosLookups.donatarios, 'nome', 'endereco');
+        popularSelect('doadorRetirada', dadosLookups.doadores, 'nome', 'local');
+    }
 
-            if (!produto.value) {
-                UI.showAlert('Selecione um produto', 'warning');
-                return;
+    function preencherEndereco(selectId, textareaId, enderecoProp) {
+        const select = document.getElementById(selectId);
+        const textarea = document.getElementById(textareaId);
+        const selectedOption = select.options[select.selectedIndex];
+        
+        if(select.value !== "0") {
+           textarea.value = selectedOption.getAttribute('data-endereco') || '';
+           Validator.clearError(textarea);
+        } else {
+           textarea.value = '';
+        }
+        
+        carregarDoacoesDisponiveis();
+    }
+
+    async function carregarDoacoesDisponiveis(selectedDoaId = null) {
+        const tipo = document.getElementById('tipoAgendamento').value;
+        const pessoaSelect = tipo === 'entrega' ? document.getElementById('donatarioEntrega') : document.getElementById('doadorRetirada');
+        const pessoaId = pessoaSelect.value;
+
+        const selectDoacao = document.getElementById('doacaoDisponivel');
+        selectDoacao.innerHTML = '<option value="0">Carregando...</option>';
+        document.getElementById('listaProdutosAgendamento').style.display = 'none';
+        selectDoacao.disabled = true;
+
+        if (pessoaId === "0" || !tipo) {
+            selectDoacao.innerHTML = '<option value="0">Selecione Tipo e Pessoa</option>';
+            selectDoacao.disabled = false;
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/doacao/disponiveis?tipo=${tipo}&pessoaId=${pessoaId}`);
+            
+            if (response.status !== 200 && response.status !== 400) {
+                 throw new Error(`Falha HTTP: ${response.status}`);
+            }
+            
+            const doacoes = await response.json();
+
+            selectDoacao.innerHTML = '<option value="0">Selecione a Doação</option>';
+            if (Array.isArray(doacoes)) {
+                doacoes.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.id;
+                    option.textContent = `ID ${d.id}: ${d.obs || 'Doação sem observação'}`;
+                    option.setAttribute('data-detalhes', JSON.stringify(d.produtos || []));
+                    if (d.id == selectedDoaId) {
+                        option.selected = true;
+                    }
+                    selectDoacao.appendChild(option);
+                });
             }
 
-            const categoriaTexto = categoria.options[categoria.selectedIndex].text;
-            const produtoTexto = produto.options[produto.selectedIndex].text;
+            selectDoacao.onchange = () => atualizarDetalhesProdutos(null);
+            selectDoacao.disabled = false;
 
-            // Verificar se já foi adicionado
-            if (produtosSelecionados.some(p => p.produtoId === produto.value)) {
-                UI.showAlert('Produto já foi adicionado', 'warning');
-                return;
-            }
+        } catch (e) {
+            console.error("Erro ao carregar doações disponíveis:", e);
+            UI.showAlert('Erro ao carregar doações disponíveis. Rota /doacao/disponiveis falhou.', 'danger');
+            selectDoacao.innerHTML = '<option value="0">Erro ao carregar doações</option>';
+            selectDoacao.disabled = false;
+        }
+    }
 
-            produtosSelecionados.push({
-                produtoId: produto.value,
-                produto: produtoTexto,
-                categoria: categoriaTexto
+    function atualizarDetalhesProdutos(doaIdOverride) {
+        const selectDoacao = document.getElementById('doacaoDisponivel');
+        const tbody = document.getElementById('tabelaProdutosAgendamento');
+        const lista = document.getElementById('listaProdutosAgendamento');
+
+        tbody.innerHTML = '';
+        lista.style.display = 'none';
+
+        let selectedOption;
+
+        if (doaIdOverride) {
+            selectedOption = Array.from(selectDoacao.options).find(opt => opt.value == doaIdOverride);
+        } else {
+            selectedOption = selectDoacao.options[selectDoacao.selectedIndex];
+        }
+
+        const detalhesJSON = selectedOption?.getAttribute('data-detalhes');
+
+        if (detalhesJSON) {
+            const detalhes = JSON.parse(detalhesJSON);
+            detalhes.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.prod}</td>
+                        <td>${item.qtde}</td>
+                        <td>${item.obs || '-'}</td>
+                    </tr>
+                `;
             });
-
-            atualizarTabelaProdutosAgendamento();
-
-            // Limpar seleção
-            categoria.value = '';
-            produto.value = '';
-        }
-
-        function atualizarTabelaProdutosAgendamento() {
-            const tbody = document.getElementById('tabelaProdutosAgendamento');
-            const lista = document.getElementById('listaProdutosAgendamento');
-
-            if (produtosSelecionados.length === 0) {
-                lista.style.display = 'none';
-                return;
-            }
-
             lista.style.display = 'block';
-            tbody.innerHTML = produtosSelecionados.map((item, index) => `
-                <tr>
-                    <td>${item.produto}</td>
-                    <td>${item.categoria}</td>
-                    <td>
-                        <button class="btn btn-sm btn-danger" onclick="removerProdutoAgendamento(${index})">
-                            🗑️ Remover
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
         }
+    }
 
-        function removerProdutoAgendamento(index) {
-            produtosSelecionados.splice(index, 1);
-            atualizarTabelaProdutosAgendamento();
-        }
+    async function confirmarApagar() {
+        const id = document.getElementById('agendamentoId').value;
+        if (!id) return;
 
-        function verDetalhes(id) {
-            UI.showAlert('Funcionalidade em desenvolvimento', 'info');
-        }
-
-        function concluir(id) {
-            UI.confirm('Marcar este agendamento como concluído?', async function() {
-                // TODO: await API.put(`/agendamentos/${id}/concluir`);
-                UI.showAlert('Agendamento concluído!', 'success');
-            });
-        }
-
-        function cancelar(id) {
-            UI.confirm('Cancelar este agendamento?', async function() {
-                // TODO: await API.put(`/agendamentos/${id}/cancelar`);
-                UI.showAlert('Agendamento cancelado!', 'success');
-            });
-        }
-
-        // Submissão do formulário
-        document.getElementById('formAgendarDoacao').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const tipoAgendamento = document.getElementById('tipoAgendamento');
-            const dataAgendamento = document.getElementById('dataAgendamento');
-            const horaAgendamento = document.getElementById('horaAgendamento');
-            const voluntarioResponsavel = document.getElementById('voluntarioResponsavel');
-
-            Validator.clearAllErrors(this);
-            let isValid = true;
-
-            if (!tipoAgendamento.value) {
-                Validator.showError(tipoAgendamento, 'Selecione o tipo');
-                isValid = false;
-            }
-
-            if (!dataAgendamento.value) {
-                Validator.showError(dataAgendamento, 'Informe a data');
-                isValid = false;
-            }
-
-            if (!horaAgendamento.value) {
-                Validator.showError(horaAgendamento, 'Informe o horário');
-                isValid = false;
-            }
-
-            if (!voluntarioResponsavel.value) {
-                Validator.showError(voluntarioResponsavel, 'Selecione um voluntário');
-                isValid = false;
-            }
-
-            // Validações específicas por tipo
-            if (tipoAgendamento.value === 'entrega') {
-                const donatario = document.getElementById('donatarioEntrega');
-                const endereco = document.getElementById('enderecoEntrega');
-
-                if (!donatario.value) {
-                    Validator.showError(donatario, 'Selecione um donatário');
-                    isValid = false;
-                }
-
-                if (!endereco.value) {
-                    Validator.showError(endereco, 'Informe o endereço');
-                    isValid = false;
-                }
-            } else if (tipoAgendamento.value === 'retirada') {
-                const doador = document.getElementById('doadorRetirada');
-                const local = document.getElementById('enderecoRetirada');
-
-                if (!doador.value) {
-                    Validator.showError(doador, 'Selecione um doador');
-                    isValid = false;
-                }
-
-                if (!local.value) {
-                    Validator.showError(local, 'Informe o local');
-                    isValid = false;
-                }
-            }
-
-            if (!isValid) return;
-
+        const confirma = await UI.confirm('Tem certeza que deseja apagar este agendamento? Esta ação é irreversível.');
+        if (confirma) {
             try {
-                const data = {
-                    tipo: tipoAgendamento.value,
-                    data: dataAgendamento.value,
-                    hora: horaAgendamento.value,
-                    voluntarioId: voluntarioResponsavel.value,
-                    donatarioId: document.getElementById('donatarioEntrega').value,
-                    doadorId: document.getElementById('doadorRetirada').value,
-                    endereco: tipoAgendamento.value === 'entrega'
-                        ? document.getElementById('enderecoEntrega').value
-                        : document.getElementById('enderecoRetirada').value,
-                    produtos: produtosSelecionados,
-                    observacoes: document.getElementById('observacoesAgendamento').value
-                };
+                const response = await fetch(`${API_BASE_URL}/agendamento/${id}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('Falha no DELETE');
 
-                // TODO: Integrar com API
-                // await API.post('/agendamentos', data);
-
-                UI.showAlert('Agendamento criado com sucesso! Notificação enviada.', 'success');
-
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-
+                UI.showAlert('Agendamento apagado com sucesso!', 'success');
+                closeSidebar();
+                calendarInstance.refetchEvents();
             } catch (error) {
-                console.error('Erro ao criar agendamento:', error);
+                console.error('Erro ao apagar agendamento:', error);
+                UI.showAlert('Erro ao apagar agendamento. Verifique a rota DELETE /apis/agendamento/{id}.', 'danger');
             }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        carregarLookups();
+
+        document.getElementById('donatarioEntrega').addEventListener('change', () => preencherEndereco('donatarioEntrega', 'enderecoEntrega', 'endereco'));
+        document.getElementById('doadorRetirada').addEventListener('change', () => preencherEndereco('doadorRetirada', 'enderecoRetirada', 'local'));
+        document.getElementById('tipoAgendamento').addEventListener('change', () => {
+             toggleTipoAgendamento(); 
+             if (document.getElementById('tipoAgendamento').value === 'entrega') {
+                 preencherEndereco('donatarioEntrega', 'enderecoEntrega', 'endereco');
+             } else if (document.getElementById('tipoAgendamento').value === 'retirada') {
+                 preencherEndereco('doadorRetirada', 'enderecoRetirada', 'local');
+             }
         });
-    </script>
+
+
+        calendarInstance = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'pt-br',
+            editable: true,
+            selectable: false,
+            height: 'auto',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+
+            events: {
+                url: `${API_BASE_URL}/agendamento`,
+                method: 'GET',
+                failure: function(error) {
+                    UI.showAlert('Erro ao carregar agendamentos do servidor. Verifique a rota GET /apis/agendamento.', 'danger');
+                },
+                success: function(rawEvents) {
+                     return Array.isArray(rawEvents) ? rawEvents : [];
+                }
+            },
+
+            eventClick: function(info) {
+                openSidebar(info.event.id);
+            },
+
+            eventDrop: async function(info) {
+                const eventId = info.event.id;
+
+                const confirma = await UI.confirm('Confirmar reagendamento?');
+
+                if (confirma) {
+                    try {
+                        const newStart = info.event.startStr;
+                        const originalProps = info.event.extendedProps; 
+                        
+                        const dataUpdate = {
+                            agData: newStart.split('T')[0],
+                            agHora: newStart.split('T')[1]?.substring(0, 5) || '09:00',
+                            
+                            // Campos obrigatórios do Service, usando dados ORIGINAIS
+                            // O Service fará o fallback ou usará NULL se o ID for 0
+                            volId: originalProps.volId || 0, 
+                            doaId: originalProps.doaId || 0, 
+                            donatarioDonId: originalProps.donatarioDonId || 0,
+                            agObs: originalProps.agObs || 'Reagendado via calendário'
+                        };
+                        
+                        const response = await fetch(`${API_BASE_URL}/agendamento/${eventId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(dataUpdate)
+                        });
+
+                        if (!response.ok) throw new Error("Erro na API");
+
+                        UI.showAlert('Agendamento reagendado com sucesso!', 'success');
+                        calendarInstance.refetchEvents();
+                    } catch(error) {
+                        UI.showAlert('Erro ao reagendar. Desfazendo a mudança. Verifique a rota PUT /apis/agendamento/{id}.', 'danger');
+                        info.revert();
+                    }
+                } else {
+                    info.revert();
+                }
+            },
+        });
+
+        calendarInstance.render();
+    });
+
+    document.getElementById('formAgendarDoacao').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const id = document.getElementById('agendamentoId').value;
+        if (!id) return;
+
+        Validator.clearAllErrors(this);
+        let isValid = Validator.validateForm(this);
+        if (!isValid) return;
+
+        try {
+            const tipo = document.getElementById('tipoAgendamento').value;
+            
+            const data = {
+                agData: document.getElementById('dataAgendamento').value,
+                agHora: document.getElementById('horaAgendamento').value,
+                volId: getValue('voluntarioResponsavel'),
+                doaId: getValue('doacaoDisponivel'),
+                agObs: document.getElementById('observacoesAgendamento').value,
+                donatarioDonId: tipo === 'entrega' ? getValue('donatarioEntrega') : 0,
+                doadorDoaId: tipo === 'retirada' ? getValue('doadorRetirada') : 0 
+            };
+
+            const response = await fetch(`${API_BASE_URL}/agendamento/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) throw new Error('Falha ao modificar agendamento');
+
+            UI.showAlert('Agendamento modificado com sucesso! O calendário será atualizado.', 'success');
+            closeSidebar();
+            calendarInstance.refetchEvents();
+
+        } catch (error) {
+            console.error('Erro ao modificar agendamento:', error);
+            UI.showAlert('Erro ao modificar agendamento. Verifique a rota PUT /apis/agendamento/{id} e os dados enviados.', 'danger');
+        }
+    });
+</script>
 </body>
 </html>

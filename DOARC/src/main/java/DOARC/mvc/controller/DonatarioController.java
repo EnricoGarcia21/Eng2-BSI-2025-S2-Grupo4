@@ -2,7 +2,8 @@ package DOARC.mvc.controller;
 
 import DOARC.mvc.dao.DonatarioDAO;
 import DOARC.mvc.model.Donatario;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.Conexao;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -10,34 +11,13 @@ import java.util.*;
 @Service
 public class DonatarioController {
 
-    @Autowired
-    private DonatarioDAO donatarioModel;
+    private final DonatarioDAO donatarioModel = new DonatarioDAO();
 
-    public List<Map<String, Object>> getDonatario() {
-        List<Donatario> lista = donatarioModel.get("");
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Donatario d : lista) {
-            Map<String, Object> json = new HashMap<>();
-            json.put("id", d.getDonId());
-            json.put("nome", d.getDonNome());
-            json.put("data_nasc", d.getDonDataNasc());
-            json.put("rua", d.getDonRua());
-            json.put("bairro", d.getDonBairro());
-            json.put("cidade", d.getDonCidade());
-            json.put("telefone", d.getDonTelefone());
-            json.put("cep", d.getDonCep());
-            json.put("uf", d.getDonUf());
-            json.put("email", d.getDonEmail());
-            json.put("sexo", d.getDonSexo());
-            result.add(json);
-        }
-        return result;
+    private Conexao getConexaoDoSingleton() {
+        return SingletonDB.getConexao();
     }
 
-    public Map<String, Object> getDonatario(int id) {
-        Donatario d = donatarioModel.get(id);
-        if (d == null) return Map.of("erro", "Donatário não encontrado");
-
+    private Map<String, Object> mapDonatarioToJson(Donatario d) {
         Map<String, Object> json = new HashMap<>();
         json.put("id", d.getDonId());
         json.put("nome", d.getDonNome());
@@ -53,68 +33,89 @@ public class DonatarioController {
         return json;
     }
 
-    public Map<String, Object> addDonatario(String nome, String dataNasc, String rua, String bairro,
-                                            String cidade, String telefone, String cep, String uf,
-                                            String email, String sexo) {
-        Donatario novo = new Donatario(nome, dataNasc, rua, bairro, cidade, telefone, cep, uf, email, sexo);
-        Donatario gravado = donatarioModel.gravar(novo);
-        if (gravado == null) return Map.of("erro", "Erro ao cadastrar o Donatário");
+    public List<Map<String, Object>> getDonatario() {
+        Conexao conn = getConexaoDoSingleton();
+        List<Donatario> lista = donatarioModel.get("", conn);
+        List<Map<String, Object>> result = new ArrayList<>();
 
-        Map<String, Object> json = new HashMap<>();
-        json.put("id", gravado.getDonId());
-        json.put("nome", gravado.getDonNome());
-        json.put("data_nasc", gravado.getDonDataNasc());
-        json.put("rua", gravado.getDonRua());
-        json.put("bairro", gravado.getDonBairro());
-        json.put("cidade", gravado.getDonCidade());
-        json.put("telefone", gravado.getDonTelefone());
-        json.put("cep", gravado.getDonCep());
-        json.put("uf", gravado.getDonUf());
-        json.put("email", gravado.getDonEmail());
-        json.put("sexo", gravado.getDonSexo());
-        return json;
+        for (Donatario d : lista) {
+            result.add(mapDonatarioToJson(d));
+        }
+        return result;
     }
 
-    public Map<String, Object> updtDonatario(int id, String nome, String dataNasc, String rua, String bairro,
-                                             String cidade, String telefone, String cep, String uf,
-                                             String email, String sexo) {
-        Donatario existente = donatarioModel.get(id);
-        if (existente == null) return Map.of("erro", "Donatário não encontrado");
+    public Map<String, Object> getDonatario(int id) {
+        Conexao conn = getConexaoDoSingleton();
+        Donatario d = donatarioModel.get(id, conn);
 
-        existente.setDonNome(nome);
-        existente.setDonDataNasc(dataNasc);
-        existente.setDonRua(rua);
-        existente.setDonBairro(bairro);
-        existente.setDonCidade(cidade);
-        existente.setDonTelefone(telefone);
-        existente.setDonCep(cep);
-        existente.setDonUf(uf);
-        existente.setDonEmail(email);
-        existente.setDonSexo(sexo);
+        if (d == null) {
+            return Map.of("erro", "Donatário não encontrado com ID: " + id);
+        }
+        return mapDonatarioToJson(d);
+    }
 
-        Donatario atualizado = donatarioModel.alterar(existente);
-        if (atualizado == null) return Map.of("erro", "Erro ao atualizar o Donatário");
+    public Map<String, Object> addDonatario(String don_nome, String don_data_nasc, String don_rua, String don_bairro,
+                                            String don_cidade, String don_telefone, String don_cep, String don_uf,
+                                            String don_email, String don_sexo) {
 
-        Map<String, Object> json = new HashMap<>();
-        json.put("id", atualizado.getDonId());
-        json.put("nome", atualizado.getDonNome());
-        json.put("data_nasc", atualizado.getDonDataNasc());
-        json.put("rua", atualizado.getDonRua());
-        json.put("bairro", atualizado.getDonBairro());
-        json.put("cidade", atualizado.getDonCidade());
-        json.put("telefone", atualizado.getDonTelefone());
-        json.put("cep", atualizado.getDonCep());
-        json.put("uf", atualizado.getDonUf());
-        json.put("email", atualizado.getDonEmail());
-        json.put("sexo", atualizado.getDonSexo());
-        return json;
+        Conexao conn = getConexaoDoSingleton();
+        Donatario novo = new Donatario(don_nome, don_data_nasc, don_rua, don_bairro, don_cidade,
+                don_telefone, don_cep, don_uf, don_email, don_sexo);
+
+        Donatario gravado = donatarioModel.gravar(novo, conn);
+
+        if (gravado == null || gravado.getDonId() == 0) {
+            return Map.of("erro", "Erro ao gravar o Donatário no banco de dados.");
+        }
+        return mapDonatarioToJson(gravado);
+    }
+
+    /**
+     * UPDATE: Método renomeado para updtDonatario (para corresponder à View).
+     */
+    public Map<String, Object> updtDonatario(int don_id, String don_nome, String don_data_nasc, String don_rua,
+                                             String don_bairro, String don_cidade, String don_telefone,
+                                             String don_cep, String don_uf, String don_email, String don_sexo) {
+
+        Conexao conn = getConexaoDoSingleton();
+        Donatario existente = donatarioModel.get(don_id, conn);
+
+        if (existente == null) {
+            return Map.of("erro", "Donatário não encontrado para alteração com ID: " + don_id);
+        }
+
+        existente.setDonNome(don_nome);
+        existente.setDonDataNasc(don_data_nasc);
+        existente.setDonRua(don_rua);
+        existente.setDonBairro(don_bairro);
+        existente.setDonCidade(don_cidade);
+        existente.setDonTelefone(don_telefone);
+        existente.setDonCep(don_cep);
+        existente.setDonUf(don_uf);
+        existente.setDonEmail(don_email);
+        existente.setDonSexo(don_sexo);
+
+        Donatario atualizado = donatarioModel.alterar(existente, conn);
+
+        if (atualizado == null) {
+            return Map.of("erro", "Erro ao atualizar o Donatário no banco de dados.");
+        }
+        return mapDonatarioToJson(atualizado);
     }
 
     public Map<String, Object> deletarDonatario(int id) {
-        Donatario d = donatarioModel.get(id);
-        if (d == null) return Map.of("erro", "Donatário não encontrado");
+        Conexao conn = getConexaoDoSingleton();
+        Donatario paraDeletar = donatarioModel.get(id, conn);
 
-        boolean deletado = donatarioModel.apagar(d);
-        return deletado ? Map.of("mensagem", "Donatário removido com sucesso") : Map.of("erro", "Erro ao remover o Donatário");
+        if (paraDeletar == null) {
+            return Map.of("erro", "Donatário não encontrado para exclusão com ID: " + id);
+        }
+
+        boolean sucesso = donatarioModel.apagar(paraDeletar, conn);
+
+        if (!sucesso) {
+            return Map.of("erro", "Erro ao apagar o Donatário no banco de dados.");
+        }
+        return Map.of("sucesso", "Donatário com ID " + id + " excluído.");
     }
 }

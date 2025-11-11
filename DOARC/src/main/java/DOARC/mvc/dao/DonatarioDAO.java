@@ -1,26 +1,36 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Donatario;
-import DOARC.mvc.util.SingletonDB;
-import org.springframework.stereotype.Repository;
-
+import DOARC.mvc.util.Conexao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
 public class DonatarioDAO implements IDAO<Donatario> {
 
-    private Connection conn;
-
-    public DonatarioDAO() {
-        conn = SingletonDB.getConexao().getConnect();
+    /**
+     * Método auxiliar para mapear um ResultSet para um objeto Donatario.
+     */
+    private Donatario mapDonatario(ResultSet rs) throws SQLException {
+        Donatario d = new Donatario();
+        d.setDonId(rs.getInt("don_id"));
+        d.setDonNome(rs.getString("don_nome"));
+        d.setDonDataNasc(rs.getString("don_data_nasc"));
+        d.setDonRua(rs.getString("don_rua"));
+        d.setDonBairro(rs.getString("don_bairro"));
+        d.setDonCidade(rs.getString("don_cidade"));
+        d.setDonTelefone(rs.getString("don_telefone"));
+        d.setDonCep(rs.getString("don_cep"));
+        d.setDonUf(rs.getString("don_uf"));
+        d.setDonEmail(rs.getString("don_email"));
+        d.setDonSexo(rs.getString("don_sexo"));
+        return d;
     }
 
     @Override
-    public Donatario gravar(Donatario entidade) {
+    public Donatario gravar(Donatario entidade, Conexao conn) {
         String sql = "INSERT INTO donatario (don_nome, don_data_nasc, don_rua, don_bairro, don_cidade, don_telefone, don_cep, don_uf, don_email, don_sexo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING don_id";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = conn.getConnect().prepareStatement(sql)) {
             pst.setString(1, entidade.getDonNome());
             pst.setString(2, entidade.getDonDataNasc());
             pst.setString(3, entidade.getDonRua());
@@ -38,15 +48,15 @@ public class DonatarioDAO implements IDAO<Donatario> {
                 return entidade;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao gravar Donatário: " + e.getMessage());
         }
         return null;
     }
 
     @Override
-    public Donatario alterar(Donatario entidade) {
+    public Donatario alterar(Donatario entidade, Conexao conn) {
         String sql = "UPDATE donatario SET don_nome=?, don_data_nasc=?, don_rua=?, don_bairro=?, don_cidade=?, don_telefone=?, don_cep=?, don_uf=?, don_email=?, don_sexo=? WHERE don_id=?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = conn.getConnect().prepareStatement(sql)) {
             pst.setString(1, entidade.getDonNome());
             pst.setString(2, entidade.getDonDataNasc());
             pst.setString(3, entidade.getDonRua());
@@ -60,70 +70,60 @@ public class DonatarioDAO implements IDAO<Donatario> {
             pst.setInt(11, entidade.getDonId());
 
             int updated = pst.executeUpdate();
-            return (updated > 0) ? entidade : null;
+            if (updated > 0) {
+                return entidade;
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao alterar Donatário: " + e.getMessage());
         }
         return null;
     }
 
     @Override
-    public boolean apagar(Donatario entidade) {
+    public boolean apagar(Donatario entidade, Conexao conn) {
         String sql = "DELETE FROM donatario WHERE don_id=?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = conn.getConnect().prepareStatement(sql)) {
             pst.setInt(1, entidade.getDonId());
-            return pst.executeUpdate() > 0;
+            if (pst.executeUpdate() > 0) {
+                return true;
+            }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao apagar Donatário: " + e.getMessage());
         }
         return false;
     }
 
     @Override
-    public Donatario get(int id) {
+    public Donatario get(int id, Conexao conn) {
         String sql = "SELECT * FROM donatario WHERE don_id=?";
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = conn.getConnect().prepareStatement(sql)) {
             pst.setInt(1, id);
             ResultSet rs = pst.executeQuery();
             if (rs.next()) {
                 return mapDonatario(rs);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao buscar Donatário por ID: " + e.getMessage());
         }
         return null;
     }
 
     @Override
-    public List<Donatario> get(String filtro) {
+    public List<Donatario> get(String filtro, Conexao conn) {
         List<Donatario> lista = new ArrayList<>();
         String sql = "SELECT * FROM donatario";
-        if (filtro != null && !filtro.isEmpty()) sql += " WHERE " + filtro;
+        if (filtro != null && !filtro.isEmpty()) {
+            sql += " WHERE " + filtro;
+        }
 
-        try (Statement st = conn.createStatement()) {
+        try (Statement st = conn.getConnect().createStatement()) {
             ResultSet rs = st.executeQuery(sql);
             while (rs.next()) {
                 lista.add(mapDonatario(rs));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Erro ao buscar lista de Donatários: " + e.getMessage());
         }
         return lista;
-    }
-
-    private Donatario mapDonatario(ResultSet rs) throws SQLException {
-        Donatario d = new Donatario();
-        d.setDonId(rs.getInt("don_id"));
-        d.setDonNome(rs.getString("don_nome"));
-        d.setDonDataNasc(rs.getString("don_data_nasc"));
-        d.setDonRua(rs.getString("don_rua"));
-        d.setDonBairro(rs.getString("don_bairro"));
-        d.setDonCidade(rs.getString("don_cidade"));
-        d.setDonTelefone(rs.getString("don_telefone"));
-        d.setDonCep(rs.getString("don_cep"));
-        d.setDonUf(rs.getString("don_uf"));
-        d.setDonEmail(rs.getString("don_email"));
-        d.setDonSexo(rs.getString("don_sexo"));
-        return d;
     }
 }
