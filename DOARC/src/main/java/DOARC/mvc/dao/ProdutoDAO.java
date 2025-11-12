@@ -1,25 +1,31 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Produto;
-import DOARC.mvc.util.SingletonDB;
-import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+/**
+ * DAO que recebe Connection do Model
+ * NÃO usa @Repository - é instanciado manualmente pelo Model
+ */
 public class ProdutoDAO implements IDAO<Produto> {
 
-    private Connection getConnection() {
-        return SingletonDB.getConnection();
+    private Connection conn;
+
+    /**
+     * Construtor que recebe a Connection do Model
+     * @param conn Conexão recebida do Model
+     */
+    public ProdutoDAO(Connection conn) {
+        this.conn = conn;
     }
 
     @Override
     public Produto gravar(Produto entidade) {
         String sql = "INSERT INTO Produto (PROD_NOME, PROD_DESCRICAO, PROD_INFORMACOES_ADICIONAIS, PROD_QUANT, CAT_ID) VALUES (?, ?, ?, ?, ?) RETURNING PROD_ID";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setString(1, entidade.getProdNome());
             pst.setString(2, entidade.getProdDescricao());
@@ -43,8 +49,7 @@ public class ProdutoDAO implements IDAO<Produto> {
     @Override
     public Produto alterar(Produto entidade) {
         String sql = "UPDATE Produto SET PROD_NOME=?, PROD_DESCRICAO=?, PROD_INFORMACOES_ADICIONAIS=?, PROD_QUANT=?, CAT_ID=? WHERE PROD_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setString(1, entidade.getProdNome());
             pst.setString(2, entidade.getProdDescricao());
@@ -65,8 +70,7 @@ public class ProdutoDAO implements IDAO<Produto> {
     @Override
     public boolean apagar(Produto entidade) {
         String sql = "DELETE FROM Produto WHERE PROD_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setInt(1, entidade.getProdId());
             return pst.executeUpdate() > 0;
@@ -80,20 +84,11 @@ public class ProdutoDAO implements IDAO<Produto> {
     @Override
     public Produto get(int id) {
         String sql = "SELECT * FROM Produto WHERE PROD_ID=?";
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            if (conn == null) {
-                System.err.println("Conexão nula ao buscar produto ID: " + id);
-                return null;
-            }
-
-            try (PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setInt(1, id);
-                try (ResultSet rs = pst.executeQuery()) {
-                    if (rs.next()) {
-                        return mapProduto(rs);
-                    }
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return mapProduto(rs);
                 }
             }
         } catch (SQLException e) {
@@ -107,8 +102,7 @@ public class ProdutoDAO implements IDAO<Produto> {
     public List<Produto> get(String filtro) {
         List<Produto> lista = new ArrayList<>();
         String sql = "SELECT * FROM Produto WHERE PROD_NOME ILIKE ? OR PROD_DESCRICAO ILIKE ?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             String searchPattern = "%" + (filtro != null ? filtro : "") + "%";
             pst.setString(1, searchPattern);
@@ -129,8 +123,7 @@ public class ProdutoDAO implements IDAO<Produto> {
     public List<Produto> getAll() {
         List<Produto> lista = new ArrayList<>();
         String sql = "SELECT * FROM Produto ORDER BY PROD_NOME";
-        Connection conn = getConnection();
-        try (Statement st = conn.createStatement();
+        try (Statement st = this.conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
@@ -151,8 +144,7 @@ public class ProdutoDAO implements IDAO<Produto> {
     public List<Produto> getPorCategoria(int catId) {
         List<Produto> lista = new ArrayList<>();
         String sql = "SELECT * FROM Produto WHERE CAT_ID=? ORDER BY PROD_NOME";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
             pst.setInt(1, catId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {

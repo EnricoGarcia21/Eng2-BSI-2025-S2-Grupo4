@@ -1,12 +1,12 @@
 package DOARC.mvc.control;
 
-import DOARC.mvc.dao.AcertoEstoqueDAO;
-import DOARC.mvc.dao.ProdutoDAO;
 import DOARC.mvc.model.AcertoEstoque;
 import DOARC.mvc.model.Produto;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -14,15 +14,34 @@ import java.util.*;
  * - Responsável por validar dados de entrada
  * - Gerencia acertos de estoque com atualização automática
  * - Valida se o estoque ficará negativo
+ * - Control gerencia a conexão STATIC e passa para o Model
  */
 @Service
 public class AcertoEstoqueControl {
 
-    @Autowired
-    private AcertoEstoqueDAO acertoEstoqueDAO;
+    // Conexão estática gerenciada pelo Control
+    private static Connection conexao = null;
 
-    @Autowired
-    private ProdutoDAO produtoDAO;
+    /**
+     * Obtém conexão estática (cria apenas se não existir ou estiver inválida)
+     */
+    private Connection getConexao() {
+        if (conexao == null || !isConexaoValida()) {
+            conexao = SingletonDB.getConnection();
+        }
+        return conexao;
+    }
+
+    /**
+     * Verifica se a conexão ainda é válida
+     */
+    private boolean isConexaoValida() {
+        try {
+            return conexao != null && !conexao.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
 
     // Motivos válidos conforme banco de dados
     private static final List<String> MOTIVOS_VALIDOS = Arrays.asList(
@@ -35,11 +54,12 @@ public class AcertoEstoqueControl {
     );
 
     public List<Map<String, Object>> getAcertos() {
-        List<AcertoEstoque> lista = acertoEstoqueDAO.getAll();
+        Connection conn = getConexao();
+        List<AcertoEstoque> lista = AcertoEstoque.getAll(conn);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (AcertoEstoque a : lista) {
-            result.add(toMap(a));
+            result.add(toMap(a, conn));
         }
         return result;
     }
@@ -49,20 +69,22 @@ public class AcertoEstoqueControl {
             return Map.of("erro", "ID inválido");
         }
 
-        AcertoEstoque a = acertoEstoqueDAO.get(id);
+        Connection conn = getConexao();
+        AcertoEstoque a = AcertoEstoque.get(conn, id);
         if (a == null) {
             return Map.of("erro", "Acerto não encontrado");
         }
 
-        return toMap(a);
+        return toMap(a, conn);
     }
 
     public List<Map<String, Object>> getAcertosPorProduto(int prodId) {
-        List<AcertoEstoque> lista = acertoEstoqueDAO.getPorProduto(prodId);
+        Connection conn = getConexao();
+        List<AcertoEstoque> lista = AcertoEstoque.getPorProduto(conn, prodId);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (AcertoEstoque a : lista) {
-            result.add(toMap(a));
+            result.add(toMap(a, conn));
         }
         return result;
     }
@@ -80,14 +102,16 @@ public class AcertoEstoqueControl {
      */
     public Map<String, Object> registrarAcerto(String data, String motivo, String observacao,
                                                String tipo, double quantidade, int volId, int prodId) {
+        Connection conn = getConexao();
+
         // Validação de entrada
-        Map<String, String> validacao = validarDados(data, motivo, observacao, tipo, quantidade, volId, prodId);
+        Map<String, String> validacao = validarDados(conn, data, motivo, observacao, tipo, quantidade, volId, prodId);
         if (!validacao.isEmpty()) {
             return Map.of("erro", validacao.values().iterator().next());
         }
 
         // Busca o produto para obter o estoque atual
-        Produto produto = produtoDAO.get(prodId);
+        Produto produto = Produto.get(conn, prodId);
         if (produto == null) {
             return Map.of("erro", "Produto não encontrado");
         }
@@ -116,14 +140,14 @@ public class AcertoEstoqueControl {
         );
 
         // Grava o acerto com atualização de estoque
-        AcertoEstoque gravado = acertoEstoqueDAO.gravarAcertoComAtualizacao(acerto, estoqueAtual);
+        AcertoEstoque gravado = acerto.gravarAcertoComAtualizacao(conn, estoqueAtual);
         if (gravado == null) {
             return Map.of("erro", "Erro ao registrar o acerto de estoque");
         }
 
-        Map<String, Object> result = toMap(gravado);
+        Map<String, Object> result = toMap(gravado, conn);
         // Adiciona o estoque atualizado
-        Produto produtoAtualizado = produtoDAO.get(prodId);
+        Produto produtoAtualizado = Produto.get(conn, prodId);
         if (produtoAtualizado != null) {
             result.put("estoque_novo", produtoAtualizado.getProdQuant());
         }
@@ -131,7 +155,7 @@ public class AcertoEstoqueControl {
         return result;
     }
 
-    private Map<String, String> validarDados(String data, String motivo, String observacao,
+    private Map<String, String> validarDados(Connection conn, String data, String motivo, String observacao,
                                             String tipo, double quantidade, int volId, int prodId) {
         Map<String, String> erros = new HashMap<>();
 
@@ -176,7 +200,7 @@ public class AcertoEstoqueControl {
         return erros;
     }
 
-    private Map<String, Object> toMap(AcertoEstoque a) {
+    private Map<String, Object> toMap(AcertoEstoque a, Connection conn) {
         Map<String, Object> json = new HashMap<>();
         json.put("id", a.getAcId());
         json.put("data", a.getAcData());
@@ -188,7 +212,7 @@ public class AcertoEstoqueControl {
         json.put("produto_id", a.getProdId());
 
         // Adiciona o nome do produto para facilitar a exibição no frontend
-        Produto p = produtoDAO.get(a.getProdId());
+        Produto p = Produto.get(conn, a.getProdId());
         if (p != null) {
             json.put("produto_nome", p.getProdNome());
         }

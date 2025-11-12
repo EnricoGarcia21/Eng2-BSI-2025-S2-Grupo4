@@ -1,26 +1,49 @@
 package DOARC.mvc.control;
 
-import DOARC.mvc.dao.DonatarioDAO;
 import DOARC.mvc.model.Donatario;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
  * Control com padrão Facade
  * - Responsável por validar dados de entrada
  * - Atua como fachada para as operações de donatário
- * - DAO gerencia a conexão internamente
+ * - Control gerencia a conexão STATIC e passa para o Model
  */
 @Service
 public class DonatarioControl {
 
-    @Autowired
-    private DonatarioDAO donatarioDAO;
+    // Conexão estática gerenciada pelo Control
+    private static Connection conexao = null;
+
+    /**
+     * Obtém conexão estática (cria apenas se não existir ou estiver inválida)
+     */
+    private Connection getConexao() {
+        if (conexao == null || !isConexaoValida()) {
+            conexao = SingletonDB.getConnection();
+        }
+        return conexao;
+    }
+
+    /**
+     * Verifica se a conexão ainda é válida
+     */
+    private boolean isConexaoValida() {
+        try {
+            return conexao != null && !conexao.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
 
     public List<Map<String, Object>> getDonatarios() {
-        List<Donatario> lista = donatarioDAO.getAll();
+        Connection conn = getConexao();
+        List<Donatario> lista = Donatario.getAll(conn);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Donatario d : lista) {
@@ -34,7 +57,8 @@ public class DonatarioControl {
             return Map.of("erro", "ID inválido");
         }
 
-        Donatario d = donatarioDAO.get(id);
+        Connection conn = getConexao();
+        Donatario d = Donatario.get(conn, id);
         if (d == null) {
             return Map.of("erro", "Donatário não encontrado");
         }
@@ -51,11 +75,12 @@ public class DonatarioControl {
             return Map.of("erro", validacao.values().iterator().next());
         }
 
+        Connection conn = getConexao();
         Donatario novo = new Donatario(nome.trim(), dataNasc, rua != null ? rua.trim() : "",
                 bairro != null ? bairro.trim() : "", cidade != null ? cidade.trim() : "",
                 telefone, cep, uf, email != null ? email.trim() : "", sexo);
 
-        Donatario gravado = donatarioDAO.gravar(novo);
+        Donatario gravado = novo.gravar(conn);
         if (gravado == null) {
             return Map.of("erro", "Erro ao cadastrar o Donatário");
         }
@@ -77,7 +102,8 @@ public class DonatarioControl {
             return Map.of("erro", validacao.values().iterator().next());
         }
 
-        Donatario existente = donatarioDAO.get(id);
+        Connection conn = getConexao();
+        Donatario existente = Donatario.get(conn, id);
         if (existente == null) {
             return Map.of("erro", "Donatário não encontrado");
         }
@@ -93,7 +119,7 @@ public class DonatarioControl {
         existente.setDonEmail(email != null ? email.trim() : "");
         existente.setDonSexo(sexo);
 
-        Donatario atualizado = donatarioDAO.alterar(existente);
+        Donatario atualizado = existente.alterar(conn);
         if (atualizado == null) {
             return Map.of("erro", "Erro ao atualizar o Donatário");
         }
@@ -106,19 +132,21 @@ public class DonatarioControl {
             return Map.of("erro", "ID inválido");
         }
 
-        Donatario d = donatarioDAO.get(id);
+        Connection conn = getConexao();
+        Donatario d = Donatario.get(conn, id);
         if (d == null) {
             return Map.of("erro", "Donatário não encontrado");
         }
 
-        boolean deletado = donatarioDAO.apagar(d);
+        boolean deletado = d.apagar(conn);
         return deletado
                 ? Map.of("mensagem", "Donatário removido com sucesso")
                 : Map.of("erro", "Erro ao remover o Donatário");
     }
 
     public List<Map<String, Object>> buscarDonatarios(String filtro) {
-        List<Donatario> lista = donatarioDAO.get(filtro);
+        Connection conn = getConexao();
+        List<Donatario> lista = Donatario.get(conn, filtro);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Donatario d : lista) {

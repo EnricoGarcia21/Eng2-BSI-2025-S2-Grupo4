@@ -1,20 +1,49 @@
 package DOARC.mvc.control;
 
-import DOARC.mvc.dao.CategoriaDAO;
 import DOARC.mvc.model.Categoria;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * Control com padrão Facade
+ * - Responsável por validar dados de entrada
+ * - Atua como fachada para as operações de categoria
+ * - Control gerencia a conexão STATIC e passa para o Model
+ */
 @Service
 public class CategoriaControl {
 
-    @Autowired
-    private CategoriaDAO categoriaDAO;
+    // Conexão estática gerenciada pelo Control
+    private static Connection conexao = null;
+
+    /**
+     * Obtém conexão estática (cria apenas se não existir ou estiver inválida)
+     */
+    private Connection getConexao() {
+        if (conexao == null || !isConexaoValida()) {
+            conexao = SingletonDB.getConnection();
+        }
+        return conexao;
+    }
+
+    /**
+     * Verifica se a conexão ainda é válida
+     */
+    private boolean isConexaoValida() {
+        try {
+            return conexao != null && !conexao.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
 
     public List<Map<String, Object>> getCategorias() {
-        List<Categoria> lista = categoriaDAO.getAll();
+        Connection conn = getConexao();
+        List<Categoria> lista = Categoria.getAll(conn);
 
         List<Map<String, Object>> result = new ArrayList<>();
         for (Categoria c : lista) {
@@ -32,7 +61,8 @@ public class CategoriaControl {
             return Map.of("erro", "ID inválido");
         }
 
-        Categoria c = categoriaDAO.get(id);
+        Connection conn = getConexao();
+        Categoria c = Categoria.get(conn, id);
         if (c == null) {
             return Map.of("erro", "Categoria não encontrada");
         }
@@ -58,8 +88,9 @@ public class CategoriaControl {
             return Map.of("erro", "Especificação muito longa (máximo 130 caracteres)");
         }
 
+        Connection conn = getConexao();
         Categoria nova = new Categoria(nome.trim(), especificacao != null ? especificacao.trim() : "");
-        Categoria gravada = categoriaDAO.gravar(nova);
+        Categoria gravada = nova.gravar(conn);
 
         if (gravada == null) {
             return Map.of("erro", "Erro ao cadastrar a Categoria");
@@ -90,7 +121,8 @@ public class CategoriaControl {
             return Map.of("erro", "Especificação muito longa (máximo 130 caracteres)");
         }
 
-        Categoria existente = categoriaDAO.get(id);
+        Connection conn = getConexao();
+        Categoria existente = Categoria.get(conn, id);
         if (existente == null) {
             return Map.of("erro", "Categoria não encontrada");
         }
@@ -98,7 +130,7 @@ public class CategoriaControl {
         existente.setCatNomeProd(nome.trim());
         existente.setCatEspecificacao(especificacao != null ? especificacao.trim() : "");
 
-        Categoria atualizada = categoriaDAO.alterar(existente);
+        Categoria atualizada = existente.alterar(conn);
         if (atualizada == null) {
             return Map.of("erro", "Erro ao atualizar a Categoria");
         }
@@ -115,24 +147,26 @@ public class CategoriaControl {
             return Map.of("erro", "ID inválido");
         }
 
-        Categoria c = categoriaDAO.get(id);
+        Connection conn = getConexao();
+        Categoria c = Categoria.get(conn, id);
         if (c == null) {
             return Map.of("erro", "Categoria não encontrada");
         }
 
         // Verifica se há produtos relacionados
-        if (categoriaDAO.temProdutosRelacionados(id)) {
+        if (Categoria.temProdutosRelacionados(conn, id)) {
             return Map.of("erro", "Não é possível excluir esta categoria pois existem produtos relacionados a ela");
         }
 
-        boolean deletado = categoriaDAO.apagar(c);
+        boolean deletado = c.apagar(conn);
         return deletado
                 ? Map.of("mensagem", "Categoria removida com sucesso")
                 : Map.of("erro", "Erro ao remover a Categoria");
     }
 
     public List<Map<String, Object>> buscarCategorias(String filtro) {
-        List<Categoria> lista = categoriaDAO.get(filtro);
+        Connection conn = getConexao();
+        List<Categoria> lista = Categoria.get(conn, filtro);
 
         List<Map<String, Object>> result = new ArrayList<>();
         for (Categoria c : lista) {

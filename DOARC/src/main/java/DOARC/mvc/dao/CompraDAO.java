@@ -2,18 +2,25 @@ package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Compra;
 import DOARC.mvc.model.CompraProduto;
-import DOARC.mvc.util.SingletonDB;
-import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+/**
+ * DAO que recebe Connection do Model
+ * NÃO usa @Repository - é instanciado manualmente pelo Model
+ */
 public class CompraDAO {
 
-    private Connection getConnection() {
-        return SingletonDB.getConnection();
+    private Connection conn;
+
+    /**
+     * Construtor que recebe a Connection do Model
+     * @param conn Conexão recebida do Model
+     */
+    public CompraDAO(Connection conn) {
+        this.conn = conn;
     }
 
     /**
@@ -23,18 +30,16 @@ public class CompraDAO {
      * @return Compra gravada com ID ou null em caso de erro
      */
     public Compra gravarCompraCompleta(Compra compra, List<CompraProduto> produtos) {
-        Connection conn = getConnection();
-
         try {
             // Desabilita auto-commit para transação
-            conn.setAutoCommit(false);
+            this.conn.setAutoCommit(false);
 
             // 1. Insere o cabeçalho da compra
             String sqlCompra = "INSERT INTO Compra (COMP_DATA_COMPRA, COMP_DESC, VOL_ID, COM_VALOR_TOTAL, COM_FORNECEDOR) " +
                               "VALUES (?::DATE, ?, ?, ?, ?) RETURNING COMP_ID";
 
             int compraId;
-            try (PreparedStatement pst = conn.prepareStatement(sqlCompra)) {
+            try (PreparedStatement pst = this.conn.prepareStatement(sqlCompra)) {
                 pst.setString(1, compra.getCompDataCompra());
                 pst.setString(2, compra.getCompDesc());
                 pst.setInt(3, compra.getVolId());
@@ -55,8 +60,8 @@ public class CompraDAO {
             String sqlCompraProduto = "INSERT INTO Compra_Produto (COMP_ID, PROD_ID, QTDE, VALOR_UNITARIO) VALUES (?, ?, ?, ?)";
             String sqlAtualizaEstoque = "UPDATE Produto SET PROD_QUANT = PROD_QUANT + ? WHERE PROD_ID = ?";
 
-            try (PreparedStatement pstProduto = conn.prepareStatement(sqlCompraProduto);
-                 PreparedStatement pstEstoque = conn.prepareStatement(sqlAtualizaEstoque)) {
+            try (PreparedStatement pstProduto = this.conn.prepareStatement(sqlCompraProduto);
+                 PreparedStatement pstEstoque = this.conn.prepareStatement(sqlAtualizaEstoque)) {
 
                 for (CompraProduto cp : produtos) {
                     // Insere na tabela Compra_Produto
@@ -74,8 +79,8 @@ public class CompraDAO {
             }
 
             // Commit da transação
-            conn.commit();
-            conn.setAutoCommit(true);
+            this.conn.commit();
+            this.conn.setAutoCommit(true);
 
             return compra;
 
@@ -84,8 +89,8 @@ public class CompraDAO {
             e.printStackTrace();
             try {
                 // Rollback em caso de erro
-                conn.rollback();
-                conn.setAutoCommit(true);
+                this.conn.rollback();
+                this.conn.setAutoCommit(true);
             } catch (SQLException ex) {
                 System.err.println("Erro ao fazer rollback: " + ex.getMessage());
             }
@@ -95,8 +100,7 @@ public class CompraDAO {
 
     public Compra get(int id) {
         String sql = "SELECT * FROM Compra WHERE COMP_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -113,8 +117,7 @@ public class CompraDAO {
     public List<Compra> getAll() {
         List<Compra> lista = new ArrayList<>();
         String sql = "SELECT * FROM Compra ORDER BY COMP_DATA_COMPRA DESC";
-        Connection conn = getConnection();
-        try (Statement st = conn.createStatement();
+        try (Statement st = this.conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
@@ -135,8 +138,7 @@ public class CompraDAO {
     public List<CompraProduto> getProdutosDaCompra(int compraId) {
         List<CompraProduto> lista = new ArrayList<>();
         String sql = "SELECT * FROM Compra_Produto WHERE COMP_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
             pst.setInt(1, compraId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {

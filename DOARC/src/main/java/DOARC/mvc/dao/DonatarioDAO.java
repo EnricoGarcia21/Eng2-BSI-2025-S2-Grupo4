@@ -1,25 +1,31 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Donatario;
-import DOARC.mvc.util.SingletonDB;
-import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+/**
+ * DAO que recebe Connection do Model
+ * NÃO usa @Repository - é instanciado manualmente pelo Model
+ */
 public class DonatarioDAO implements IDAO<Donatario> {
 
-    private Connection getConnection() {
-        return SingletonDB.getConnection();
+    private Connection conn;
+
+    /**
+     * Construtor que recebe a Connection do Model
+     * @param conn Conexão recebida do Model
+     */
+    public DonatarioDAO(Connection conn) {
+        this.conn = conn;
     }
 
     @Override
     public Donatario gravar(Donatario entidade) {
         String sql = "INSERT INTO Donatario (DON_NOME, DON_DATA_NASC, DON_RUA, DON_BAIRRO, DON_CIDADE, DON_TELEFONE, DON_CEP, DON_UF, DON_EMAIL, DON_SEXO) VALUES (?, ?::DATE, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING DON_ID";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setString(1, entidade.getDonNome());
             pst.setString(2, entidade.getDonDataNasc());
@@ -48,8 +54,7 @@ public class DonatarioDAO implements IDAO<Donatario> {
     @Override
     public Donatario alterar(Donatario entidade) {
         String sql = "UPDATE Donatario SET DON_NOME=?, DON_DATA_NASC=?::DATE, DON_RUA=?, DON_BAIRRO=?, DON_CIDADE=?, DON_TELEFONE=?, DON_CEP=?, DON_UF=?, DON_EMAIL=?, DON_SEXO=? WHERE DON_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setString(1, entidade.getDonNome());
             pst.setString(2, entidade.getDonDataNasc());
@@ -75,8 +80,7 @@ public class DonatarioDAO implements IDAO<Donatario> {
     @Override
     public boolean apagar(Donatario entidade) {
         String sql = "DELETE FROM Donatario WHERE DON_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setInt(1, entidade.getDonId());
             return pst.executeUpdate() > 0;
@@ -90,8 +94,7 @@ public class DonatarioDAO implements IDAO<Donatario> {
     @Override
     public Donatario get(int id) {
         String sql = "SELECT * FROM Donatario WHERE DON_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
@@ -110,8 +113,7 @@ public class DonatarioDAO implements IDAO<Donatario> {
     public List<Donatario> get(String filtro) {
         List<Donatario> lista = new ArrayList<>();
         String sql = "SELECT * FROM Donatario WHERE DON_NOME ILIKE ? OR DON_EMAIL ILIKE ? OR DON_CIDADE ILIKE ?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             String searchPattern = "%" + (filtro != null ? filtro : "") + "%";
             pst.setString(1, searchPattern);
@@ -133,8 +135,7 @@ public class DonatarioDAO implements IDAO<Donatario> {
     public List<Donatario> getAll() {
         List<Donatario> lista = new ArrayList<>();
         String sql = "SELECT * FROM Donatario ORDER BY DON_NOME";
-        Connection conn = getConnection();
-        try (Statement st = conn.createStatement();
+        try (Statement st = this.conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {

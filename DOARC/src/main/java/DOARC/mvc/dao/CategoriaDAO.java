@@ -1,25 +1,31 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Categoria;
-import DOARC.mvc.util.SingletonDB;
-import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+/**
+ * DAO que recebe Connection do Model
+ * NÃO usa @Repository - é instanciado manualmente pelo Model
+ */
 public class CategoriaDAO implements IDAO<Categoria> {
 
-    private Connection getConnection() {
-        return SingletonDB.getConnection();
+    private Connection conn;
+
+    /**
+     * Construtor que recebe a Connection do Model
+     * @param conn Conexão recebida do Model
+     */
+    public CategoriaDAO(Connection conn) {
+        this.conn = conn;
     }
 
     @Override
     public Categoria gravar(Categoria entidade) {
         String sql = "INSERT INTO Categoria (CAT_NOME_PROD, CAT_ESPECIFICACAO) VALUES (?, ?) RETURNING CAT_ID";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setString(1, entidade.getCatNomeProd());
             pst.setString(2, entidade.getCatEspecificacao());
@@ -40,8 +46,7 @@ public class CategoriaDAO implements IDAO<Categoria> {
     @Override
     public Categoria alterar(Categoria entidade) {
         String sql = "UPDATE Categoria SET CAT_NOME_PROD=?, CAT_ESPECIFICACAO=? WHERE CAT_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setString(1, entidade.getCatNomeProd());
             pst.setString(2, entidade.getCatEspecificacao());
@@ -65,8 +70,7 @@ public class CategoriaDAO implements IDAO<Categoria> {
         }
 
         String sql = "DELETE FROM Categoria WHERE CAT_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             pst.setInt(1, entidade.getCatId());
             return pst.executeUpdate() > 0;
@@ -84,8 +88,7 @@ public class CategoriaDAO implements IDAO<Categoria> {
      */
     public boolean temProdutosRelacionados(int catId) {
         String sql = "SELECT COUNT(*) as total FROM Produto WHERE CAT_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
             pst.setInt(1, catId);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -103,20 +106,11 @@ public class CategoriaDAO implements IDAO<Categoria> {
     @Override
     public Categoria get(int id) {
         String sql = "SELECT * FROM Categoria WHERE CAT_ID=?";
-        Connection conn = null;
-        try {
-            conn = getConnection();
-            if (conn == null) {
-                System.err.println("Conexão nula ao buscar categoria ID: " + id);
-                return null;
-            }
-
-            try (PreparedStatement pst = conn.prepareStatement(sql)) {
-                pst.setInt(1, id);
-                try (ResultSet rs = pst.executeQuery()) {
-                    if (rs.next()) {
-                        return mapCategoria(rs);
-                    }
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
+            pst.setInt(1, id);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return mapCategoria(rs);
                 }
             }
         } catch (SQLException e) {
@@ -130,8 +124,7 @@ public class CategoriaDAO implements IDAO<Categoria> {
     public List<Categoria> get(String filtro) {
         List<Categoria> lista = new ArrayList<>();
         String sql = "SELECT * FROM Categoria WHERE CAT_NOME_PROD ILIKE ? OR CAT_ESPECIFICACAO ILIKE ?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
 
             String searchPattern = "%" + (filtro != null ? filtro : "") + "%";
             pst.setString(1, searchPattern);
@@ -152,8 +145,7 @@ public class CategoriaDAO implements IDAO<Categoria> {
     public List<Categoria> getAll() {
         List<Categoria> lista = new ArrayList<>();
         String sql = "SELECT * FROM Categoria ORDER BY CAT_NOME_PROD";
-        Connection conn = getConnection();
-        try (Statement st = conn.createStatement();
+        try (Statement st = this.conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {

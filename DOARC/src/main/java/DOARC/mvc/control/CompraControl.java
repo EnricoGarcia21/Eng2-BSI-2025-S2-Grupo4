@@ -1,13 +1,13 @@
 package DOARC.mvc.control;
 
-import DOARC.mvc.dao.CompraDAO;
-import DOARC.mvc.dao.ProdutoDAO;
 import DOARC.mvc.model.Compra;
 import DOARC.mvc.model.CompraProduto;
 import DOARC.mvc.model.Produto;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -15,18 +15,38 @@ import java.util.*;
  * - Responsável por validar dados de entrada
  * - Gerencia transações de compra/arrecadação
  * - Atualiza estoque automaticamente
+ * - Control gerencia a conexão STATIC e passa para o Model
  */
 @Service
 public class CompraControl {
 
-    @Autowired
-    private CompraDAO compraDAO;
+    // Conexão estática gerenciada pelo Control
+    private static Connection conexao = null;
 
-    @Autowired
-    private ProdutoDAO produtoDAO;
+    /**
+     * Obtém conexão estática (cria apenas se não existir ou estiver inválida)
+     */
+    private Connection getConexao() {
+        if (conexao == null || !isConexaoValida()) {
+            conexao = SingletonDB.getConnection();
+        }
+        return conexao;
+    }
+
+    /**
+     * Verifica se a conexão ainda é válida
+     */
+    private boolean isConexaoValida() {
+        try {
+            return conexao != null && !conexao.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
 
     public List<Map<String, Object>> getCompras() {
-        List<Compra> lista = compraDAO.getAll();
+        Connection conn = getConexao();
+        List<Compra> lista = Compra.getAll(conn);
         List<Map<String, Object>> result = new ArrayList<>();
 
         for (Compra c : lista) {
@@ -40,7 +60,8 @@ public class CompraControl {
             return Map.of("erro", "ID inválido");
         }
 
-        Compra c = compraDAO.get(id);
+        Connection conn = getConexao();
+        Compra c = Compra.get(conn, id);
         if (c == null) {
             return Map.of("erro", "Compra não encontrada");
         }
@@ -48,12 +69,12 @@ public class CompraControl {
         Map<String, Object> result = toMap(c);
 
         // Adiciona os produtos da compra
-        List<CompraProduto> produtos = compraDAO.getProdutosDaCompra(id);
+        List<CompraProduto> produtos = Compra.getProdutosDaCompra(conn, id);
         List<Map<String, Object>> produtosMap = new ArrayList<>();
 
         for (CompraProduto cp : produtos) {
             Map<String, Object> prodMap = new HashMap<>();
-            Produto p = produtoDAO.get(cp.getProdId());
+            Produto p = Produto.get(conn, cp.getProdId());
 
             prodMap.put("produto_id", cp.getProdId());
             prodMap.put("produto_nome", p != null ? p.getProdNome() : "");
@@ -80,8 +101,10 @@ public class CompraControl {
     public Map<String, Object> registrarCompra(String dataCompra, String descricao, int volId,
                                                double valorTotal, String fornecedor,
                                                List<Map<String, Object>> produtosJson) {
+        Connection conn = getConexao();
+
         // Validação de entrada
-        Map<String, String> validacao = validarDados(dataCompra, volId, fornecedor, valorTotal, produtosJson);
+        Map<String, String> validacao = validarDados(conn, dataCompra, volId, fornecedor, valorTotal, produtosJson);
         if (!validacao.isEmpty()) {
             return Map.of("erro", validacao.values().iterator().next());
         }
@@ -106,7 +129,7 @@ public class CompraControl {
                     : 0.0;
 
                 // Valida se o produto existe
-                Produto p = produtoDAO.get(prodId);
+                Produto p = Produto.get(conn, prodId);
                 if (p == null) {
                     return Map.of("erro", "Produto ID " + prodId + " não encontrado");
                 }
@@ -122,7 +145,7 @@ public class CompraControl {
         }
 
         // Grava a compra completa (com transação)
-        Compra gravada = compraDAO.gravarCompraCompleta(compra, produtos);
+        Compra gravada = compra.gravarCompraCompleta(conn, produtos);
         if (gravada == null) {
             return Map.of("erro", "Erro ao registrar a compra");
         }
@@ -130,7 +153,7 @@ public class CompraControl {
         return toMap(gravada);
     }
 
-    private Map<String, String> validarDados(String dataCompra, int volId, String fornecedor,
+    private Map<String, String> validarDados(Connection conn, String dataCompra, int volId, String fornecedor,
                                             double valorTotal, List<Map<String, Object>> produtos) {
         Map<String, String> erros = new HashMap<>();
 

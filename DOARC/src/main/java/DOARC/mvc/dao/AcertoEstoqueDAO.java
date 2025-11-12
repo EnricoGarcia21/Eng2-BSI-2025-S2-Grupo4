@@ -1,18 +1,25 @@
 package DOARC.mvc.dao;
 
 import DOARC.mvc.model.AcertoEstoque;
-import DOARC.mvc.util.SingletonDB;
-import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Repository
+/**
+ * DAO que recebe Connection do Model
+ * NÃO usa @Repository - é instanciado manualmente pelo Model
+ */
 public class AcertoEstoqueDAO {
 
-    private Connection getConnection() {
-        return SingletonDB.getConnection();
+    private Connection conn;
+
+    /**
+     * Construtor que recebe a Connection do Model
+     * @param conn Conexão recebida do Model
+     */
+    public AcertoEstoqueDAO(Connection conn) {
+        this.conn = conn;
     }
 
     /**
@@ -23,18 +30,16 @@ public class AcertoEstoqueDAO {
      * @return AcertoEstoque gravado com ID ou null em caso de erro
      */
     public AcertoEstoque gravarAcertoComAtualizacao(AcertoEstoque acerto, int estoqueAtual) {
-        Connection conn = getConnection();
-
         try {
             // Desabilita auto-commit para transação
-            conn.setAutoCommit(false);
+            this.conn.setAutoCommit(false);
 
             // 1. Insere o acerto de estoque
             String sqlAcerto = "INSERT INTO Acerto_Estoque (AC_DATA, AC_MOTIVO, AC_OBS, AC_TIPO, AC_QUANTIDADE, VOL_ID, PROD_ID) " +
                               "VALUES (?::DATE, ?, ?, ?, ?, ?, ?) RETURNING AC_ID";
 
             int acertoId;
-            try (PreparedStatement pst = conn.prepareStatement(sqlAcerto)) {
+            try (PreparedStatement pst = this.conn.prepareStatement(sqlAcerto)) {
                 pst.setString(1, acerto.getAcData());
                 pst.setString(2, acerto.getAcMotivo());
                 pst.setString(3, acerto.getAcObs());
@@ -63,15 +68,15 @@ public class AcertoEstoqueDAO {
                 sqlAtualizaEstoque = "UPDATE Produto SET PROD_QUANT = PROD_QUANT - ? WHERE PROD_ID = ?";
             }
 
-            try (PreparedStatement pstEstoque = conn.prepareStatement(sqlAtualizaEstoque)) {
+            try (PreparedStatement pstEstoque = this.conn.prepareStatement(sqlAtualizaEstoque)) {
                 pstEstoque.setDouble(1, acerto.getAcQuantidade());
                 pstEstoque.setInt(2, acerto.getProdId());
                 pstEstoque.executeUpdate();
             }
 
             // Commit da transação
-            conn.commit();
-            conn.setAutoCommit(true);
+            this.conn.commit();
+            this.conn.setAutoCommit(true);
 
             return acerto;
 
@@ -80,8 +85,8 @@ public class AcertoEstoqueDAO {
             e.printStackTrace();
             try {
                 // Rollback em caso de erro
-                conn.rollback();
-                conn.setAutoCommit(true);
+                this.conn.rollback();
+                this.conn.setAutoCommit(true);
             } catch (SQLException ex) {
                 System.err.println("Erro ao fazer rollback: " + ex.getMessage());
             }
@@ -91,8 +96,7 @@ public class AcertoEstoqueDAO {
 
     public AcertoEstoque get(int id) {
         String sql = "SELECT * FROM Acerto_Estoque WHERE AC_ID=?";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
             pst.setInt(1, id);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
@@ -109,8 +113,7 @@ public class AcertoEstoqueDAO {
     public List<AcertoEstoque> getAll() {
         List<AcertoEstoque> lista = new ArrayList<>();
         String sql = "SELECT * FROM Acerto_Estoque ORDER BY AC_DATA DESC";
-        Connection conn = getConnection();
-        try (Statement st = conn.createStatement();
+        try (Statement st = this.conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
@@ -126,8 +129,7 @@ public class AcertoEstoqueDAO {
     public List<AcertoEstoque> getPorProduto(int prodId) {
         List<AcertoEstoque> lista = new ArrayList<>();
         String sql = "SELECT * FROM Acerto_Estoque WHERE PROD_ID=? ORDER BY AC_DATA DESC";
-        Connection conn = getConnection();
-        try (PreparedStatement pst = conn.prepareStatement(sql)) {
+        try (PreparedStatement pst = this.conn.prepareStatement(sql)) {
             pst.setInt(1, prodId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
