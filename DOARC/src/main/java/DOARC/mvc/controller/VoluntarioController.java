@@ -14,7 +14,6 @@ public class VoluntarioController {
     @Autowired
     private Voluntario voluntarioModel;
 
-    // Buscar voluntário por ID
     public Map<String, Object> getVoluntario(int id) {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -66,7 +65,6 @@ public class VoluntarioController {
         return json;
     }
 
-    // Buscar voluntários por cidade
     public Map<String, Object> getVoluntariosPorCidade(String cidade) {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -87,7 +85,6 @@ public class VoluntarioController {
         return json;
     }
 
-    // Buscar apenas o nome do voluntário por ID (método específico para dropdowns)
     public Map<String, Object> getNomeVoluntario(int id) {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -114,14 +111,12 @@ public class VoluntarioController {
         return json;
     }
 
-    // Método adicional para buscar voluntários disponíveis (útil para agendamentos)
     public Map<String, Object> getVoluntariosDisponiveis() {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
 
         if (conexao.conectar()) {
             try {
-                // Assumindo que há um campo 'disponivel' na tabela ou filtro específico
                 List<Voluntario> voluntarios = voluntarioModel.get("disponivel = true", conexao);
                 json.put("voluntarios", voluntarios);
             } catch (Exception e) {

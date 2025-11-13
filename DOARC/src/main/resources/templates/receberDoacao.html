@@ -3,18 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendar Retirada - DOARC</title>
+    <title>Receber Doação - DOARC</title>
 
-    <!-- Bootstrap CSS para base -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome para ícones -->
+    <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts para tipografia -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            /* Cores principais */
             --primary-color: #2c5f8d;
             --secondary-color: #4a8fc7;
             --accent-color: #f39c12;
@@ -22,20 +21,14 @@
             --danger-color: #e74c3c;
             --warning-color: #f39c12;
             --info-color: #3498db;
-
-            /* Cores neutras */
             --bg-light: #f5f7fa;
             --bg-white: #ffffff;
             --text-dark: #2c3e50;
             --text-light: #7f8c8d;
             --border-color: #dce4ec;
-
-            /* Sombras */
             --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
             --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
-
-            /* Transições */
             --transition: all 0.3s ease;
         }
 
@@ -106,9 +99,22 @@
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             padding: 40px 0;
-            border-radius: 10px;
+            border-radius: 15px;
             margin-bottom: 30px;
             box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
 
         .page-title {
@@ -134,6 +140,12 @@
             box-shadow: var(--shadow-lg);
             overflow: hidden;
             background: var(--bg-white);
+            transition: var(--transition);
+        }
+
+        .form-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         }
 
         .card-section {
@@ -149,6 +161,8 @@
             color: var(--primary-color);
             margin-bottom: 20px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
         }
 
         .custom-input, .form-select {
@@ -224,7 +238,12 @@
             color: white;
         }
 
-        /* Botão de menu */
+        .btn-success {
+            background: var(--success-color);
+            border: none;
+            color: white;
+        }
+
         .menu-btn {
             position: fixed;
             top: 20px;
@@ -243,7 +262,6 @@
             background: var(--secondary-color);
         }
 
-        /* Tabela de agendamentos */
         .table-custom {
             border-radius: 10px;
             overflow: hidden;
@@ -273,35 +291,36 @@
             font-weight: 500;
         }
 
-        .status-agendado {
-            background: #d4edda;
-            color: #155724;
+        .valor-destaque {
+            font-weight: 700;
+            color: var(--success-color);
+            font-size: 1.1rem;
         }
 
-        .status-concluido {
-            background: #d1ecf1;
-            color: #0c5460;
+        .card-estatistica {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
         }
 
-        .status-cancelado {
-            background: #f8d7da;
-            color: #721c24;
+        .card-estatistica:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
 
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .sidebar {
-                left: -250px;
-            }
-            .content {
-                margin-left: 0;
-            }
-            .page-title {
-                font-size: 2rem;
-            }
-            .table-responsive {
-                font-size: 0.9rem;
-            }
+        .card-estatistica .valor {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .card-estatistica .descricao {
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
 
         .input-group {
@@ -338,8 +357,12 @@
             display: block;
         }
 
-        .modal {
-            z-index: 1060;
+        .custom-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 300px;
         }
 
         .btn-group-actions {
@@ -351,28 +374,19 @@
             padding: 0.25rem 0.5rem;
         }
 
-        .custom-toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
-        }
-
-        /* Loading spinner */
-        .spinner-border-sm {
-            width: 1rem;
-            height: 1rem;
-        }
-
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        .btn-warning:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+        @media (max-width: 768px) {
+            .sidebar {
+                left: -250px;
+            }
+            .content {
+                margin-left: 0;
+            }
+            .page-title {
+                font-size: 2rem;
+            }
+            .table-responsive {
+                font-size: 0.9rem;
+            }
         }
     </style>
 </head>
@@ -391,7 +405,8 @@
 <div class="sidebar" id="sidebar">
     <h4><i class="fas fa-building me-2"></i>DOARC</h4>
     <a href="#"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
-    <a href="agendarRetiradaDoacao.html" class="active"><i class="fas fa-plus-circle me-2"></i>Agendar Retirada</a>
+    <a href="agendarRetiradaDoacao.html"><i class="fas fa-plus-circle me-2"></i>Agendar Retirada</a>
+    <a href="receberDoacao.html" class="active"><i class="fas fa-hand-holding-usd me-2"></i>Receber Doação</a>
     <a href="#"><i class="fas fa-list me-2"></i>Agendamentos</a>
     <a href="#"><i class="fas fa-users me-2"></i>Voluntários</a>
     <a href="#"><i class="fas fa-box me-2"></i>Doações</a>
@@ -407,12 +422,12 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-8">
-                    <h1 class="page-title"><i class="fas fa-truck-loading me-3"></i>Agendar Retirada</h1>
-                    <p class="page-subtitle">Agende a retirada de doações por voluntários</p>
+                    <h1 class="page-title"><i class="fas fa-hand-holding-usd me-3"></i>Receber Doação</h1>
+                    <p class="page-subtitle">Registre doações recebidas por voluntários</p>
                 </div>
                 <div class="col-md-4 text-end">
                     <div class="badge bg-white text-primary p-3">
-                        <i class="fas fa-calendar-check me-2"></i>Sistema de Agendamentos
+                        <i class="fas fa-donate me-2"></i>Sistema de Doações
                     </div>
                 </div>
             </div>
@@ -420,45 +435,56 @@
     </div>
 
     <div class="container mt-4">
+        <!-- Estatísticas Rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card-estatistica">
+                    <i class="fas fa-donate fa-2x"></i>
+                    <div class="valor" id="totalDoacoes">R$ 0,00</div>
+                    <div class="descricao">Total Recebido</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card-estatistica">
+                    <i class="fas fa-calendar-day fa-2x"></i>
+                    <div class="valor" id="doacoesHoje">0</div>
+                    <div class="descricao">Doações Hoje</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card-estatistica">
+                    <i class="fas fa-users fa-2x"></i>
+                    <div class="valor" id="totalVoluntarios">0</div>
+                    <div class="descricao">Voluntários</div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card-estatistica">
+                    <i class="fas fa-user-friends fa-2x"></i>
+                    <div class="valor" id="totalDoadores">0</div>
+                    <div class="descricao">Doadores</div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
-            <!-- Formulário de Agendamento -->
+            <!-- Formulário de Receber Doação -->
             <div class="col-lg-6">
                 <div class="card form-card mb-4">
                     <div class="card-body p-0">
-                        <form method="POST" id="formAgendamento" onsubmit="return salvarAgendamento(event)">
+                        <form method="POST" id="formDoacao" onsubmit="return salvarDoacao(event)">
 
-                            <!-- Dados do Agendamento -->
+                            <!-- Dados da Doação -->
                             <div class="card-section">
                                 <h5 class="section-title">
-                                    <i class="fas fa-calendar-alt me-2"></i>
-                                    <span id="formTitle">Dados do Agendamento</span>
-                                    <input type="hidden" id="agendaId" name="agendaId">
+                                    <i class="fas fa-edit me-2"></i>
+                                    <span id="formTitle">Registrar Doação</span>
+                                    <input type="hidden" id="doacaoId" name="doacaoId">
                                 </h5>
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label for="dataRetiro" class="form-label required">Data da Retirada</label>
-                                        <div class="input-group">
-                                            <input type="date" id="dataRetiro" name="dataRetiro" class="form-control custom-input" required>
-                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
-                                        </div>
-                                        <div class="invalid-feedback">Selecione uma data válida (hoje ou futura).</div>
-                                        <div class="form-help">Selecione a data para retirada</div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="horaRetiro" class="form-label required">Hora da Retirada</label>
-                                        <div class="input-group">
-                                            <input type="time" id="horaRetiro" name="horaRetiro" class="form-control custom-input" required min="08:00" max="18:00">
-                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
-                                        </div>
-                                        <div class="invalid-feedback">Selecione uma hora válida entre 8:00 e 18:00.</div>
-                                        <div class="form-help">Selecione o horário para retirada (8:00 às 18:00)</div>
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-12">
-                                        <label for="volId" class="form-label required">Voluntário</label>
+                                        <label for="volId" class="form-label required">Voluntário Responsável</label>
                                         <div class="input-group">
                                             <select id="volId" name="volId" class="form-select custom-input" required>
                                                 <option value="">Carregando voluntários...</option>
@@ -466,29 +492,50 @@
                                             <i class="fas fa-exclamation-triangle invalid-icon"></i>
                                         </div>
                                         <div class="invalid-feedback">Selecione um voluntário.</div>
-                                        <div class="form-help">Escolha o voluntário responsável pela retirada</div>
+                                        <div class="form-help">Voluntário que recebeu a doação</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="doaId" class="form-label required">Doador</label>
+                                        <div class="input-group">
+                                            <select id="doaId" name="doaId" class="form-select custom-input" required>
+                                                <option value="">Carregando doadores...</option>
+                                            </select>
+                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Selecione um doador.</div>
+                                        <div class="form-help">Pessoa/organização que fez a doação</div>
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
-                                    <div class="col-12">
-                                        <label for="doaId" class="form-label required">Doação</label>
+                                    <div class="col-md-6">
+                                        <label for="dataDoacao" class="form-label required">Data da Doação</label>
                                         <div class="input-group">
-                                            <select id="doaId" name="doaId" class="form-select custom-input" required>
-                                                <option value="">Carregando doações...</option>
-                                            </select>
+                                            <input type="date" id="dataDoacao" name="dataDoacao" class="form-control custom-input" required>
                                             <i class="fas fa-exclamation-triangle invalid-icon"></i>
                                         </div>
-                                        <div class="invalid-feedback">Selecione uma doação.</div>
-                                        <div class="form-help">Escolha a doação a ser retirada</div>
+                                        <div class="invalid-feedback">Selecione uma data válida.</div>
+                                        <div class="form-help">Data em que a doação foi recebida</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="valorDoado" class="form-label required">Valor da Doação</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">R$</span>
+                                            <input type="number" id="valorDoado" name="valorDoado" class="form-control custom-input"
+                                                   step="0.01" min="0.01" placeholder="0,00" required>
+                                            <i class="fas fa-exclamation-triangle invalid-icon"></i>
+                                        </div>
+                                        <div class="invalid-feedback">Informe um valor maior que zero.</div>
+                                        <div class="form-help">Valor monetário da doação</div>
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-12">
-                                        <label for="obsRetiro" class="form-label">Observações</label>
-                                        <textarea id="obsRetiro" name="obsRetiro" class="form-control custom-input" rows="4" placeholder="Informações adicionais sobre a retirada..."></textarea>
-                                        <div class="form-help">Instruções especiais ou observações (opcional)</div>
+                                        <label for="obsDoacao" class="form-label">Observações</label>
+                                        <textarea id="obsDoacao" name="obsDoacao" class="form-control custom-input" rows="4"
+                                                  placeholder="Informações adicionais sobre a doação (tipo de doação, finalidade, etc.)..."></textarea>
+                                        <div class="form-help">Detalhes sobre a doação (opcional)</div>
                                     </div>
                                 </div>
                             </div>
@@ -501,8 +548,8 @@
                                 <button type="reset" class="btn btn-secondary btn-custom me-2" id="btnLimpar">
                                     <i class="fas fa-eraser me-2"></i>Limpar
                                 </button>
-                                <button type="submit" class="btn btn-primary btn-custom" id="btnSalvar">
-                                    <i class="fas fa-calendar-plus me-2"></i>Agendar Retirada
+                                <button type="submit" class="btn btn-success btn-custom" id="btnSalvar">
+                                    <i class="fas fa-save me-2"></i>Registrar Doação
                                 </button>
                             </div>
                         </form>
@@ -510,31 +557,47 @@
                 </div>
             </div>
 
-            <!-- Lista de Agendamentos -->
+            <!-- Lista de Doações e Filtros -->
             <div class="col-lg-6">
                 <div class="card form-card">
                     <div class="card-body p-0">
                         <div class="card-section">
                             <h5 class="section-title">
-                                <i class="fas fa-list me-2"></i>Agendamentos Recentes
-                                <button class="btn btn-sm btn-outline-primary float-end" onclick="carregarAgendamentos()" title="Recarregar">
+                                <i class="fas fa-list me-2"></i>Doações Recentes
+                                <button class="btn btn-sm btn-outline-primary float-end" onclick="carregarDoacoes()" title="Recarregar">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
                             </h5>
 
                             <!-- Filtros -->
                             <div class="row mb-3">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label for="filtroVoluntario" class="form-label">Filtrar por Voluntário</label>
-                                    <select id="filtroVoluntario" class="form-select custom-input" onchange="filtrarAgendamentos()">
+                                    <select id="filtroVoluntario" class="form-select custom-input" onchange="filtrarDoacoes()">
                                         <option value="">Todos os voluntários</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label for="filtroData" class="form-label">Filtrar por Data</label>
-                                    <input type="date" id="filtroData" class="form-control custom-input" onchange="filtrarAgendamentos()">
+                                    <input type="date" id="filtroData" class="form-control custom-input" onchange="filtrarDoacoes()">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="filtroValor" class="form-label">Filtrar por Valor</label>
+                                    <select id="filtroValor" class="form-select custom-input" onchange="filtrarDoacoes()">
+                                        <option value="">Todos os valores</option>
+                                        <option value="0-50">Até R$ 50,00</option>
+                                        <option value="50-100">R$ 50,00 a R$ 100,00</option>
+                                        <option value="100-500">R$ 100,00 a R$ 500,00</option>
+                                        <option value="500-1000">R$ 500,00 a R$ 1.000,00</option>
+                                        <option value="1000+">Acima de R$ 1.000,00</option>
+                                    </select>
                                 </div>
                             </div>
+
+
+
+
+
 
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
@@ -543,7 +606,7 @@
                                     </button>
                                 </div>
                                 <div class="text-muted small">
-                                    <span id="contadorAgendamentos">0</span> agendamento(s) encontrado(s)
+                                    <span id="contadorDoacoes">0</span> doação(ões) encontrada(s)
                                 </div>
                             </div>
 
@@ -551,16 +614,16 @@
                                 <table class="table table-custom table-hover">
                                     <thead>
                                     <tr>
-                                        <th>Data/Hora</th>
+                                        <th>Data</th>
                                         <th>Voluntário</th>
-                                        <th>Status</th>
+                                        <th>Valor</th>
                                         <th>Ações</th>
                                     </tr>
                                     </thead>
-                                    <tbody id="tabelaAgendamentos">
+                                    <tbody id="tabelaDoacoes">
                                     <tr>
                                         <td colspan="4" class="text-center text-muted py-4">
-                                            <i class="fas fa-spinner fa-spin me-2"></i>Carregando agendamentos...
+                                            <i class="fas fa-spinner fa-spin me-2"></i>Carregando doações...
                                         </td>
                                     </tr>
                                     </tbody>
@@ -579,11 +642,11 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Detalhes do Agendamento</h5>
+                <h5 class="modal-title">Detalhes da Doação</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="modalDetalhesBody">
-
+                <!-- Conteúdo será preenchido via JavaScript -->
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -594,6 +657,6 @@
 
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/scriptAgendarRetirada.js"></script>
+<script src="js/ScriptReceberDoacao.js"></script>
 </body>
 </html>

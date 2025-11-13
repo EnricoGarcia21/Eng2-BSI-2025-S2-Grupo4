@@ -1,6 +1,4 @@
-// scriptAgendarRetirada.js - Versão Completa com Filtros
 
-// URLs dos endpoints reais
 const API_BASE = 'http://localhost:8080/apis/agendar-retirada';
 const API_VOLUNTARIOS = 'http://localhost:8080/apis/voluntarios';
 const API_DOACOES = 'http://localhost:8080/apis/doadores';
@@ -300,7 +298,6 @@ function validarHorarioComercial(hora) {
     const [horas, minutos] = hora.split(':').map(Number);
     const totalMinutos = horas * 60 + minutos;
 
-    // Horário comercial: 8:00 (480 minutos) até 18:00 (1080 minutos)
     return totalMinutos >= 480 && totalMinutos <= 1080;
 }
 
@@ -421,10 +418,8 @@ async function salvarAgendamento(event) {
 
         mostrarMensagem(modoEdicao ? 'Retirada atualizada com sucesso!' : 'Retirada agendada com sucesso!', 'success');
 
-        // CORREÇÃO: Chamar cancelarEdicao() para resetar o formulário e voltar ao modo de criação
         cancelarEdicao();
 
-        // Recarregar lista de agendamentos
         await carregarAgendamentos();
 
     } catch (error) {
@@ -648,11 +643,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Definir data mínima para hoje
     const hoje = new Date().toISOString().split('T')[0];
     document.getElementById('dataRetiro').setAttribute('min', hoje);
 
-    // Menu toggle
     document.getElementById('menuBtn').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');
@@ -669,7 +662,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Fechar sidebar ao clicar no overlay
     document.getElementById('overlay').addEventListener('click', function() {
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('overlay');

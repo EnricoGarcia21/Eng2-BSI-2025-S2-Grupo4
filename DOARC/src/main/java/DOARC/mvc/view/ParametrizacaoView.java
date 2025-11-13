@@ -34,7 +34,7 @@ public class ParametrizacaoView {
             @RequestParam(required = false) MultipartFile file) {
 
         Map<String, Object> json = parametrizacaoController.addParam(razaoSocial, nomeFantasia, cnpj, rua, numero,
-                bairro, cidade, uf, cep, telefone, email, site, file); // REMOVIDO: estado
+                bairro, cidade, uf, cep, telefone, email, site, file);
 
         return json.get("erro") == null
                 ? ResponseEntity.ok(new Mensagem("Empresa cadastrada com sucesso!"))
@@ -51,7 +51,7 @@ public class ParametrizacaoView {
             @RequestParam String numero,
             @RequestParam String bairro,
             @RequestParam String cidade,
-            @RequestParam String uf, // REMOVIDO: estado
+            @RequestParam String uf,
             @RequestParam String cep,
             @RequestParam String telefone,
             @RequestParam String email,
@@ -59,7 +59,7 @@ public class ParametrizacaoView {
             @RequestParam(required = false) MultipartFile file) {
 
         Map<String, Object> json = parametrizacaoController.updtParam(id, razaoSocial, nomeFantasia, cnpj, rua, numero,
-                bairro, cidade, uf, cep, telefone, email, site, file); // REMOVIDO: estado
+                bairro, cidade, uf, cep, telefone, email, site, file);
 
         return json.get("erro") == null
                 ? ResponseEntity.ok(new Mensagem("Empresa alterada com sucesso!"))

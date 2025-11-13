@@ -132,7 +132,6 @@ public class AgendarRetiradaDAO implements IDAO<AgendarRetirada> {
         return lista;
     }
 
-    // Métodos específicos para AgendarRetirada
     public List<AgendarRetirada> getPorVoluntario(int volId, SingletonDB conexao) {
         List<AgendarRetirada> lista = new ArrayList<>();
         if (!conexao.isConectado()) {

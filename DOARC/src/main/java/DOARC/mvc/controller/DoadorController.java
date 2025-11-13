@@ -15,7 +15,6 @@ public class DoadorController {
     @Autowired
     private Doador doadorModel;
 
-    // Buscar doador por ID
     public Map<String, Object> getDoador(int id) {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -45,7 +44,6 @@ public class DoadorController {
                 System.out.println("DEBUG: Erro no controller ao buscar doador: " + e.getMessage());
                 json.put("erro", "Erro interno: " + e.getMessage());
             }
-            // ❌ Removido o conexao.Desconectar()
         } else {
             json.put("erro", "Erro ao conectar com o BD");
         }
@@ -53,7 +51,6 @@ public class DoadorController {
         return json;
     }
 
-    // Listar todos os doadores
     public Map<String, Object> listarDoadores() {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -66,7 +63,6 @@ public class DoadorController {
                 System.out.println("DEBUG: Erro no controller ao listar doadores: " + e.getMessage());
                 json.put("erro", "Erro interno: " + e.getMessage());
             }
-            // ❌ Removido o conexao.Desconectar()
         } else {
             json.put("erro", "Erro ao conectar com o BD");
         }
@@ -74,7 +70,6 @@ public class DoadorController {
         return json;
     }
 
-    // Buscar doadores por cidade
     public Map<String, Object> getDoadoresPorCidade(String cidade) {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -87,7 +82,6 @@ public class DoadorController {
                 System.out.println("DEBUG: Erro no controller ao buscar doadores por cidade: " + e.getMessage());
                 json.put("erro", "Erro interno: " + e.getMessage());
             }
-            // ❌ Removido o conexao.Desconectar()
         } else {
             json.put("erro", "Erro ao conectar com o BD");
         }
@@ -95,7 +89,6 @@ public class DoadorController {
         return json;
     }
 
-    // Buscar doadores por bairro
     public Map<String, Object> getDoadoresPorBairro(String bairro) {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -108,7 +101,6 @@ public class DoadorController {
                 System.out.println("DEBUG: Erro no controller ao buscar doadores por bairro: " + e.getMessage());
                 json.put("erro", "Erro interno: " + e.getMessage());
             }
-            // ❌ Removido o conexao.Desconectar()
         } else {
             json.put("erro", "Erro ao conectar com o BD");
         }
@@ -116,7 +108,6 @@ public class DoadorController {
         return json;
     }
 
-    // Buscar apenas o nome do doador por ID (método específico para dropdowns)
     public Map<String, Object> getNomeDoador(int id) {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String, Object> json = new HashMap<>();
@@ -135,7 +126,6 @@ public class DoadorController {
                 System.out.println("DEBUG: Erro no controller ao buscar nome do doador: " + e.getMessage());
                 json.put("erro", "Erro interno: " + e.getMessage());
             }
-            // ❌ Removido o conexao.Desconectar()
         } else {
             json.put("erro", "Erro ao conectar com o BD");
         }

@@ -67,7 +67,6 @@ public class SingletonDB {
         return false;
     }
 
-    // Método para verificar se está conectado
     public boolean isConectado() {
         try {
             return connection != null && !connection.isClosed();

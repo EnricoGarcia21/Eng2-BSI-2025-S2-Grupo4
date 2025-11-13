@@ -61,8 +61,6 @@ public class ParametrizacaoController {
 
         if(conexao.conectar()){
             try {
-                // Remove a verificação isEmpty se sempre vai ter apenas um registro
-                // Ou mantém se quiser evitar duplicação
                 if (isEmpty(conexao)) {
                     try{
                         // Upload do arquivo
@@ -108,7 +106,6 @@ public class ParametrizacaoController {
                         json.put("erro", "Erro ao armazenar o arquivo. " + e.getMessage());
                     }
                 } else {
-                    // Se já existe, faz update em vez de insert
                     json.put("erro", "Já existe uma Empresa cadastrada. Use a função de editar.");
                 }
             } catch (Exception e) {
@@ -141,12 +138,11 @@ public class ParametrizacaoController {
                     file.transferTo(new File(uploadFolder.getAbsoluteFile() + File.separator + "logo.png"));
                 }
 
-                // Formatação dos dados
+
                 cnpj = cnpj.replaceAll("[^\\d]", "");
                 cep = cep.replaceAll("[^\\d]", "");
                 telefone = telefone.replaceAll("[^\\d]", "");
 
-                // Cria objeto Parametrizacao
                 Parametrizacao param = new Parametrizacao(
                         id, cnpj, razaoSocial, nomeFantasia, rua, cidade,
                         bairro, Integer.parseInt(numero), uf, cep, email, site, telefone
@@ -184,7 +180,7 @@ public class ParametrizacaoController {
         return json;
     }
 
-    // Método para obter todos os parâmetros (útil para o frontend)
+
     public Map<String,Object> getAllParams() {
         SingletonDB conexao = SingletonDB.getInstancia();
         Map<String,Object> json = new HashMap<>();
@@ -193,7 +189,6 @@ public class ParametrizacaoController {
             try {
                 List<Parametrizacao> parametrizacoes = paramModel.get(null, conexao);
                 if (parametrizacoes != null && !parametrizacoes.isEmpty()) {
-                    // Retorna o primeiro (e único) registro de parametrização
                     Parametrizacao param = parametrizacoes.get(0);
                     json.put("id", param.getId());
                     json.put("razaoSocial", param.getRazaoSocial());
@@ -223,7 +218,6 @@ public class ParametrizacaoController {
         return json;
     }
 
-    // Método para verificar se já existe empresa cadastrada - NÃO desconecta!
     private boolean isEmpty(SingletonDB conexao) {
         try {
             List<Parametrizacao> parametrizacoes = paramModel.get(null, conexao);

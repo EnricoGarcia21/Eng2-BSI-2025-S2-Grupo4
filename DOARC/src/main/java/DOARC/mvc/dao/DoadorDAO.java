@@ -149,12 +149,10 @@ public class DoadorDAO implements IDAO<Doador> {
         return lista;
     }
 
-    // Método específico para buscar todos os doadores (alias para get com filtro null)
     public List<Doador> getAll(SingletonDB conexao) {
         return get(null, conexao);
     }
 
-    // Método específico para buscar doadores por cidade
     public List<Doador> getPorCidade(String cidade, SingletonDB conexao) {
         List<Doador> lista = new ArrayList<>();
         if (!conexao.isConectado()) {
@@ -176,7 +174,6 @@ public class DoadorDAO implements IDAO<Doador> {
         return lista;
     }
 
-    // Método específico para buscar doadores por bairro
     public List<Doador> getPorBairro(String bairro, SingletonDB conexao) {
         List<Doador> lista = new ArrayList<>();
         if (!conexao.isConectado()) {

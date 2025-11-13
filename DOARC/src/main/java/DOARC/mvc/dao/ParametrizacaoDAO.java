@@ -13,7 +13,6 @@ public class ParametrizacaoDAO implements IDAO<Parametrizacao> {
 
     @Override
     public Parametrizacao gravar(Parametrizacao entidade, SingletonDB conexao) {
-        // Força o ID para 1 sempre
         String sql = "INSERT INTO parametrizacao (id, p_cnpj, p_razaosocial, p_nomefantasia, p_rua, p_cidade, p_bairro, numero, p_uf, p_cep, p_email, p_site, p_telefone) " +
                 "VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -33,7 +32,7 @@ public class ParametrizacaoDAO implements IDAO<Parametrizacao> {
 
             int affectedRows = pst.executeUpdate();
             if (affectedRows > 0) {
-                entidade.setId(1); // Define o ID como 1
+                entidade.setId(1);
                 return entidade;
             }
         } catch (SQLException e) {
@@ -75,7 +74,7 @@ public class ParametrizacaoDAO implements IDAO<Parametrizacao> {
 
     @Override
     public Parametrizacao get(int id, SingletonDB conexao) {
-        String sql = "SELECT * FROM parametrizacao WHERE id=1"; // Sempre busca ID 1
+        String sql = "SELECT * FROM parametrizacao WHERE id=1";
 
         try (PreparedStatement pst = conexao.getConnection().prepareStatement(sql)) {
             ResultSet rs = pst.executeQuery();
