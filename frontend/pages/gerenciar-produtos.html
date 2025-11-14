@@ -438,6 +438,8 @@
                 categoriaId: parseInt(categoria.value)
             };
 
+
+            
             if (produtoId) {
                 // PUT /api/produtos/{id}
                 await API.put(`/produtos/${produtoId}`, data);
