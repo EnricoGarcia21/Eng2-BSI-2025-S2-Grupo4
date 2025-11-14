@@ -1,61 +1,163 @@
 package DOARC.mvc.view;
 
 import DOARC.mvc.controller.VoluntarioController;
+import DOARC.mvc.model.Voluntario;
+import DOARC.mvc.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/apis/voluntario")
 public class VoluntarioView {
+
     @Autowired
     private VoluntarioController voluntarioController;
 
-    @PostMapping
-    public ResponseEntity<Object> addVoluntario(@RequestBody Map<String, Object> dados) {
+    @Autowired
+    private Voluntario voluntarioModel;
 
-        Map<String, Object> resultado = voluntarioController.addVoluntario(dados);
-
-        return resultado.containsKey("erro")
-                ? ResponseEntity.badRequest().body(resultado)
-                : ResponseEntity.ok(resultado);
+    private Conexao getConexao() {
+        return SingletonDB.conectar();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateVoluntario(@PathVariable int id,
-                                                   @RequestBody Map<String, Object> dados) {
+    // ===== PERFIL DO VOLUNTÁRIO =====
 
-        Map<String, Object> resultado = voluntarioController.updtVoluntario(id, dados);
+    @GetMapping("/perfil/{id}")
+    public ResponseEntity<Map<String, Object>> obterPerfil(@PathVariable int id) {
+        try {
+            Map<String, Object> voluntario = voluntarioController.getVoluntario(id);
 
-        return resultado.containsKey("erro")
-                ? ResponseEntity.badRequest().body(resultado)
-                : ResponseEntity.ok(resultado);
+            if (voluntario.containsKey("erro")) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(voluntario);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao obter perfil: " + e.getMessage());
+            Map<String, Object> error = Map.of("erro", "Erro interno do servidor");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
-    @GetMapping
-    public ResponseEntity<Object> listar() {
-        return ResponseEntity.ok(voluntarioController.getVoluntarios());
+    @PutMapping("/perfil/{id}")
+    public ResponseEntity<Map<String, Object>> atualizarPerfil(@PathVariable int id, @RequestBody Map<String, Object> dados) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Verificar se o voluntário existe
+            Voluntario existente = voluntarioModel.consultar(id, getConexao());
+            if (existente == null) {
+                response.put("erro", "Voluntário não encontrado");
+                return ResponseEntity.notFound().build();
+            }
+
+            // Atualizar apenas campos permitidos (não críticos)
+            if (dados.containsKey("vol_nome")) {
+                existente.setVol_nome((String) dados.get("vol_nome"));
+            }
+            if (dados.containsKey("vol_telefone")) {
+                existente.setVol_telefone((String) dados.get("vol_telefone"));
+            }
+            if (dados.containsKey("vol_rua")) {
+                existente.setVol_rua((String) dados.get("vol_rua"));
+            }
+            if (dados.containsKey("vol_bairro")) {
+                existente.setVol_bairro((String) dados.get("vol_bairro"));
+            }
+            if (dados.containsKey("vol_cidade")) {
+                existente.setVol_cidade((String) dados.get("vol_cidade"));
+            }
+            if (dados.containsKey("vol_numero")) {
+                existente.setVol_numero((String) dados.get("vol_numero"));
+            }
+            if (dados.containsKey("vol_cep")) {
+                existente.setVol_cep((String) dados.get("vol_cep"));
+            }
+            if (dados.containsKey("vol_uf")) {
+                existente.setVol_uf((String) dados.get("vol_uf"));
+            }
+
+            Voluntario atualizado = voluntarioModel.alterar(existente, getConexao());
+
+            if (atualizado != null) {
+                response.put("success", true);
+                response.put("message", "Perfil atualizado com sucesso!");
+
+                // Retornar dados atualizados
+                Map<String, Object> voluntarioMap = new HashMap<>();
+                voluntarioMap.put("vol_id", atualizado.getVol_id());
+                voluntarioMap.put("vol_nome", atualizado.getVol_nome());
+                voluntarioMap.put("vol_cpf", atualizado.getVol_cpf());
+                voluntarioMap.put("vol_email", atualizado.getVol_email());
+                voluntarioMap.put("vol_telefone", atualizado.getVol_telefone());
+                voluntarioMap.put("vol_datanasc", atualizado.getVol_datanasc());
+                voluntarioMap.put("vol_rua", atualizado.getVol_rua());
+                voluntarioMap.put("vol_bairro", atualizado.getVol_bairro());
+                voluntarioMap.put("vol_cidade", atualizado.getVol_cidade());
+                voluntarioMap.put("vol_numero", atualizado.getVol_numero());
+                voluntarioMap.put("vol_cep", atualizado.getVol_cep());
+                voluntarioMap.put("vol_uf", atualizado.getVol_uf());
+                voluntarioMap.put("vol_sexo", atualizado.getVol_sexo());
+
+                response.put("voluntario", voluntarioMap);
+                return ResponseEntity.ok(response);
+            } else {
+                response.put("erro", "Erro ao atualizar perfil");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao atualizar perfil: " + e.getMessage());
+            response.put("erro", "Erro interno do servidor");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Object> buscar(@PathVariable int id) {
+    // ===== CAMPANHAS DO VOLUNTÁRIO =====
 
-        Map<String, Object> json = voluntarioController.getVoluntarioById(id);
-
-        return json.containsKey("erro")
-                ? ResponseEntity.badRequest().body(json)
-                : ResponseEntity.ok(json);
+    @GetMapping("/minhas-campanhas/{voluntarioId}")
+    public ResponseEntity<List<Map<String, Object>>> obterMinhasCampanhas(@PathVariable int voluntarioId) {
+        try {
+            // Reutilizar o endpoint de campanhas
+            RestCampanhaController campanhaRest = new RestCampanhaController();
+            return campanhaRest.listarCampanhasPorVoluntario(voluntarioId);
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao obter campanhas do voluntário: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
+        }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletar(@PathVariable int id) {
+    // ===== DASHBOARD DO VOLUNTÁRIO =====
 
-        Map<String, Object> json = voluntarioController.deletarVoluntario(id);
+    @GetMapping("/dashboard/{voluntarioId}")
+    public ResponseEntity<Map<String, Object>> obterDashboard(@PathVariable int voluntarioId) {
+        try {
+            Map<String, Object> dashboard = new HashMap<>();
 
-        return json.containsKey("erro")
-                ? ResponseEntity.badRequest().body(json)
-                : ResponseEntity.ok(json);
+            // Informações do voluntário
+            Voluntario voluntario = voluntarioModel.consultar(voluntarioId, getConexao());
+            if (voluntario != null) {
+                dashboard.put("nome", voluntario.getVol_nome());
+                dashboard.put("email", voluntario.getVol_email());
+            }
+
+            // Estatísticas básicas (pode ser expandido)
+            dashboard.put("totalCampanhas", 0); // Implementar contagem se necessário
+            dashboard.put("campanhasAtivas", 0);
+            dashboard.put("ultimoLogin", new Date());
+
+            return ResponseEntity.ok(dashboard);
+
+        } catch (Exception e) {
+            System.err.println("❌ Erro ao obter dashboard: " + e.getMessage());
+            Map<String, Object> error = Map.of("erro", "Erro interno do servidor");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 }

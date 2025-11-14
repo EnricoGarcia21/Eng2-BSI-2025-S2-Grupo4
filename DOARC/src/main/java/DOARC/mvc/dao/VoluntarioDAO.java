@@ -4,6 +4,7 @@ import DOARC.mvc.model.Voluntario;
 import DOARC.mvc.util.Conexao;
 import org.springframework.stereotype.Repository;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -162,5 +163,27 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         v.setVol_cpf(rs.getString("vol_cpf"));
 
         return v;
+    }
+
+    public Voluntario buscarPorCpf(String cpf, Conexao conexao) {
+        String sql = "SELECT * FROM voluntario WHERE vol_cpf = ?";
+
+        try {
+            Conexao conn = (Conexao) conexao.getConnect();
+            if (conn == null) return null;
+
+            try (PreparedStatement stmt = ((java.sql.Connection) conn).prepareStatement(sql)) {
+                stmt.setString(1, cpf);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    if (rs.next()) {
+                        return mapVoluntario(rs); // Use seu método de mapeamento
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("ERRO buscarPorCpf: " + e.getMessage());
+            e.printStackTrace();
+        }
+        return null;
     }
 }

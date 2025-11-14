@@ -5,39 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOARC - Gerenciar Voluntários</title>
     <link rel="stylesheet" href="../css/style.css">
-    <script src="https://unpkg.com/vanilla-masker@1.2.0/lib/vanilla-masker.js"></script>
-    <style>
-        /* Estilos básicos para garantir funcionamento */
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 5% auto; padding: 0; border-radius: 8px; width: 90%; max-width: 600px; }
-        .modal-header { padding: 1rem 1.5rem; border-bottom: 1px solid #dee2e6; display: flex; justify-content: between; align-items: center; }
-        .modal-body { padding: 1.5rem; max-height: 70vh; overflow-y: auto; }
-        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; gap: 0.5rem; }
-        .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; }
-        .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
-        .form-group { flex: 1; }
-        .form-label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
-        .form-control { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; }
-        .form-select { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; background-color: white; }
-        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; display: inline-block; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-outline { background-color: transparent; border: 1px solid #ddd; color: #333; }
-        .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.875rem; }
-        .btn-info { background-color: #17a2b8; color: white; }
-        .btn-warning { background-color: #ffc107; color: black; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-secondary { background-color: #6c757d; color: white; }
-        .table { width: 100%; border-collapse: collapse; }
-        .table th, .table td { padding: 0.75rem; border-bottom: 1px solid #dee2e6; text-align: left; }
-        .table-striped tbody tr:nth-child(odd) { background-color: #f8f9fa; }
-        .badge { padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; }
-        .badge-success { background-color: #28a745; color: white; }
-        .badge-danger { background-color: #dc3545; color: white; }
-        .text-center { text-align: center; }
-        .required::after { content: " *"; color: red; }
-        .form-error { color: red; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
-        .action-buttons { display: flex; gap: 0.25rem; }
-    </style>
 </head>
 <body>
     <header class="header">
@@ -102,13 +69,13 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
                     <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                         <input type="text" id="searchInput" class="form-control" placeholder="Buscar voluntário..." style="max-width: 300px;">
-                        <select id="filtroStatus" class="form-control form-select" style="max-width: 150px;">
+                        <select id="filtroStatus" class="form-control form-select" style="max-width: 150px;" onchange="filtrarPorStatus()">
                             <option value="">Todos Status</option>
                             <option value="ativo">Ativo</option>
                             <option value="inativo">Inativo</option>
                         </select>
                     </div>
-                    
+                    <button class="btn btn-primary" onclick="openModal('modalVoluntario')">➕ Novo Voluntário</button>
                 </div>
 
                 <div class="table-container">
@@ -126,7 +93,34 @@
                             </tr>
                         </thead>
                         <tbody id="tabelaVoluntarios">
-                            <!-- Os dados serão carregados via JavaScript -->
+                            <tr>
+                                <td>João Silva</td>
+                                <td>123.456.789-00</td>
+                                <td>joao@email.com</td>
+                                <td>(18) 99999-9999</td>
+                                <td>10/01/2023</td>
+                                <td>45</td>
+                                <td><span class="badge badge-success">Ativo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(1)">✏️</button>
+                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(1)">📋</button>
+                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(1)">🔒</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Maria Santos</td>
+                                <td>987.654.321-00</td>
+                                <td>maria@email.com</td>
+                                <td>(18) 98888-8888</td>
+                                <td>15/03/2022</td>
+                                <td>68</td>
+                                <td><span class="badge badge-success">Ativo</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(2)">✏️</button>
+                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(2)">📋</button>
+                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(2)">🔒</button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -134,7 +128,6 @@
         </div>
     </main>
 
-    <!-- Modal para Cadastro/Edição de Voluntários -->
     <div id="modalVoluntario" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -144,116 +137,51 @@
             <div class="modal-body">
                 <form id="formVoluntario">
                     <input type="hidden" id="voluntarioId">
-                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="vol_nome" class="form-label required">Nome Completo</label>
-                            <input type="text" id="vol_nome" class="form-control" required>
+                            <label for="nome" class="form-label required">Nome Completo</label>
+                            <input type="text" id="nome" class="form-control" required>
                             <div class="form-error">Nome é obrigatório</div>
                         </div>
                         <div class="form-group">
-                            <label for="vol_cpf" class="form-label required">CPF</label>
-                            <input type="text" id="vol_cpf" class="form-control" required>
+                            <label for="cpf" class="form-label required">CPF</label>
+                            <input type="text" id="cpf" class="form-control" data-mask="cpf" required>
                             <div class="form-error">CPF inválido</div>
                         </div>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="vol_email" class="form-label required">E-mail</label>
-                            <input type="email" id="vol_email" class="form-control" required>
+                            <label for="email" class="form-label required">E-mail</label>
+                            <input type="email" id="email" class="form-control" required>
                             <div class="form-error">E-mail inválido</div>
                         </div>
                         <div class="form-group">
-                            <label for="vol_telefone" class="form-label required">Telefone</label>
-                            <input type="tel" id="vol_telefone" class="form-control" required>
+                            <label for="telefone" class="form-label required">Telefone</label>
+                            <input type="tel" id="telefone" class="form-control" data-mask="phone" required>
                             <div class="form-error">Telefone inválido</div>
                         </div>
                     </div>
-                    
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="vol_dataNasc" class="form-label required">Data de Nascimento</label>
-                            <input type="date" id="vol_dataNasc" class="form-control" required>
+                            <label for="dataNascimento" class="form-label required">Data de Nascimento</label>
+                            <input type="date" id="dataNascimento" class="form-control" required>
                             <div class="form-error">Data é obrigatória</div>
                         </div>
                         <div class="form-group">
-                            <label for="vol_sexo" class="form-label required">Sexo</label>
-                            <select id="vol_sexo" class="form-control form-select" required>
-                                <option value="M">Masculino</option>
-                                <option value="F">Feminino</option>
+                            <label for="statusVoluntario" class="form-label required">Status</label>
+                            <select id="statusVoluntario" class="form-control form-select" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="inativo">Inativo</option>
                             </select>
                         </div>
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="vol_rua" class="form-label required">Rua</label>
-                            <input type="text" id="vol_rua" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="vol_numero" class="form-label required">Número</label>
-                            <input type="text" id="vol_numero" class="form-control" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="endereco" class="form-label">Endereço</label>
+                        <input type="text" id="endereco" class="form-control">
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="vol_bairro" class="form-label required">Bairro</label>
-                            <input type="text" id="vol_bairro" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="vol_cidade" class="form-label required">Cidade</label>
-                            <input type="text" id="vol_cidade" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="vol_cep" class="form-label required">CEP</label>
-                            <input type="text" id="vol_cep" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="vol_uf" class="form-label required">UF</label>
-                            <select id="vol_uf" class="form-control form-select" required>
-                                <option value="">Selecione um estado</option>
-                                <option value="AC">Acre</option>
-                                <option value="AL">Alagoas</option>
-                                <option value="AP">Amapá</option>
-                                <option value="AM">Amazonas</option>
-                                <option value="BA">Bahia</option>
-                                <option value="CE">Ceará</option>
-                                <option value="DF">Distrito Federal</option>
-                                <option value="ES">Espírito Santo</option>
-                                <option value="GO">Goiás</option>
-                                <option value="MA">Maranhão</option>
-                                <option value="MT">Mato Grosso</option>
-                                <option value="MS">Mato Grosso do Sul</option>
-                                <option value="MG">Minas Gerais</option>
-                                <option value="PA">Pará</option>
-                                <option value="PB">Paraíba</option>
-                                <option value="PR">Paraná</option>
-                                <option value="PE">Pernambuco</option>
-                                <option value="PI">Piauí</option>
-                                <option value="RJ">Rio de Janeiro</option>
-                                <option value="RN">Rio Grande do Norte</option>
-                                <option value="RS">Rio Grande do Sul</option>
-                                <option value="RO">Rondônia</option>
-                                <option value="RR">Roraima</option>
-                                <option value="SC">Santa Catarina</option>
-                                <option value="SP">São Paulo</option>
-                                <option value="SE">Sergipe</option>
-                                <option value="TO">Tocantins</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group" style="flex: 1;">
-                            <label for="vol_observacoes" class="form-label">Observações</label>
-                            <textarea id="vol_observacoes" class="form-control" rows="3" 
-                                    placeholder="Digite aqui observações relevantes sobre o voluntário..."></textarea>
-                        </div>
+                    <div class="form-group">
+                        <label for="observacoes" class="form-label">Observações</label>
+                        <textarea id="observacoes" class="form-control" rows="3"></textarea>
                     </div>
                 </form>
             </div>
@@ -264,7 +192,6 @@
         </div>
     </div>
 
-    <!-- Modal para Histórico -->
     <div id="modalHistorico" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -293,578 +220,441 @@
             </div>
         </div>
     </div>
+
+    <script src="../js/app.js"></script>
 <script>
-    // Variável global para armazenar os voluntários
-    let voluntariosData = [];
-
-    // Configuração específica para esta página
-    const VOLUNTARIOS_CONFIG = {
-        BASE_URL: 'http://localhost:8080/apis/voluntario',
-        HEADERS: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+// =======================================================================
+// POLYFILLS/MOCKS para UI e Validator (Garantir que as funções chamadas existam)
+// O seu arquivo '../js/app.js' deve conter implementações mais robustas.
+// =======================================================================
+const UI = window.UI || {
+    showAlert: (message, type) => {
+        const container = document.getElementById('api-messages');
+        container.innerHTML = `<div class="alert ${type} fade show">${message}</div>`;
+        setTimeout(() => container.innerHTML = '', 5000);
+    },
+    confirm: (message, callback) => {
+        if (confirm(message)) {
+            callback();
         }
-    };
-
-    // Sistema de Autenticação SIMPLES para esta página
-    const Auth = {
-        getUserName() {
-            // Tenta pegar do localStorage (seu sistema atual)
-            const userData = localStorage.getItem('doarc_user');
-            if (userData) {
-                try {
-                    const user = JSON.parse(userData);
-                    return user.nome || user.username || 'Voluntário';
-                } catch (e) {
-                    console.error('Erro ao parsear user data:', e);
-                }
+    },
+    openModal: (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+            modal.classList.add('open');
+        }
+    },
+    closeModal: (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('open');
+            // Limpa erros do modalVoluntario ao fechar
+            if (modalId === 'modalVoluntario') {
+                const form = document.getElementById('formVoluntario');
+                if (form && window.Validator) Validator.clearAllErrors(form);
             }
-            
-            // Tenta pegar do sessionStorage (alternativo)
-            const sessionUser = sessionStorage.getItem('userName');
-            if (sessionUser) return sessionUser;
-            
-            // Valor padrão
-            return 'Voluntário';
-        },
+        }
+    }
+};
 
-       logout() {
-            // Limpa todos os possíveis storages
-            localStorage.removeItem('doarc_user');
-            localStorage.removeItem('user');
-            localStorage.removeItem('token');
-            localStorage.removeItem('loggedIn');
-            sessionStorage.clear();
-            
-    // Redireciona para login (INDEX)
-         window.location.href = '../index.html'; // ← Volta para raiz
+const Validator = window.Validator || {
+    isEmpty: value => !value || String(value).trim() === '',
+    isValidEmail: email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    isValidCPF: cpf => /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/.test(cpf) && cpf.replace(/[^\d]/g, '').length === 11,
+    isValidPhone: phone => /[0-9]{2}[\s]?[9]?[0-9]{4}-?[0-9]{4}/.test(phone.replace(/[^\d]/g, '')),
+    showError: (inputElement, message) => {
+        inputElement.classList.add('error');
+        const errorDiv = inputElement.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains('form-error')) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    },
+    clearError: (inputElement) => {
+        inputElement.classList.remove('error');
+        const errorDiv = inputElement.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains('form-error')) {
+            errorDiv.textContent = '';
+            errorDiv.style.display = 'none';
+        }
+    },
+    clearAllErrors: (formElement) => {
+        formElement.querySelectorAll('.form-control.error').forEach(input => Validator.clearError(input));
+    }
+};
+// =======================================================================
+
+
+// Configuração base da API
+const API_BASE = "http://localhost:8080/apis";
+const API_VOLUNTARIOS = `${API_BASE}/voluntario`;
+
+/**
+ * Headers padrão com autenticação JWT.
+ * Redireciona para login se o token não existir.
+ */
+const getHeaders = () => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    
+    // 🔑 JWT AUTHENTICATION
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+        headers.append("Authorization", `Bearer ${token}`);
+    } else {
+        // Se não houver token, força o logout e redireciona
+        UI.showAlert('Sessão expirada. Faça login novamente.', 'danger');
+        window.location.href = '../index.html'; 
+    }
+    return headers;
+};
+
+// Funções de formatação
+function formatarCPF(cpf) {
+    if (!cpf) return '';
+    return String(cpf).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
-    };
 
-    // Inicialização da página
-    document.addEventListener('DOMContentLoaded', function() {
-        // 1. Atualiza o nome do usuário no header
-        atualizarUsuarioHeader();
+function formatarTelefone(telefone) {
+    if (!telefone) return '';
+    // Formata para (XX) XXXXX-XXXX
+    const digits = String(telefone).replace(/[^\d]/g, '');
+    if (digits.length === 11) {
+        return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+    // Formata para (XX) XXXX-XXXX (fixo)
+    if (digits.length === 10) {
+        return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return telefone;
+}
+
+function formatarData(data) {
+    if (!data) return '';
+    // Converte de YYYY-MM-DD para DD/MM/YYYY
+    if (data.includes('-')) {
+        const parts = data.split('-');
+        // Tenta reverter de YYYY-MM-DD para o formato BR
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+    }
+    // Se for uma string de data completa (ISO), usa toLocaleDateString
+    return new Date(data).toLocaleDateString('pt-BR');
+}
+
+// Função para carregar voluntários da API
+async function carregarVoluntarios() {
+    try {
+        const response = await fetch(API_VOLUNTARIOS, { headers: getHeaders() });
         
-        // 2. Configura o botão de logout
-        configurarLogout();
+        if (!response.ok) {
+             // Tenta extrair a mensagem de erro do backend (ex: Acesso negado)
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.erro || `Erro de rede: ${response.status}`);
+        }
         
-        // 3. Inicializa máscaras
-        inicializarMascaras();
+        const voluntarios = await response.json();
+        preencherTabela(voluntarios);
+    } catch (error) {
+        console.error('Erro ao carregar voluntários:', error);
+        UI.showAlert('❌ Erro ao carregar voluntários. ' + (error.message || ''), 'danger');
+        const tbody = document.getElementById('tabelaVoluntarios');
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Não foi possível carregar os dados.</td></tr>';
+    }
+}
+
+// Função para preencher a tabela com dados da API
+function preencherTabela(voluntarios) {
+    const tbody = document.getElementById('tabelaVoluntarios');
+    tbody.innerHTML = '';
+
+    if (voluntarios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum voluntário encontrado.</td></tr>';
+        return;
+    }
+
+    voluntarios.forEach(vol => {
+        // Normaliza as chaves do objeto (supondo que a API retorne vol_id, vol_nome, etc.)
+        const id = vol.vol_id || vol.id;
+        const nome = vol.vol_nome || vol.nome || '';
+        const cpf = vol.vol_cpf || vol.cpf || '';
+        const email = vol.vol_email || vol.email || '';
+        const telefone = vol.vol_telefone || vol.telefone || '';
+        // Converte a data de 'YYYY-MM-DD' (ou similar) para 'DD/MM/YYYY'
+        const dataCadastro = formatarData(vol.vol_datacadastro || vol.dataCadastro || '');
+        const doacoesRealizadas = vol.doacoes_realizadas || vol.doacoesRealizadas || 0;
+        const status = (vol.status || 'ativo').toLowerCase();
+
+        const statusClass = status === 'ativo' ? 'success' : 'danger';
+        const statusText = status === 'ativo' ? 'Ativo' : 'Inativo';
+        const acaoIcone = status === 'ativo' ? '🔒' : '🔓';
+        const acaoClass = status === 'ativo' ? 'danger' : 'success';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${nome}</td>
+            <td>${formatarCPF(cpf)}</td>
+            <td>${email}</td>
+            <td>${formatarTelefone(telefone)}</td>
+            <td>${dataCadastro}</td>
+            <td>${doacoesRealizadas}</td>
+            <td><span class="badge badge-${statusClass}">${statusText}</span></td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="editarVoluntario(${id})">✏️</button>
+                <button class="btn btn-sm btn-warning" onclick="verHistorico(${id})">📋</button>
+                <button class="btn btn-sm btn-${acaoClass}" onclick="toggleStatus(${id}, '${status}')">
+                    ${acaoIcone}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Função para buscar voluntário por ID
+async function buscarVoluntarioPorId(id) {
+    try {
+        const response = await fetch(`${API_VOLUNTARIOS}/${id}`, { headers: getHeaders() });
+        if (!response.ok) throw new Error('Voluntário não encontrado');
+        return await response.json();
+    } catch (error) {
+        console.error('Erro:', error);
+        UI.showAlert('Erro ao carregar dados do voluntário', 'danger');
+        return null;
+    }
+}
+
+// Função para salvar voluntário (criar ou atualizar)
+async function salvarVoluntario() {
+    const form = document.getElementById('formVoluntario');
+    const nome = document.getElementById('nome');
+    const cpf = document.getElementById('cpf');
+    const email = document.getElementById('email');
+    const telefone = document.getElementById('telefone');
+    const dataNascimento = document.getElementById('dataNascimento');
+    const endereco = document.getElementById('endereco'); // Usado como placeholder para vol_rua
+    const statusVoluntario = document.getElementById('statusVoluntario');
+
+    Validator.clearAllErrors(form);
+    let isValid = true;
+
+    // Validações
+    if (Validator.isEmpty(nome.value)) { Validator.showError(nome, 'Nome é obrigatório'); isValid = false; }
+    // A validação de CPF deve ser feita no formato puro (somente dígitos)
+    const cpfPuro = cpf.value.replace(/[^\d]/g, '');
+    if (Validator.isEmpty(cpfPuro) || !Validator.isValidCPF(cpfPuro)) { Validator.showError(cpf, 'CPF inválido'); isValid = false; }
+    if (Validator.isEmpty(email.value) || !Validator.isValidEmail(email.value)) { Validator.showError(email, 'E-mail inválido'); isValid = false; }
+    // A validação de telefone deve ser feita no formato puro (somente dígitos)
+    const telefonePuro = telefone.value.replace(/[^\d]/g, '');
+    if (Validator.isEmpty(telefonePuro) || !Validator.isValidPhone(telefonePuro)) { Validator.showError(telefone, 'Telefone inválido'); isValid = false; }
+    if (Validator.isEmpty(dataNascimento.value)) { Validator.showError(dataNascimento, 'Data é obrigatória'); isValid = false; }
+
+    if (!isValid) {
+        UI.showAlert('Corrija os erros do formulário.', 'danger');
+        return;
+    }
+
+    try {
+        const voluntarioId = document.getElementById('voluntarioId').value;
         
-        // 4. Configura event listeners
-        inicializarEventListeners();
+        // 🛠️ Mapeamento para o formato da API (utilizando as informações do form)
+        // Valores default/hardcoded são usados para campos não presentes no modal
+        const data = {
+            vol_nome: nome.value,
+            vol_cpf: cpfPuro,
+            vol_email: email.value,
+            vol_telefone: telefonePuro,
+            vol_datanasc: dataNascimento.value,
+            vol_rua: endereco.value || '', // Assumindo 'endereco' é 'vol_rua'
+            vol_bairro: "Não Informado", // Hardcoded
+            vol_numero: "S/N",   // Hardcoded
+            vol_cidade: "Não Informado", // Hardcoded
+            vol_cep: "00000000", // Hardcoded
+            vol_uf: "ND", // Hardcoded
+            vol_sexo: "N", // Hardcoded (Pode ser adicionado um campo 'Sexo' ao form)
+            status: statusVoluntario.value // Adicionando status no payload
+        };
+
+        const requestOptions = {
+            method: voluntarioId ? "PUT" : "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        };
+
+        const url = voluntarioId ? `${API_VOLUNTARIOS}/${voluntarioId}` : API_VOLUNTARIOS;
+
+        const response = await fetch(url, requestOptions);
         
-        // 5. Carrega os voluntários
-        carregarVoluntarios();
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.erro || `Erro de rede: ${response.status}`);
+        }
+
+        UI.showAlert(voluntarioId ? '✅ Voluntário atualizado!' : '✅ Voluntário cadastrado!', 'success');
+        closeModal('modalVoluntario');
+        carregarVoluntarios(); // Recarrega a lista
+    } catch (error) {
+        console.error('Erro:', error);
+        UI.showAlert('❌ Erro ao salvar voluntário: ' + (error.message || ''), 'danger');
+    }
+}
+
+// Função para editar voluntário
+async function editarVoluntario(id) {
+    try {
+        const voluntario = await buscarVoluntarioPorId(id);
+        if (!voluntario) return;
+
+        // Limpa erros antes de popular
+        Validator.clearAllErrors(document.getElementById('formVoluntario'));
+
+        document.getElementById('voluntarioId').value = id;
+        document.getElementById('modalTitle').textContent = 'Editar Voluntário';
+        // Mapeamento das chaves da API para os campos do formulário
+        document.getElementById('nome').value = voluntario.vol_nome || voluntario.nome || '';
+        document.getElementById('cpf').value = voluntario.vol_cpf || voluntario.cpf || '';
+        document.getElementById('email').value = voluntario.vol_email || voluntario.email || '';
+        document.getElementById('telefone').value = voluntario.vol_telefone || voluntario.telefone || '';
+        document.getElementById('dataNascimento').value = (voluntario.vol_datanasc || voluntario.dataNascimento || '').split('T')[0]; // Pega apenas a data
+        document.getElementById('endereco').value = voluntario.vol_rua || voluntario.endereco || ''; // Assumindo 'vol_rua'
+        document.getElementById('statusVoluntario').value = (voluntario.status || 'ativo').toLowerCase();
+        document.getElementById('observacoes').value = voluntario.observacoes || ''; // Se tiver campo de observacoes
+
+        UI.openModal('modalVoluntario');
+    } catch (error) {
+        console.error('Erro:', error);
+        UI.showAlert('❌ Erro ao carregar dados do voluntário para edição', 'danger');
+    }
+}
+
+// Função para alternar status
+async function toggleStatus(id, statusAtual) {
+    const novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
+    const acao = novoStatus === 'ativo' ? 'ativar' : 'inativar';
+    
+    UI.confirm(`Deseja realmente ${acao} este voluntário?`, async function() {
+        try {
+            const data = { status: novoStatus };
+            
+            const requestOptions = {
+                method: "PUT",
+                headers: getHeaders(),
+                body: JSON.stringify(data)
+            };
+            // Endpoint de alteração de status (PATCH é mais semanticamente correto, mas PUT com corpo simplificado também é comum)
+            const response = await fetch(`${API_VOLUNTARIOS}/${id}/status`, requestOptions);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.erro || `Erro de rede: ${response.status}`);
+            }
+
+            UI.showAlert(`✅ Status do voluntário alterado para ${acao} com sucesso!`, 'success');
+            carregarVoluntarios(); // Recarrega a lista
+        } catch (error) {
+            console.error('Erro:', error);
+            UI.showAlert('❌ Erro ao alterar status: ' + (error.message || ''), 'danger');
+        }
+    });
+}
+
+// Função para ver histórico (adaptar conforme sua API)
+async function verHistorico(id) {
+    try {
+        const response = await fetch(`${API_VOLUNTARIOS}/${id}/historico`, { headers: getHeaders() });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.erro || `Erro ao buscar histórico: ${response.status}`);
+        }
+
+        const historico = await response.json();
+        const tbody = document.getElementById('tabelaHistorico');
+        
+        tbody.innerHTML = historico.length > 0 
+            ? historico.map(item => {
+                const statusClass = item.status === 'concluido' ? 'success' : 'warning';
+                return `
+                    <tr>
+                        <td>${formatarData(item.data)}</td>
+                        <td>${item.tipo}</td>
+                        <td>${item.descricao}</td>
+                        <td><span class="badge badge-${statusClass}">${item.status}</span></td>
+                    </tr>
+                `;
+            }).join('')
+            : '<tr><td colspan="4" class="text-center">Nenhum histórico de doação encontrado.</td></tr>';
+            
+        UI.openModal('modalHistorico');
+    } catch (error) {
+        console.error('Erro:', error);
+        document.getElementById('tabelaHistorico').innerHTML = '<tr><td colspan="4" class="text-center">Erro ao carregar histórico</td></tr>';
+        UI.showAlert('❌ ' + (error.message || 'Erro ao buscar histórico.'), 'danger');
+        UI.openModal('modalHistorico'); // Abre o modal mesmo com erro para exibir a mensagem interna
+    }
+}
+
+
+// ============== EVENT LISTENERS E INICIALIZAÇÃO ==============
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Carregar Voluntários ao iniciar
+    carregarVoluntarios();
+    
+    // 2. Lógica de Logout
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('jwtToken');
+        window.location.href = '../index.html'; // Redireciona para a página de login
     });
 
-    // ===== FUNÇÕES DE USUÁRIO =====
-    function atualizarUsuarioHeader() {
-        const userNameElement = document.getElementById('userName');
-        if (userNameElement) {
-            userNameElement.textContent = Auth.getUserName();
-        }
-    }
+    // 3. Event Listener para Busca
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+        rows.forEach(row => {
+            // Verifica se o texto da linha inclui o termo de busca E se está visível pelo filtro de status
+            const statusFilter = document.getElementById('filtroStatus').value.toLowerCase();
+            const matchesSearch = row.textContent.toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || row.textContent.toLowerCase().includes(statusFilter);
+            
+            row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+        });
+    });
+});
 
-    function configurarLogout() {
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (confirm('Deseja realmente sair do sistema?')) {
-                    Auth.logout();
-                }
-            });
-        }
-    }
+// Funções globais de UI (mantidas para compatibilidade com o HTML)
 
-    // ===== FUNÇÕES DE MÁSCARAS =====
-    function inicializarMascaras() {
-        // Máscara para CEP
-        const cepInput = document.querySelector("#vol_cep");
-        if (cepInput) {
-            VMasker(cepInput).maskPattern("99999-999");
-        }
-
-        // Máscara para CPF
-        const cpfInput = document.querySelector("#vol_cpf");
-        if (cpfInput) {
-            VMasker(cpfInput).maskPattern("999.999.999-99");
-        }
-
-        // Máscara para telefone
-        const phoneInput = document.querySelector("#vol_telefone");
-        if (phoneInput) {
-            VMasker(phoneInput).maskPattern("(99) 9999-99999");
-            phoneInput.addEventListener('input', function(e) {
-                let value = e.target.value.replace(/\D/g, '');
-                if (value.length > 10) {
-                    VMasker(phoneInput).maskPattern("(99) 99999-9999");
-                } else {
-                    VMasker(phoneInput).maskPattern("(99) 9999-99999");
-                }
-            });
-        }
-    }
-
-    // ===== FUNÇÕES DE UI =====
-    const UI = {
-        openModal: (modalId) => {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'block';
-            }
-        },
-        closeModal: (modalId) => { 
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        },
-        showAlert: (message, type = 'info') => {
-            alert(`${type.toUpperCase()}: ${message}`);
-        },
-        confirm: (message, callback) => {
-            if (confirm(message)) {
-                callback();
-            }
-        }
-    };
-
-    // ===== FUNÇÕES DE VALIDAÇÃO =====
-    const Validator = {
-        isEmpty: (value) => !value || value.trim() === '',
-        isValidCPF: (cpf) => {
-            const cleanCPF = cpf.replace(/[^\d]/g, '');
-            return cleanCPF.length === 11;
-        },
-        isValidEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-        isValidPhone: (phone) => {
-            const cleanPhone = phone.replace(/[^\d]/g, '');
-            return cleanPhone.length >= 10 && cleanPhone.length <= 11;
-        },
-        showError: (input, message) => {
-            const errorElement = input.nextElementSibling;
-            if (errorElement && errorElement.classList.contains('form-error')) {
-                errorElement.textContent = message;
-                errorElement.style.display = 'block';
-                input.style.borderColor = 'red';
-            }
-        },
-        clearAllErrors: (form) => {
-            const errors = form.querySelectorAll('.form-error');
-            const inputs = form.querySelectorAll('.form-control');
-            errors.forEach(error => error.style.display = 'none');
-            inputs.forEach(input => input.style.borderColor = '');
-        }
-    };
-
-    // ===== FUNÇÕES GLOBAIS (chamadas pelo HTML) =====
-    function openModal(modalId) {
-        if (modalId === 'modalVoluntario') {
-            document.getElementById('formVoluntario').reset();
-            document.getElementById('voluntarioId').value = '';
-            document.getElementById('modalTitle').textContent = 'Novo Voluntário';
-            Validator.clearAllErrors(document.getElementById('formVoluntario'));
-        }
-        UI.openModal(modalId);
-    }
-
-    function closeModal(modalId) { 
-        UI.closeModal(modalId); 
-    }
+function filtrarPorStatus() {
+    const status = document.getElementById('filtroStatus').value.toLowerCase();
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#tabelaVoluntarios tr');
     
+    rows.forEach(row => {
+        // Verifica se o texto da linha inclui o status filtrado E se está visível pela busca
+        const matchesStatus = !status || row.textContent.toLowerCase().includes(status);
+        const matchesSearch = row.textContent.toLowerCase().includes(searchTerm);
 
-    //AJUSTAR O EDITAR VOLUNTARIO, ao inves de editar ele cria um novo voluntario
-    async function editarVoluntario(id) {
-        try {
-            
-            const response = await fetch(`${VOLUNTARIOS_CONFIG.BASE_URL}/${id}`, {
-                method: 'GET',
-                headers: VOLUNTARIOS_CONFIG.HEADERS
-            });
+        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+    });
+}
 
-            if (!response.ok) {
-                throw new Error(`Erro ${response.status}: ${response.statusText}`);
-            }
-
-            const vol = await response.json();
-            
-            // Preenche o formulário com os dados
-            document.getElementById('voluntarioId').value = vol.id;
-            document.getElementById('modalTitle').textContent = 'Editar Voluntário';
-            document.getElementById('vol_nome').value = vol.nome || '';
-            document.getElementById('vol_cpf').value = vol.cpf || '';
-            document.getElementById('vol_email').value = vol.email || '';
-            document.getElementById('vol_telefone').value = vol.telefone || '';
-            document.getElementById('vol_dataNasc').value = vol.dataNasc ? vol.dataNasc.split('T')[0] : '';
-            document.getElementById('vol_sexo').value = vol.sexo || 'M';
-            document.getElementById('vol_rua').value = vol.rua || '';
-            document.getElementById('vol_numero').value = vol.numero || '';
-            document.getElementById('vol_bairro').value = vol.bairro || '';
-            document.getElementById('vol_cidade').value = vol.cidade || '';
-            document.getElementById('vol_cep').value = vol.cep || '';
-            document.getElementById('vol_uf').value = vol.uf || '';
-            document.getElementById('vol_observacoes').value = vol.observacoes || '';
-            
-            openModal('modalVoluntario');
-        } catch (error) {
-            console.error('Erro ao carregar voluntário:', error);
-            UI.showAlert('Erro ao carregar dados do voluntário: ' + error.message, 'error');
-        }
+function openModal(modalId) {
+    if (modalId === 'modalVoluntario') {
+        // Limpa o formulário e erros ao abrir para "Novo Voluntário"
+        document.getElementById('formVoluntario').reset();
+        Validator.clearAllErrors(document.getElementById('formVoluntario'));
+        document.getElementById('voluntarioId').value = '';
+        document.getElementById('modalTitle').textContent = 'Novo Voluntário';
     }
+    UI.openModal(modalId);
+}
 
-    function verHistorico(id) {
-        // Simulação de histórico
-        document.getElementById('tabelaHistorico').innerHTML = `
-            <tr>
-                <td>10/10/2025</td>
-                <td>Recebimento</td>
-                <td>Recebeu 50kg de arroz</td>
-                <td><span class="badge badge-success">Concluído</span></td>
-            </tr>
-            <tr>
-                <td>05/10/2025</td>
-                <td>Distribuição</td>
-                <td>Distribuiu 10 cestas básicas</td>
-                <td><span class="badge badge-success">Concluído</span></td>
-            </tr>
-        `;
-        openModal('modalHistorico');
-    }
-
-    async function toggleStatus(id) {
-        const voluntario = voluntariosData.find(v => v.id === id);
-        if (!voluntario) {
-            UI.showAlert('Voluntário não encontrado', 'error');
-            return;
-        }
-
-        const novoStatus = voluntario.status === 'ativo' ? 'inativo' : 'ativo';
-        const acao = novoStatus === 'ativo' ? 'ativar' : 'inativar';
-        
-        UI.confirm(`Deseja ${acao} este voluntário?`, async function() {
-            try {
-                //console.log(`Alterando status do voluntário ${id} para: ${novoStatus}`);
-                
-                // ✅ SOLUÇÃO FRONTEND - Status apenas na memória
-                voluntario.status = novoStatus;
-                
-                // Atualizar a interface
-                atualizarInterfaceVoluntarios();
-                
-                UI.showAlert(`Voluntário ${novoStatus === 'ativo' ? 'ativado' : 'inativado'} com sucesso!`, 'success');
-                
-            } catch (error) {
-               // console.error('Erro ao alterar status:', error);
-                UI.showAlert('Erro ao alterar status: ' + error.message, 'error');
-            }
-        });
-    }
-
-    async function excluirVoluntario(id) {
-        UI.confirm('Tem certeza que deseja excluir este voluntário? Esta ação não pode ser desfeita.', async function() {
-            try {
-                const response = await fetch(`${VOLUNTARIOS_CONFIG.BASE_URL}/${id}`, {
-                    method: 'DELETE',
-                    headers: VOLUNTARIOS_CONFIG.HEADERS
-                });
-
-                if (response.ok) {
-                    voluntariosData = voluntariosData.filter(v => v.id !== id);
-                    atualizarInterfaceVoluntarios();
-                    UI.showAlert('Voluntário excluído com sucesso!', 'success');
-                } else {
-                    throw new Error('Erro ao excluir voluntário');
-                }
-            } catch (error) {
-                //console.error('Erro:', error);
-                UI.showAlert('Erro ao excluir voluntário: ' + error.message, 'error');
-            }
-        });
-    }
-
-    function atualizarInterfaceVoluntarios() {
-        const tbody = document.getElementById('tabelaVoluntarios');
-        if (!tbody) return;
-        
-        tbody.innerHTML = '';
-        
-        if (voluntariosData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum voluntário cadastrado</td></tr>';
-            return;
-        }
-        
-        voluntariosData.forEach(vol => {
-            const row = document.createElement('tr');
-            const isAtivo = vol.status === 'ativo';
-            
-            row.innerHTML = `
-                <td>${vol.nome || 'N/A'}</td>
-                <td>${vol.cpf || 'N/A'}</td>
-                <td>${vol.email || 'N/A'}</td>
-                <td>${vol.telefone || 'N/A'}</td>
-                <td>${vol.dataCadastro ? new Date(vol.dataCadastro).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR')}</td>
-                <td>${vol.doacoesRealizadas || 0}</td>
-                <td>
-                    <span class="badge ${isAtivo ? 'badge-success' : 'badge-danger'}">
-                        ${isAtivo ? 'Ativo' : 'Inativo'}
-                    </span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <button class="btn btn-sm btn-info" onclick="editarVoluntario(${vol.id})" title="Editar">✏️</button>
-                        <button class="btn btn-sm btn-warning" onclick="verHistorico(${vol.id})" title="Histórico">📋</button>
-                        <button class="btn btn-sm ${isAtivo ? 'btn-secondary' : 'btn-warning'}" onclick="toggleStatus(${vol.id})" title="${isAtivo ? 'Inativar' : 'Ativar'}">
-                            ${isAtivo ? '🔒' : '🔓'}
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="excluirVoluntario(${vol.id})" title="Excluir">🗑️</button>
-                    </div>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    }
-
-    async function carregarVoluntarios() {
-        try {
-            //console.log('Iniciando carregamento de voluntários...');
-            const response = await fetch(VOLUNTARIOS_CONFIG.BASE_URL, {
-                method: 'GET',
-                headers: VOLUNTARIOS_CONFIG.HEADERS
-            });
-
-            console.log('Resposta do servidor:', {
-                status: response.status,
-                statusText: response.statusText
-            });
-
-            const responseText = await response.text();
-           // console.log('Resposta como texto:', responseText);
-            
-            let responseData;
-            try {
-                responseData = JSON.parse(responseText);
-            } catch (e) {
-                //console.error('Erro ao converter resposta para JSON:', e);
-                throw new Error('Resposta do servidor não é um JSON válido');
-            }
-
-            // Tratamento de diferentes cenários
-            if (response.status === 400 && responseData.mensagem === "Nenhum voluntário encontrado.") {
-                voluntariosData = [];
-                atualizarInterfaceVoluntarios();
-                UI.showAlert('Nenhum voluntário cadastrado no sistema.', 'info');
-                return;
-            }
-
-            if (!response.ok) {
-                console.error('Erro na requisição GET:', {
-                    status: response.status,
-                    statusText: response.statusText,
-                    body: responseText
-                });
-                throw new Error(`Erro ao carregar voluntários: ${responseData.mensagem || responseText}`);
-            }
-
-            // Processamento dos dados
-            voluntariosData = Array.isArray(responseData) ? responseData : 
-                            responseData.data ? responseData.data : [];
-
-            console.log('Voluntários carregados:', voluntariosData);
-            
-          
-            voluntariosData.forEach(vol => {
-                if (!vol.status) {
-                    vol.status = 'ativo'; // Status padrão
-                }
-                if (!vol.doacoesRealizadas) {
-                    vol.doacoesRealizadas = 0;
-                }
-            });
-
-            atualizarInterfaceVoluntarios();
-            
-        } catch (error) {
-            //console.error('Erro ao carregar voluntários:', error);
-            const tbody = document.getElementById('tabelaVoluntarios');
-            if (tbody) {
-                tbody.innerHTML = '<tr><td colspan="8" class="text-center">Erro ao carregar dados: ' + error.message + '</td></tr>';
-            }
-            UI.showAlert('Erro ao carregar voluntários: ' + error.message, 'error');
-        }
-    }
-
-    async function salvarVoluntario() {
-        const form = document.getElementById('formVoluntario');
-        const vol_nome = document.getElementById('vol_nome');
-        const vol_cpf = document.getElementById('vol_cpf');
-        const vol_email = document.getElementById('vol_email');
-        const vol_telefone = document.getElementById('vol_telefone');
-        const vol_dataNasc = document.getElementById('vol_dataNasc');
-
-        Validator.clearAllErrors(form);
-        let isValid = true;
-
-        // Validações
-        if (Validator.isEmpty(vol_nome.value)) {
-            Validator.showError(vol_nome, 'Nome é obrigatório');
-            isValid = false;
-        }
-        if (Validator.isEmpty(vol_cpf.value) || !Validator.isValidCPF(vol_cpf.value)) {
-            Validator.showError(vol_cpf, 'CPF inválido');
-            isValid = false;
-        }
-        if (Validator.isEmpty(vol_email.value) || !Validator.isValidEmail(vol_email.value)) {
-            Validator.showError(vol_email, 'E-mail inválido');
-            isValid = false;
-        }
-        if (Validator.isEmpty(vol_telefone.value) || !Validator.isValidPhone(vol_telefone.value)) {
-            Validator.showError(vol_telefone, 'Telefone inválido');
-            isValid = false;
-        }
-        if (Validator.isEmpty(vol_dataNasc.value)) {
-            Validator.showError(vol_dataNasc, 'Data é obrigatória');
-            isValid = false;
-        }
-
-        if (!isValid) {
-            UI.showAlert('Por favor, corrija os erros no formulário', 'error');
-            return;
-        }
-
-        try {
-            const voluntarioId = document.getElementById('voluntarioId').value;
-            
-            // Cria FormData para enviar como @RequestParam
-            const formData = new URLSearchParams();
-            formData.append('vol_nome', vol_nome.value);
-            formData.append('vol_cpf', vol_cpf.value.replace(/[^\d]/g, ''));
-            formData.append('vol_email', vol_email.value);
-            formData.append('vol_telefone', vol_telefone.value.replace(/[^\d]/g, ''));
-            formData.append('vol_dataNasc', vol_dataNasc.value);
-            formData.append('vol_sexo', document.getElementById('vol_sexo').value);
-            formData.append('vol_rua', document.getElementById('vol_rua').value);
-            formData.append('vol_numero', document.getElementById('vol_numero').value);
-            formData.append('vol_bairro', document.getElementById('vol_bairro').value);
-            formData.append('vol_cidade', document.getElementById('vol_cidade').value);
-            formData.append('vol_cep', document.getElementById('vol_cep').value.replace(/[^\d]/g, ''));
-            formData.append('vol_uf', document.getElementById('vol_uf').value);
-            formData.append('vol_observacoes', document.getElementById('vol_observacoes').value);
-
-           // console.log('Enviando dados como FormData:');
-            for (let [key, value] of formData.entries()) {
-                console.log(`${key}: ${value}`);
-            }
-
-            let response;
-            let url = VOLUNTARIOS_CONFIG.BASE_URL;
-            
-            if (voluntarioId) {
-                // Edição - adiciona o ID
-                formData.append('vol_id', voluntarioId);
-                response = await fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData
-                });
-            } else {
-                // Cadastro
-                response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData
-                });
-            }
-
-            console.log('Resposta do servidor:', {
-                status: response.status,
-                statusText: response.statusText
-            });
-
-            const responseText = await response.text();
-           // console.log('Resposta como texto:', responseText);
-            
-            let result;
-            try {
-                result = responseText ? JSON.parse(responseText) : {};
-            } catch (e) {
-                result = { mensagem: responseText };
-            }
-
-            if (response.ok) {
-                UI.showAlert(voluntarioId ? 'Voluntário atualizado!' : 'Voluntário cadastrado!', 'success');
-                closeModal('modalVoluntario');
-                await carregarVoluntarios();
-            } else {
-                const errorMessage = result.mensagem || responseText || 'Erro desconhecido';
-                throw new Error(errorMessage);
-            }
-            
-        } catch (error) {
-            //console.error('Erro ao salvar voluntário:', error);
-            UI.showAlert('Erro ao salvar voluntário: ' + error.message, 'error');
-        }
-    }
-
-    // ===== EVENT LISTENERS =====
-    function inicializarEventListeners() {
-        // Botão de logout
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                if (confirm('Deseja realmente sair do sistema?')) {
-                    Auth.logout();
-                }
-            });
-        }
-
-        // Busca em tempo real
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-            searchInput.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const rows = document.querySelectorAll('#tabelaVoluntarios tr');
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
-            });
-        }
-
-        // Filtro por status
-        const filtroStatus = document.getElementById('filtroStatus');
-        if (filtroStatus) {
-            filtroStatus.addEventListener('change', function() {
-                const status = this.value.toLowerCase();
-                const rows = document.querySelectorAll('#tabelaVoluntarios tr');
-                rows.forEach(row => {
-                    if (!status) {
-                        row.style.display = '';
-                    } else {
-                        const rowStatus = row.querySelector('.badge')?.textContent.toLowerCase();
-                        row.style.display = rowStatus === status ? '' : 'none';
-                    }
-                });
-            });
-        }
-
-        // Fechar modal ao clicar fora
-        const modals = document.querySelectorAll('.modal');
-        modals.forEach(modal => {
-            modal.addEventListener('click', function(e) {
-                if (e.target === this) {
-                    closeModal(this.id);
-                }
-            });
-        });
-    }
+function closeModal(modalId) { 
+    UI.closeModal(modalId); 
+}
 </script>
 </body>
 </html>

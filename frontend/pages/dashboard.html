@@ -5,101 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOARC - Dashboard</title>
     <link rel="stylesheet" href="../css/style.css">
-    <style>
-        /* Estilos para debug */
-        .debug-alert {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ff4444;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 10000;
-            font-size: 14px;
-        }
-    </style>
 </head>
 <body>
-    <!-- Sistema de Autenticação -->
-    <script>
-        //console.log('🚀 Dashboard iniciando...');
-        
-        // Sistema de autenticação
-        const Auth = {
-            isLoggedIn: () => {
-                try {
-                    const loggedIn = localStorage.getItem('loggedIn') === 'true';
-                    const token = localStorage.getItem('token');
-                    const loginTime = localStorage.getItem('loginTime');
-                    const currentTime = new Date().getTime();
-
-                    console.log('🔍 Verificando autenticação:', {
-                        loggedIn,
-                        token: token ? 'EXISTE' : 'NÃO EXISTE',
-                        loginTime
-                    });
-
-                    // Verificações críticas
-                    if (!loggedIn || !token || token === 'undefined' || token === 'null' || token.trim() === '') {
-                        //console.log('❌ Token inválido ou não existe');
-                        return false;
-                    }
-
-                    // Verificar expiração (24 horas)
-                    if (loginTime) {
-                        const hoursSinceLogin = (currentTime - parseInt(loginTime)) / (1000 * 60 * 60);
-                       // console.log(`⏰ Horas desde login: ${hoursSinceLogin.toFixed(2)}`);
-                        if (hoursSinceLogin > 24) {
-                            //console.log('❌ Login expirado');
-                            return false;
-                        }
-                    }
-
-                   // console.log('✅ Autenticação válida');
-                    return true;
-                } catch (error) {
-                    //console.error('💥 Erro na verificação:', error);
-                    return false;
-                }
-            },
-
-            getUser: () => {
-                const user = localStorage.getItem('user');
-                return user ? JSON.parse(user) : null;
-            },
-
-            logout: () => {
-                console.log('🚪 Fazendo logout...');
-                localStorage.removeItem('user');
-                localStorage.removeItem('token');
-                localStorage.removeItem('loggedIn');
-                localStorage.removeItem('loginTime');
-                window.location.href = '../index.html?logout=true';
-            },
-
-            // Verificar e redirecionar se não estiver logado
-            checkAndRedirect: () => {
-                if (!Auth.isLoggedIn()) {
-                    //console.log('🔄 Redirecionando para login...');
-                    window.location.href = '../index.html';
-                    return false;
-                }
-                return true;
-            }
-        };
-
-        // Verificação IMEDIATA ao carregar a página
-       // console.log('🛡️ Verificando autenticação IMEDIATAMENTE...');
-        if (!Auth.checkAndRedirect()) {
-            // Para completamente a execução se não estiver autenticado
-            throw new Error('Usuário não autenticado');
-        }
-
-        console.log('✅ Dashboard carregado para usuário autenticado');
-    </script>
-
     <!-- Header -->
     <header class="header">
         <div class="header-content">
@@ -116,6 +23,9 @@
         <ul class="nav-list">
             <li class="nav-item">
                 <a href="dashboard.html" class="nav-link active">Dashboard</a>
+            </li>
+            <li class="nav-item" id="adminNav" style="display: none;">
+                <a href="admin-dashboard.html" class="nav-link">Dashboard Admin</a>
             </li>
             <li class="nav-item">
                 <a href="#" class="nav-link">Gerenciar</a>
@@ -159,6 +69,15 @@
         </div>
 
         <h1 style="margin-bottom: 2rem; color: var(--primary-color);">Dashboard</h1>
+
+        <!-- User Info -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>Bem-vindo, <span id="userWelcome">Voluntário</span>!</h3>
+                <p>Nível de acesso: <strong id="userLevel">USER</strong></p>
+                <p>Status: <span class="badge badge-success">Ativo</span></p>
+            </div>
+        </div>
 
         <!-- Statistics Cards -->
         <div class="dashboard-grid">
@@ -254,52 +173,41 @@
             </div>
         </div>
 
-        <!-- Pending Schedules -->
+        <!-- Voluntários List (for authenticated users) -->
         <div class="card mt-4">
             <div class="card-header">
-                <h2 class="card-title">Agendamentos Pendentes</h2>
+                <h2 class="card-title">Lista de Voluntários</h2>
+                <button class="btn btn-primary" onclick="loadVoluntarios()">🔄 Atualizar</button>
             </div>
             <div class="card-body">
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Tipo</th>
-                                <th>Pessoa</th>
-                                <th>Responsável</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="agendamentosPendentes">
-                            <tr>
-                                <td colspan="5" class="text-center" style="padding: 2rem; color: var(--text-light);">
-                                    Nenhum agendamento pendente
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="voluntariosList">
+                    <p class="text-center">Carregue a lista de voluntários...</p>
                 </div>
             </div>
         </div>
     </main>
 
+    <!-- Scripts -->
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
     <script>
-        // Sistema de gerenciamento de usuário
         document.addEventListener('DOMContentLoaded', function() {
-           // console.log('📄 DOM carregado - inicializando dashboard...');
-            
-            // Verificar novamente (segunda camada de segurança)
-            if (!Auth.isLoggedIn()) {
-                //console.log('❌ Segunda verificação falhou - redirecionando...');
-                window.location.href = '../index.html';
+            // Verificar autenticação
+            if (!Auth.checkAuth()) {
                 return;
             }
 
             // Carregar dados do usuário
             const user = Auth.getUser();
-            if (user && user.nome) {
-                document.getElementById('userName').textContent = user.nome;
+            if (user) {
+                document.getElementById('userName').textContent = user.email;
+                document.getElementById('userWelcome').textContent = user.email;
+                document.getElementById('userLevel').textContent = user.nivelAcesso;
+                
+                // Mostrar link admin se for admin
+                if (user.nivelAcesso === 'ADMIN') {
+                    document.getElementById('adminNav').style.display = 'block';
+                }
             }
 
             // Configurar logout
@@ -309,69 +217,85 @@
                 }
             });
 
-            // Carregar dados do dashboard
+            // Carregar dados iniciais
             loadDashboardData();
-
-            // Verificação periódica a cada 30 segundos
-            setInterval(() => {
-                if (!Auth.isLoggedIn()) {
-                    alert('Sua sessão expirou. Faça login novamente.');
-                    window.location.href = '../index.html';
-                }
-            }, 30000);
         });
 
-        // Carrega dados do dashboard
-        async function loadDashboardData() {
-            try {
-                //console.log('📊 Carregando dados do dashboard...');
-                
-                // TODO: Integrar com API real
-                // const stats = await API.get('/dashboard/stats');
+        // Carregar dados do dashboard
+        function loadDashboardData() {
+            // Dados simulados - integrar com API real posteriormente
+            document.getElementById('totalProdutos').textContent = '150';
+            document.getElementById('doacoesRecebidas').textContent = '45';
+            document.getElementById('doacoesEfetuadas').textContent = '32';
+            document.getElementById('voluntariosAtivos').textContent = '12';
+            document.getElementById('campanhasAtivas').textContent = '3';
+            document.getElementById('donatariosAtivos').textContent = '78';
 
-                // Dados simulados para desenvolvimento
-                document.getElementById('totalProdutos').textContent = '150';
-                document.getElementById('doacoesRecebidas').textContent = '45';
-                document.getElementById('doacoesEfetuadas').textContent = '32';
-                document.getElementById('voluntariosAtivos').textContent = '12';
-                document.getElementById('campanhasAtivas').textContent = '3';
-                document.getElementById('donatariosAtivos').textContent = '78';
-
-                // Simula atividades recentes
-                const atividades = [
-                    {
-                        data: '14/10/2025',
-                        tipo: 'Doação Recebida',
-                        descricao: 'Recebimento de 50kg de alimentos',
-                        voluntario: 'João Silva',
-                        status: 'Concluído'
-                    },
-                    {
-                        data: '13/10/2025',
-                        tipo: 'Doação Efetuada',
-                        descricao: 'Distribuição de cestas básicas',
-                        voluntario: 'Maria Santos',
-                        status: 'Concluído'
-                    }
-                ];
-
-                const tbody = document.getElementById('atividadesRecentes');
-                if (atividades.length > 0) {
-                    tbody.innerHTML = atividades.map(ativ => `
-                        <tr>
-                            <td>${ativ.data}</td>
-                            <td>${ativ.tipo}</td>
-                            <td>${ativ.descricao}</td>
-                            <td>${ativ.voluntario}</td>
-                            <td><span class="badge badge-success">${ativ.status}</span></td>
-                        </tr>
-                    `).join('');
+            // Simular atividades recentes
+            const atividades = [
+                {
+                    data: '14/11/2025',
+                    tipo: 'Doação Recebida',
+                    descricao: 'Recebimento de 50kg de alimentos',
+                    voluntario: 'João Silva',
+                    status: 'Concluído'
+                },
+                {
+                    data: '13/11/2025',
+                    tipo: 'Doação Efetuada',
+                    descricao: 'Distribuição de cestas básicas',
+                    voluntario: 'Maria Santos',
+                    status: 'Concluído'
                 }
+            ];
 
-                //console.log('✅ Dados do dashboard carregados com sucesso');
+            const tbody = document.getElementById('atividadesRecentes');
+            if (atividades.length > 0) {
+                tbody.innerHTML = atividades.map(ativ => `
+                    <tr>
+                        <td>${ativ.data}</td>
+                        <td>${ativ.tipo}</td>
+                        <td>${ativ.descricao}</td>
+                        <td>${ativ.voluntario}</td>
+                        <td><span class="badge badge-success">${ativ.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
 
+        // Carregar lista de voluntários
+        async function loadVoluntarios() {
+            const voluntariosList = document.getElementById('voluntariosList');
+            
+            try {
+                voluntariosList.innerHTML = '<p class="text-center">Carregando voluntários...</p>';
+                
+                const data = await API.voluntario.listar();
+                
+                if (data.voluntarios && data.voluntarios.length > 0) {
+                    voluntariosList.innerHTML = `
+                        <p><strong>Total de voluntários:</strong> ${data.total}</p>
+                        <div class="row">
+                            ${data.voluntarios.map(vol => `
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6>${vol.vol_nome || vol.nome || 'Nome não informado'}</h6>
+                                            <p class="text-muted">${vol.vol_email || vol.email || 'Email não informado'}</p>
+                                            <small>ID: ${vol.vol_id || vol.id}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    voluntariosList.innerHTML = '<p class="text-center">Nenhum voluntário encontrado.</p>';
+                }
+                
             } catch (error) {
-                console.error('Erro ao carregar dados do dashboard:', error);
+                console.error('Erro ao carregar voluntários:', error);
+                voluntariosList.innerHTML = '<p class="text-center text-danger">Erro ao carregar voluntários.</p>';
             }
         }
     </script>

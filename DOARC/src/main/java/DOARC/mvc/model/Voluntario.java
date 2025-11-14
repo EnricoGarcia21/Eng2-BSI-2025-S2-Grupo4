@@ -47,6 +47,9 @@ public class Voluntario {
     }
 
     // ✅ Métodos da Model
+    public Voluntario buscarPorCpf(String cpf, Conexao conexao) {
+        return dao.buscarPorCpf(cpf, conexao);
+    }
     public Voluntario gravar(Voluntario v, Conexao conexao) {
         return dao.gravar(v, conexao);
     }

@@ -14,11 +14,13 @@ public class VoluntarioController {
     @Autowired
     private Voluntario voluntarioModel;
 
+    @Autowired
+    private AcessoController auth;
+
     private Conexao getConexao() {
         return SingletonDB.conectar();
     }
 
-    // ✅ ADD via MAP (para a View)
     public Map<String, Object> addVoluntario(Map<String, Object> dados) {
 
         Voluntario novo = new Voluntario(
@@ -38,8 +40,29 @@ public class VoluntarioController {
 
         Voluntario gravado = voluntarioModel.gravar(novo, getConexao());
 
-        return gravado == null ? Map.of("erro", "Erro ao cadastrar") : mapVoluntario(gravado);
+        if (gravado == null)
+            return Map.of("erro", "Erro ao cadastrar voluntário");
+
+
+        String login = gravado.getVol_email(); // ou CPF ou outro campo
+        String senhaPadrao = "123456"; // você escolhe
+        String nivelAcesso = "USER";
+
+        auth.registrarUsuario(
+                gravado.getVol_id(),
+                login,
+                senhaPadrao,
+                nivelAcesso
+        );
+
+        // Retornar dado do voluntário + aviso
+        Map<String, Object> resp = mapVoluntario(gravado);
+        resp.put("loginCriado", login);
+        resp.put("senhaPadrao", senhaPadrao);
+
+        return resp;
     }
+
 
     // ✅ UPDATE via MAP
     public Map<String, Object> updtVoluntario(int id, Map<String, Object> dados) {
@@ -120,4 +143,7 @@ public class VoluntarioController {
 
         return json;
     }
+
+
+
 }
