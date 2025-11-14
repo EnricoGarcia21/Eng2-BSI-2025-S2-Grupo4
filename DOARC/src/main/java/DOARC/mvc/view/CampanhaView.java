@@ -79,7 +79,7 @@ public class CampanhaView {
 
     // ===== ENDPOINTS ADMINISTRATIVOS =====
 
-    @PostMapping("/lancar")
+    @PostMapping // ✅ CORRIGIDO: Mapeia para /apis/campanha (POST)
     public ResponseEntity<Map<String, Object>> lancarCampanha(@RequestBody Map<String, Object> dados) {
         Map<String, Object> response = new HashMap<>();
 
@@ -114,10 +114,8 @@ public class CampanhaView {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // ===== ENVIAR NOTIFICAÇÕES POR EMAIL =====
+            // ===== ENVIAR NOTIFICAÇÕES POR EMAIL (Omitido por brevidade) =====
             try {
-                System.out.println("📧 Enviando notificações por email...");
-
                 // Buscar todos os voluntários ativos
                 List<Voluntario> voluntarios = voluntarioModel.consultar("", getConexao());
                 List<String> emails = voluntarios.stream()
@@ -140,11 +138,9 @@ public class CampanhaView {
                         System.out.println("✅ Notificações enviadas para " + emails.size() + " voluntários");
                         resultado.put("notificacoes_enviadas", emails.size());
                     } else {
-                        System.err.println("⚠️ Erro ao enviar algumas notificações");
                         resultado.put("aviso", "Campanha criada, mas houve erro no envio de algumas notificações");
                     }
                 } else {
-                    System.out.println("⚠️ Nenhum email de voluntário encontrado");
                     resultado.put("aviso", "Campanha criada, mas nenhum voluntário para notificar");
                 }
 
@@ -170,6 +166,7 @@ public class CampanhaView {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, Object>> atualizarCampanha(@PathVariable int id, @RequestBody Map<String, Object> dados) {
+        // ... (método omitido)
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -213,6 +210,7 @@ public class CampanhaView {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deletarCampanha(@PathVariable int id) {
+        // ... (método omitido)
         Map<String, Object> response = new HashMap<>();
 
         try {

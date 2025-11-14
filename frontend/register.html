@@ -192,8 +192,11 @@
                             </div>
                         </div>
                     </div>
+<button type="submit" class="btn btn-primary">Cadastrar</button>
 
-                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+    <div class="text-center mt-3">
+        <a href="index.html" class="btn btn-link">Já tem conta? Fazer login</a>
+    </div>
 
                 </form>
 
@@ -228,12 +231,10 @@ $(document).ready(() => {
     $('#cep').mask('00000-000');
 });
 </script>
-
-<!-- LÓGICA DO FORMULÁRIO -->
 <script>
 
-const API_VOLUNTARIO = "http://localhost:8080/apis/voluntario";
 const API_REGISTRO_URL = "http://localhost:8080/apis/acesso/registrar";
+const API_VOLUNTARIO = "http://localhost:8080/apis/voluntario"; // Removido por ser redundante, mas mantida a declaração
 
 document.getElementById('registerForm').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -245,7 +246,6 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     const telefone = document.getElementById('telefone').value.trim();
     const dataNascimento = document.getElementById('dataNascimento').value;
     const sexo = document.getElementById('sexo').value;
-    const cep = document.getElementById('cep').value.trim();
     const rua = document.getElementById('rua').value.trim();
     const numero = document.getElementById('numero').value.trim();
     const bairro = document.getElementById('bairro').value.trim();
@@ -256,10 +256,9 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     const confirmSenha = document.getElementById('confirmPassword').value.trim();
 
     // ------------------------------
-    // Validações
+    // 1. Validações Frontend
     // ------------------------------
 
-    // Validar campos obrigatórios
     const camposObrigatorios = [
         {valor: nome, nome: "Nome Completo"},
         {valor: cpf, nome: "CPF"},
@@ -267,7 +266,6 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         {valor: telefone, nome: "Telefone"},
         {valor: dataNascimento, nome: "Data de Nascimento"},
         {valor: sexo, nome: "Sexo"},
-        {valor: cep, nome: "CEP"},
         {valor: rua, nome: "Rua"},
         {valor: numero, nome: "Número"},
         {valor: bairro, nome: "Bairro"},
@@ -308,157 +306,60 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         return;
     }
 
-    // Validação de CPF
-    const cpfLimpo = cpf.replace(/\D/g, '');
-    if (cpfLimpo.length !== 11) {
-        UI.showAlert("⚠️ CPF inválido.");
-        return;
-    }
-
     // ------------------------------
-    // 1️⃣ Criar voluntário
+    // 2. Construir Payload Único
     // ------------------------------
 
-    // Tente diferentes estruturas de payload baseado no que seu backend espera
-    const voluntarioPayloads = [
-        {
-            // Estrutura 1: Campos completos
-            vol_nome: nome,
-            vol_cpf: cpfLimpo,
-            vol_email: email,
-            vol_telefone: telefone.replace(/\D/g, ''),
-            vol_datanasc: dataNascimento,
-            vol_sexo: sexo,
-            vol_rua: rua,
-            vol_numero: numero,
-            vol_bairro: bairro,
-            vol_cidade: cidade,
-            vol_uf: uf,
-            vol_cep: cep.replace(/\D/g, ''),
-            vol_complemento: complemento,
-            vol_status: "A"
-        },
-        {
-            // Estrutura 2: Formato alternativo
-            nome: nome,
-            cpf: cpfLimpo,
-            email: email,
-            telefone: telefone.replace(/\D/g, ''),
-            dataNascimento: dataNascimento,
-            sexo: sexo,
-            endereco: {
-                rua: rua,
-                numero: numero,
-                bairro: bairro,
-                cidade: cidade,
-                uf: uf,
-                cep: cep.replace(/\D/g, ''),
-                complemento: complemento
+    // O Controller espera um campo único 'endereco' que mapeia para 'vol_rua' e é usado
+    // para compor parte do endereço (com o complemento)
+    const enderecoCompleto = [rua, numero, bairro, cidade, uf, complemento].filter(Boolean).join(', ');
+    
+    const dadosVoluntario = {
+        nome: nome,
+        // Enviar CPF e Telefone LIMPOS (O Controller já está corrigido para limpar, mas é boa prática)
+        cpf: cpf.replace(/\D/g, ''),
+        telefone: telefone.replace(/\D/g, ''),
+        dataNascimento: dataNascimento,
+        endereco: enderecoCompleto, // Mapeia para 'endereco' esperado pelo Controller
+        email: email,
+        senha: senha,
+        sexo: sexo,
+        nivelAcesso: 'USER' // Padrão
+    };
+
+    // ------------------------------
+    // 3. Chamar a API de Registro (Passo Único)
+    // ------------------------------
+
+    try {
+        UI.showAlert("Cadastrando voluntário...", "info");
+        
+        // CORREÇÃO CRÍTICA: Usar o endpoint de registro completo
+        const response = await fetch(API_REGISTRO_URL, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                "Accept": "application/json"
             },
-            status: "A"
+            body: JSON.stringify(dadosVoluntario)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok) {
+            UI.showAlert("✅ Cadastro realizado com sucesso! Redirecionando para login...", "success");
+            setTimeout(() => {
+                // Redireciona para a página de login (index.html)
+                window.location.href = "index.html";
+            }, 3000);
+        } else {
+            // O backend retorna { "erro": "..." } em caso de falha de validação
+            const errorMessage = result.erro || "Erro desconhecido no servidor durante o cadastro.";
+            UI.showAlert("❌ " + errorMessage);
         }
-    ];
-
-    let voluntarioId;
-    let success = false;
-
-    // Tentar diferentes formatos de payload
-    for (let payload of voluntarioPayloads) {
-        try {
-            console.log("Tentando payload:", payload);
-            
-            const response = await fetch(API_VOLUNTARIO, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-            console.log("Resposta do servidor:", result);
-
-            if (response.ok) {
-                // Tente diferentes possibilidades de onde o ID pode estar
-                voluntarioId = result.voluntarioId || result.id || result.codigo || result.codVoluntario;
-                success = true;
-                break;
-            } else {
-                console.log("Falha com payload:", payload, "Erro:", result);
-            }
-        } catch (error) {
-            console.log("Erro na requisição:", error);
-        }
-    }
-
-    if (!success) {
-        UI.showAlert("❌ Erro ao cadastrar voluntário. Verifique os dados e tente novamente.");
-        return;
-    }
-
-    if (!voluntarioId) {
-        UI.showAlert("❌ Não foi possível obter o ID do voluntário cadastrado.");
-        return;
-    }
-
-    // ------------------------------
-    // 2️⃣ Criar login
-    // ------------------------------
-
-    const loginPayloads = [
-        {
-            // Estrutura 1
-            login: email,
-            senha: senha,
-            voluntarioId: voluntarioId,
-            nivelAcesso: "VOLUNTARIO",
-            status: "A"
-        },
-        {
-            // Estrutura 2
-            email: email,
-            password: senha,
-            idVoluntario: voluntarioId,
-            nivel: "VOLUNTARIO",
-            ativo: true
-        }
-    ];
-
-    let loginSuccess = false;
-
-    for (let loginPayload of loginPayloads) {
-        try {
-            console.log("Tentando login payload:", loginPayload);
-            
-            const response = await fetch(API_REGISTRO_URL, {
-                method: "POST",
-                headers: { 
-                    "Content-Type": "application/json",
-                    "Accept": "application/json"
-                },
-                body: JSON.stringify(loginPayload)
-            });
-
-            const result = await response.json();
-            console.log("Resposta do login:", result);
-
-            if (response.ok) {
-                loginSuccess = true;
-                break;
-            }
-        } catch (error) {
-            console.log("Erro no login:", error);
-        }
-    }
-
-    if (loginSuccess) {
-        UI.showAlert("✅ Cadastro realizado com sucesso! Redirecionando para login...", "success");
-        setTimeout(() => {
-            window.location.href = "login.html"; // ou index.html
-        }, 3000);
-    } else {
-        UI.showAlert("⚠️ Voluntário cadastrado, mas houve problema ao criar o acesso. Entre em contato com o suporte.");
+    } catch (error) {   
+        console.error("Erro no registro:", error);
+        UI.showAlert("❌ Erro de conexão com o servidor. Verifique se o backend está rodando.");
     }
 });
 
@@ -509,7 +410,6 @@ document.getElementById('confirmPassword').addEventListener('input', function() 
     }
 });
 </script>
-
 <!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 

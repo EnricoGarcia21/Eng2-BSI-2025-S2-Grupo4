@@ -8,6 +8,7 @@ import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Date;
 
 @Repository
 public class CampRespDAO {
@@ -44,6 +45,7 @@ public class CampRespDAO {
             PreparedStatement stmt;
 
             if (filtro != null && !filtro.isBlank()) {
+                // AVISO: MANTIDO PARA COMPATIBILIDADE, MAS O CONTROLLER DEVE GARANTIR A SEGURANÇA.
                 sql += " WHERE " + filtro;
                 stmt = conn.prepareStatement(sql);
             } else {
@@ -67,6 +69,32 @@ public class CampRespDAO {
         return lista;
     }
 
+    // ✅ NOVO MÉTODO: Consulta SEGURA por chave composta (Usado no Controller)
+    public List<CampResponsavel> getByCompositeKey(int camId, int voluntarioId, Conexao conexao) {
+        List<CampResponsavel> lista = new ArrayList<>();
+        String sql = "SELECT * FROM camp_responsavel WHERE cam_id = ? AND voluntario_vol_id = ?";
+
+        try (Connection conn = conexao.getConnect();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, camId);
+            stmt.setInt(2, voluntarioId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapCampResponsavel(rs));
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Erro ao buscar CampResponsavel por chave composta: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return lista;
+    }
+
+
     public CampResponsavel gravar(CampResponsavel cr, Conexao conexao) {
         String sql = """
             INSERT INTO camp_responsavel 
@@ -89,8 +117,8 @@ public class CampRespDAO {
 
             stmt.setInt(1, cr.getCam_id());
             stmt.setInt(2, cr.getVoluntario_vol_id());
-            stmt.setDate(3, dataInicio);  // CORREÇÃO: usar setDate
-            stmt.setDate(4, dataFim);     // CORREÇÃO: usar setDate
+            stmt.setDate(3, dataInicio);
+            stmt.setDate(4, dataFim);
             stmt.setString(5, cr.getObs_texto());
 
             int rowsAffected = stmt.executeUpdate();
@@ -128,8 +156,8 @@ public class CampRespDAO {
                 return null;
             }
 
-            stmt.setDate(1, dataInicio);  // CORREÇÃO: usar setDate
-            stmt.setDate(2, dataFim);     // CORREÇÃO: usar setDate
+            stmt.setDate(1, dataInicio);
+            stmt.setDate(2, dataFim);
             stmt.setString(3, cr.getObs_texto());
             stmt.setInt(4, cr.getCam_id());
             stmt.setInt(5, cr.getVoluntario_vol_id());

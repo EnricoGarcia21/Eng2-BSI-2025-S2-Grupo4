@@ -30,7 +30,7 @@ public class CampanhaController {
         return json;
     }
 
-    // ✅ VALIDAÇÃO DOS DADOS
+    // ✅ VALIDAÇÃO DOS DADOS (Omitida por brevidade)
     private String validarCampanha(Campanha c) {
         if (c.getCam_data_ini() == null || c.getCam_data_ini().isBlank()) {
             return "Data de início é obrigatória";

@@ -28,7 +28,7 @@ public class CampRespController {
         return json;
     }
 
-    // ✅ VALIDAÇÃO DOS DADOS
+    // ✅ VALIDAÇÃO DOS DADOS (Omitida por brevidade)
     private String validarCampResponsavel(CampResponsavel cr) {
         if (cr.getCam_id() <= 0) {
             return "ID da campanha é obrigatório";
@@ -46,7 +46,6 @@ public class CampRespController {
         // Validação adicional: data fim não pode ser anterior à data início
         if (cr.getDATA_INICIO() != null && cr.getDATA_FIM() != null) {
             try {
-                // Assumindo formato de data compatível para comparação
                 if (cr.getDATA_FIM().compareTo(cr.getDATA_INICIO()) < 0) {
                     return "Data de fim não pode ser anterior à data de início";
                 }
@@ -59,7 +58,7 @@ public class CampRespController {
     }
 
     // ===================================
-    // ✅ ADD (COM VALIDAÇÃO)
+    // ✅ ADD (SEGURO: Consulta por chave composta)
     // ===================================
     public Map<String, Object> addCampResponsavel(CampResponsavel nova) {
 
@@ -76,9 +75,10 @@ public class CampRespController {
                 return Map.of("erro", "Erro ao conectar ao banco de dados");
             }
 
-            // Verificar se já existe o relacionamento
-            List<CampResponsavel> existentes = campRespModel.consultar(
-                    "cam_id = " + nova.getCam_id() + " AND voluntario_vol_id = " + nova.getVoluntario_vol_id(),
+            // ✅ CORREÇÃO: Usando o método seguro do Model/DAO
+            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(
+                    nova.getCam_id(),
+                    nova.getVoluntario_vol_id(),
                     conexao
             );
 
@@ -89,9 +89,7 @@ public class CampRespController {
             CampResponsavel gravada = campRespModel.gravar(nova, conexao);
 
             if (gravada == null) {
-                String msgErro = conexao.getMensagemErro();
-                return Map.of("erro", "Erro ao vincular voluntário à campanha: " +
-                        (msgErro != null ? msgErro : "Erro desconhecido"));
+                return Map.of("erro", "Erro ao vincular voluntário à campanha.");
             }
 
             return toJson(gravada);
@@ -103,7 +101,7 @@ public class CampRespController {
     }
 
     // ===================================
-    // ✅ UPDATE (COM VALIDAÇÃO)
+    // ✅ UPDATE (SEGURO: Consulta por chave composta)
     // ===================================
     public Map<String, Object> updtCampResponsavel(CampResponsavel campResp) {
 
@@ -120,9 +118,10 @@ public class CampRespController {
                 return Map.of("erro", "Erro ao conectar ao banco de dados");
             }
 
-            // Buscar o relacionamento existente
-            List<CampResponsavel> existentes = campRespModel.consultar(
-                    "cam_id = " + campResp.getCam_id() + " AND voluntario_vol_id = " + campResp.getVoluntario_vol_id(),
+            // ✅ CORREÇÃO: Usando o método seguro do Model/DAO
+            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(
+                    campResp.getCam_id(),
+                    campResp.getVoluntario_vol_id(),
                     conexao
             );
 
@@ -138,9 +137,7 @@ public class CampRespController {
             CampResponsavel alterada = campRespModel.alterar(existente, conexao);
 
             if (alterada == null) {
-                String msgErro = conexao.getMensagemErro();
-                return Map.of("erro", "Erro ao atualizar a vinculação: " +
-                        (msgErro != null ? msgErro : "Erro desconhecido"));
+                return Map.of("erro", "Erro ao atualizar a vinculação.");
             }
 
             return toJson(alterada);
@@ -184,13 +181,16 @@ public class CampRespController {
     }
 
     // ===================================
-    // ✅ GET ESPECÍFICO
+    // ✅ GET ESPECÍFICO (SEGURO: Consulta por chave composta)
     // ===================================
     public Map<String, Object> getCampResponsavel(int camId, int voluntarioId) {
         try {
             Conexao conexao = getConexao();
-            List<CampResponsavel> lista = campRespModel.consultar(
-                    "cam_id = " + camId + " AND voluntario_vol_id = " + voluntarioId,
+
+            // ✅ CORREÇÃO: Usando o método seguro do Model/DAO
+            List<CampResponsavel> lista = campRespModel.consultarPorChaveComposta(
+                    camId,
+                    voluntarioId,
                     conexao
             );
 
@@ -213,9 +213,10 @@ public class CampRespController {
         try {
             Conexao conexao = getConexao();
 
-            // Buscar a vinculação
-            List<CampResponsavel> existentes = campRespModel.consultar(
-                    "cam_id = " + camId + " AND voluntario_vol_id = " + voluntarioId,
+            // ✅ CORREÇÃO: Usando o método seguro do Model/DAO
+            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(
+                    camId,
+                    voluntarioId,
                     conexao
             );
 

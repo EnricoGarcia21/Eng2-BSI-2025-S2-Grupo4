@@ -2,29 +2,25 @@ package DOARC.mvc.view;
 
 import DOARC.mvc.controller.VoluntarioController;
 import DOARC.mvc.model.Voluntario;
-import DOARC.mvc.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/apis/voluntario")
+@CrossOrigin(origins = "*")
 public class VoluntarioView {
 
     @Autowired
     private VoluntarioController voluntarioController;
-
-    @Autowired
-    private Voluntario voluntarioModel;
-
-    private Conexao getConexao() {
-        return SingletonDB.conectar();
-    }
 
     // ===== PERFIL DO VOLUNTÁRIO =====
 
@@ -50,8 +46,9 @@ public class VoluntarioView {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            // Verificar se o voluntário existe
-            Voluntario existente = voluntarioModel.consultar(id, getConexao());
+            // ✅ Agora usa o controller para buscar
+            Voluntario existente = voluntarioController.buscarVoluntarioPorId(id);
+
             if (existente == null) {
                 response.put("erro", "Voluntário não encontrado");
                 return ResponseEntity.notFound().build();
@@ -83,7 +80,8 @@ public class VoluntarioView {
                 existente.setVol_uf((String) dados.get("vol_uf"));
             }
 
-            Voluntario atualizado = voluntarioModel.alterar(existente, getConexao());
+            // ✅ Agora usa o controller para atualizar
+            Voluntario atualizado = voluntarioController.atualizarPerfil(existente);
 
             if (atualizado != null) {
                 response.put("success", true);
@@ -121,12 +119,18 @@ public class VoluntarioView {
 
     // ===== CAMPANHAS DO VOLUNTÁRIO =====
 
+    // Injete o CampanhaController se ele existir
+    // @Autowired
+    // private CampanhaController campanhaController;
+
     @GetMapping("/minhas-campanhas/{voluntarioId}")
     public ResponseEntity<List<Map<String, Object>>> obterMinhasCampanhas(@PathVariable int voluntarioId) {
         try {
-            // Reutilizar o endpoint de campanhas
-            RestCampanhaController campanhaRest = new RestCampanhaController();
-            return campanhaRest.listarCampanhasPorVoluntario(voluntarioId);
+            // TODO: Quando o CampanhaController estiver pronto, use:
+            // List<Map<String, Object>> campanhas = campanhaController.listarCampanhasPorVoluntario(voluntarioId);
+            // return ResponseEntity.ok(campanhas);
+
+            return ResponseEntity.ok(new ArrayList<>());
         } catch (Exception e) {
             System.err.println("❌ Erro ao obter campanhas do voluntário: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
@@ -140,8 +144,9 @@ public class VoluntarioView {
         try {
             Map<String, Object> dashboard = new HashMap<>();
 
-            // Informações do voluntário
-            Voluntario voluntario = voluntarioModel.consultar(voluntarioId, getConexao());
+            // ✅ Agora usa o controller
+            Voluntario voluntario = voluntarioController.buscarVoluntarioPorId(voluntarioId);
+
             if (voluntario != null) {
                 dashboard.put("nome", voluntario.getVol_nome());
                 dashboard.put("email", voluntario.getVol_email());

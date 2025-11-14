@@ -45,6 +45,11 @@ public class CampResponsavel {
         return dao.get(filtro, conexao);
     }
 
+    // ✅ NOVO MÉTODO: Consulta segura por chave composta
+    public List<CampResponsavel> consultarPorChaveComposta(int camId, int voluntarioId, Conexao conexao) {
+        return dao.getByCompositeKey(camId, voluntarioId, conexao);
+    }
+
 
     public CampResponsavel gravar(CampResponsavel c, Conexao conexao) {
         return dao.gravar(c, conexao);
