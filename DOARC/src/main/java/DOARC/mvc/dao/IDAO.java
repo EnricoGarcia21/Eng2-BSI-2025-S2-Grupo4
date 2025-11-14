@@ -1,17 +1,13 @@
 package DOARC.mvc.dao;
 
+import DOARC.mvc.util.Conexao;
 import java.util.List;
 
-public interface IDAO<T>{
-    // Retorno alterado de Object para T
-    public T gravar(T entidade);
-    // Retorno alterado de Object para T
-    public T alterar(T entidade);
+public interface IDAO<T> {
 
-    public boolean apagar(T entidade);
-
-    public T get(int id);
-
-    // Método get com filtro (substitui listar())
-    public List<T> get(String filtro);
+    T gravar(T entidade, Conexao conexao);
+    T alterar(T entidade, Conexao conexao);
+    boolean apagar(T entidade, Conexao conexao);
+    T get(int id, Conexao conexao);
+    List<T> get(String filtro, Conexao conexao);
 }
