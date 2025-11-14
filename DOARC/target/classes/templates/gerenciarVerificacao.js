@@ -6,10 +6,13 @@ const btnFiltrarResultado = document.getElementById('filtrar-resultado');
 const filtroStatus = document.getElementById('filtro-status');
 
 const API_URL = 'http://localhost:8080/apis/verificacao';
+// NOVO: URL da API para Donatários
+const API_DONATARIO_URL = 'http://localhost:8080/apis/donatario'; 
 
-// --- Variáveis de controle de filtro ---
+// --- Variáveis de controle de filtro e Donatários ---
 let listaVerificacao = [];
 let campoFiltroAtual = 'observacao'; // Inicia filtrando por observação
+let donatariosMap = {}; // Mapa para ID -> Nome
 filtroStatus.textContent = 'Filtrando por Observação';
 
 // --- Função Debounce (reutilizada) ---
@@ -36,8 +39,34 @@ function formatarDataBrasileira(dateString) {
     return dateString;
 }
 
+// --- NOVO: Função para buscar Donatários e criar Mapa ---
+async function carregarDonatarios() {
+    try {
+        const response = await fetch(API_DONATARIO_URL); 
+        if (!response.ok) throw new Error('Erro ao buscar donatários.');
+        
+        const data = await response.json();
+        
+        if (data.mensagem && !Array.isArray(data)) {
+            donatariosMap = {}; 
+        } else {
+            // Cria um mapa ID -> Nome
+            donatariosMap = data.reduce((map, donatario) => {
+                map[donatario.id] = donatario.nome || 'Nome Indisponível';
+                return map;
+            }, {});
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mapa de donatários:', error.message);
+        donatariosMap = {};
+    }
+}
+
 // --- Carregar Verificações do backend ---
 async function carregarVerificacoes() {
+    // CHAMA O NOVO MÉTODO ANTES DE TUDO
+    await carregarDonatarios(); 
+    
     try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error('Erro ao buscar verificações.');
@@ -75,6 +104,9 @@ function atualizarTabela(verificacoes) {
         const resultado = v.resultado || 'N/A';
         const volId = v.vol_id || 'N/A';
         const doaId = v.doa_id || 'N/A';
+        
+        // NOVO: Busca o nome usando o mapa
+        const donatarioNome = donatariosMap[doaId] || (doaId !== 'N/A' ? `ID: ${doaId}` : 'N/A'); 
 
         // Cria parâmetros para a página de alteração
         const params = new URLSearchParams({
@@ -100,7 +132,7 @@ function atualizarTabela(verificacoes) {
             <td>${observacao}</td>
             <td>${resultado}</td>
             <td>${volId}</td>
-            <td>${doaId}</td>
+            <td>${donatarioNome} (ID: ${doaId})</td> 
             <td>${acoes}</td>
         `;
         tabelaVerificacao.appendChild(tr);
