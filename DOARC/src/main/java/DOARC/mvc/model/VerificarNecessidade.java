@@ -15,7 +15,7 @@ public class VerificarNecessidade {
     private String verObs;
     private String verResultado;
     private int volId; // Chave estrangeira para Voluntário
-    private int doaId; // Chave estrangeira para Doador
+    private int donaId; // CORREÇÃO: Chave estrangeira para Donatário
 
     @Autowired // Model Instancia (recebe) o DAO
     private VerificarNecessidadeDAO dao;
@@ -25,12 +25,12 @@ public class VerificarNecessidade {
     }
 
     // Construtor para gravação (sem ID)
-    public VerificarNecessidade(String verData, String verObs, String verResultado, int volId, int doaId) {
+    public VerificarNecessidade(String verData, String verObs, String verResultado, int volId, int donaId) { // CORREÇÃO
         this.verData = verData;
         this.verObs = verObs;
         this.verResultado = verResultado;
         this.volId = volId;
-        this.doaId = doaId;
+        this.donaId = donaId; // CORREÇÃO
     }
 
     // --- MÉTODOS DE DELEGAÇÃO PARA O DAO ---
@@ -65,6 +65,6 @@ public class VerificarNecessidade {
     public void setVerResultado(String verResultado) { this.verResultado = verResultado; }
     public int getVolId() { return volId; }
     public void setVolId(int volId) { this.volId = volId; }
-    public int getDoaId() { return doaId; }
-    public void setDoaId(int doaId) { this.doaId = doaId; }
+    public int getDonaId() { return donaId; } // CORREÇÃO
+    public void setDonaId(int donaId) { this.donaId = donaId; } // CORREÇÃO
 }

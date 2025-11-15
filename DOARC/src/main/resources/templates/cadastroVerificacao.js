@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // ALTERADO: Campo agora é um SELECT (doa_select)
         doaId: {
             id: 'doa_select', 
-            name: 'doa_id', // O nome do parâmetro para o backend continua 'doa_id'
+            name: 'dona_id', // << CORREÇÃO: MUDANÇA PARA 'dona_id' para bater com o Backend
             required: true,
             validate: validarIdNumerico, // Agora valida se o valor selecionado (ID) é numérico
             exemplo: 'Selecione um Donatário válido.'
@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    // ---------------- NOVO: CARREGAR DONATÁRIOS ----------------
+    // ---------------- NOVO: CARREGAR DONATÁRIOS (MANTÉM FUNCIONALIDADE) ----------------
     async function carregarDonatarios() {
         const doaSelect = document.getElementById(CAMPOS_MAP.doaId.id);
         doaSelect.innerHTML = '<option value="">Carregando Donatários...</option>';
@@ -134,9 +134,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (listaDonatarios.length > 0) {
                 listaDonatarios.forEach(donatario => {
                     const option = document.createElement('option');
-                    // O valor enviado é o ID (doa_id)
+                    // O valor enviado é o ID (é isso que vai para o backend)
                     option.value = donatario.id; 
-                    // O texto visível é o Nome + ID
+                    // O texto visível é o Nome + ID (para o usuário)
                     option.textContent = `${donatario.nome} (ID: ${donatario.id})`;
                     doaSelect.appendChild(option);
                 });
@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---------------- INICIALIZAÇÃO E EVENTOS ----------------
+    // ---------------- INICIALIZAÇÃO E EVENTOS (Sem Alteração) ----------------
     function adicionarValidacaoTempoReal(campo) {
         if (campo.element) {
             const eventType = (campo.element.tagName === 'SELECT' || campo.element.type === 'date') ? 'change' : 'input';
@@ -197,13 +197,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // ---------------- SUBMIT (Sem Alteração Lógica) ----------------
+    // ---------------- SUBMIT (FORM DATA) ----------------
     verificacaoForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         hideMessage(submitErrorMessage);
         hideMessage(submitSuccessMessage);
         let formValido = true;
-        const params = new URLSearchParams();
+        
+        const params = new URLSearchParams(); 
 
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
@@ -225,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
                  esconderExemplo(campoElement);
             }
 
+            // O JavaScript já envia o valor do select (que é o ID)
             params.append(campo.name, valor); 
         }
 
@@ -232,16 +234,18 @@ document.addEventListener("DOMContentLoaded", () => {
             exibirMensagem('erro', 'Preencha todos os campos obrigatórios corretamente.');
             return;
         }
-
+        
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
+                // Content-Type correto para @RequestParam no Spring
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: params.toString()
             });
 
             const result = await response.json().catch(() => ({}));
             
+            // O Erro 400 é resolvido no Java View (Integer), permitindo que a aplicação prossiga aqui.
             if (!response.ok) throw new Error(result.erro || result.mensagem || `Erro HTTP: ${response.status}`);
 
             exibirMensagem('sucesso', result.mensagem || 'Verificação cadastrada com sucesso!');
@@ -257,6 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
         } catch (error) {
             console.error("Erro ao enviar Verificação:", error);
+            // Exibe a mensagem de erro da requisição ou a mensagem padrão
             exibirMensagem('erro', `Erro ao cadastrar Verificação: ${error.message || "Erro desconhecido."}`);
         }
     });

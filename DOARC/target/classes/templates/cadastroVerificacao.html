@@ -1,56 +1,56 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Cadastro de Verificação de Necessidades</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Verificação de Necessidades</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <header class="header">
-    <nav>
-        <a href="consultaVerificacao.html" class="nav-link">Voltar para Consulta de Verificações</a>
-    </nav>
+    <nav>
+        <a href="consultaVerificacao.html" class="nav-link">Voltar para Consulta de Verificações</a>
+    </nav>
 </header>
 
 <main>
-    <div class="form-container">
-        <h1>Cadastrar Nova Verificação de Necessidade</h1>
-        <form id="verificacaoForm" novalidate>
+    <div class="form-container">
+        <h1>Cadastrar Nova Verificação de Necessidade</h1>
+        <form id="verificacaoForm" novalidate>
 
-            <h2>Dados da Verificação</h2>
+            <h2>Dados da Verificação</h2>
 
-            <label for="ver_data" class="form-label">Data da Verificação:</label>
-            <input type="date" id="ver_data" name="data" class="form-control" required />
+            <label for="ver_data" class="form-label">Data da Verificação:</label>
+            <input type="date" id="ver_data" name="data" class="form-control" required />
 
-            <label for="ver_resultado" class="form-label">Resultado (Nível de Necessidade):</label>
-            <select id="ver_resultado" name="resultado" class="form-control" required>
-                <option value="">Selecione...</option>
-                <option value="Alta alimentos">Alta (Alimentos)</option>
-                <option value="Media vestuario">Média (Vestuário)</option>
-                <option value="Baixa">Baixa</option>
-                <option value="Nao ha">Não há necessidade imediata</option>
-            </select>
+            <label for="ver_resultado" class="form-label">Resultado (Nível de Necessidade):</label>
+            <select id="ver_resultado" name="resultado" class="form-control" required>
+                <option value="">Selecione...</option>
+                <option value="Alta alimentos">Alta (Alimentos)</option>
+                <option value="Media vestuario">Média (Vestuário)</option>
+                <option value="Baixa">Baixa</option>
+                <option value="Nao ha">Não há necessidade imediata</option>
+            </select>
 
-            <h2>Referências</h2>
-            
-            <label for="vol_id" class="form-label">ID do Voluntário Responsável:</label>
-            <input type="number" id="vol_id" name="vol_id" class="form-control" min="1" placeholder="Ex: 1" required />
+            <h2>Referências</h2>
+            
+            <label for="vol_id" class="form-label">ID do Voluntário Responsável:</label>
+            <input type="number" id="vol_id" name="vol_id" class="form-control" min="1" placeholder="Ex: 1" required />
 
-            <label for="doa_select" class="form-label">Donatário (Família) Verificado:</label>
-            <select id="doa_select" name="doa_id" class="form-control" required>
-                <option value="">Carregando donatários...</option>
-            </select>
-            <label for="ver_obs" class="form-label">Observações Detalhadas (Máx. 500 caracteres):</label>
-            <textarea id="ver_obs" name="observacao" class="form-control" rows="5" maxlength="500" placeholder="Ex: Família 1 verificada. Necessidade alta de cobertores e leite."></textarea>
+            <label for="doa_select" class="form-label">Donatário (Família) Verificado:</label>
+            <select id="doa_select" name="dona_id" class="form-control" required> 
+                <option value="">Carregando donatários...</option>
+            </select>
+            <label for="ver_obs" class="form-label">Observações Detalhadas (Máx. 500 caracteres):</label>
+            <textarea id="ver_obs" name="observacao" class="form-control" rows="5" maxlength="500" placeholder="Ex: Família 1 verificada. Necessidade alta de cobertores e leite."></textarea>
 
 
-            <p id="submitErrorMessage" class="error-message message" style="display: none;"></p>
-            <p id="submitSuccessMessage" class="success-message message" style="display: none;"></p>
+            <p id="submitErrorMessage" class="error-message message" style="display: none;"></p>
+            <p id="submitSuccessMessage" class="success-message message" style="display: none;"></p>
 
-            <button type="submit" class="btn-gradient">Cadastrar Verificação</button>
-        </form>
-    </div>
+            <button type="submit" class="btn-gradient">Cadastrar Verificação</button>
+        </form>
+    </div>
 </main>
 
 <script src="cadastroVerificacao.js"></script>

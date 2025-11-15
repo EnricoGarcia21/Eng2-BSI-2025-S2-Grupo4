@@ -33,7 +33,7 @@ function formatarDataBrasileira(dateString) {
     if (parts.length === 3) {
          // Verifica se é YYYY-MM-DD
         if (parts[0].length === 4) return `${parts[2]}/${parts[1]}/${parts[0]}`; 
-        // Se for DD/MM/YYYY
+         // Se for DD/MM/YYYY
         return dateString;
     }
     return dateString;
@@ -103,10 +103,13 @@ function atualizarTabela(verificacoes) {
         const observacao = v.observacao || 'N/A';
         const resultado = v.resultado || 'N/A';
         const volId = v.vol_id || 'N/A';
-        const doaId = v.doa_id || 'N/A';
+        
+        // CORREÇÃO: Usa a nova chave 'dona_id'
+        const donaId = v.dona_id || 'N/A'; 
         
         // NOVO: Busca o nome usando o mapa
-        const donatarioNome = donatariosMap[doaId] || (doaId !== 'N/A' ? `ID: ${doaId}` : 'N/A'); 
+        // CORREÇÃO: Usa a chave donaId
+        const donatarioNome = donatariosMap[donaId] || (donaId !== 'N/A' ? `ID: ${donaId}` : 'N/A'); 
 
         // Cria parâmetros para a página de alteração
         const params = new URLSearchParams({
@@ -115,7 +118,7 @@ function atualizarTabela(verificacoes) {
             observacao, 
             resultado, 
             vol_id: volId, 
-            doa_id: doaId
+            dona_id: donaId // CORREÇÃO: Manda a chave correta
         }).toString();
 
         const acoes = `
@@ -132,7 +135,7 @@ function atualizarTabela(verificacoes) {
             <td>${observacao}</td>
             <td>${resultado}</td>
             <td>${volId}</td>
-            <td>${donatarioNome} (ID: ${doaId})</td> 
+            <td>${donatarioNome} (ID: ${donaId})</td> 
             <td>${acoes}</td>
         `;
         tabelaVerificacao.appendChild(tr);

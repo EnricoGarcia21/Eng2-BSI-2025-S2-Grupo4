@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitSuccessMsg = document.getElementById('submitSuccessMessage');
 
     const API_BASE_URL = 'http://localhost:8080/apis/verificacao';
+    // NOVA URL PARA BUSCAR DONATÁRIOS
+    const API_DONATARIO_URL = 'http://localhost:8080/apis/donatario';
 
     // Obtém o ID da verificação da URL
     const urlParams = new URLSearchParams(window.location.search);
@@ -16,29 +18,31 @@ document.addEventListener('DOMContentLoaded', () => {
         observacao: { id: 'ver_obs', required: false, validate: validarObservacao, name: 'observacao' },
         resultado: { id: 'ver_resultado', required: true, validate: validarSelecao, name: 'resultado' },
         vol_id: { id: 'vol_id', required: true, validate: validarIdNumerico, name: 'vol_id' },
-        doa_id: { id: 'doa_id', required: true, validate: validarIdNumerico, name: 'doa_id' }
+        // ALTERADO: ID do elemento agora é 'doa_select', mas o nome para o backend continua 'doa_id'
+        doa_id: { id: 'doa_select', required: true, validate: validarIdNumerico, name: 'doa_id' }
     };
 
-    // ---------------- VALIDADORES ----------------
+    // ---------------- VALIDADORES (Mantidos) ----------------
     function validarDataHojeOuPassada(valor) {
         if (!valor) return false;
         const dataInput = new Date(valor + 'T00:00:00'); 
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0);
-        // A data da verificação deve ser hoje ou no passado (não pode ser futura)
         return !isNaN(dataInput.getTime()) && dataInput.getTime() <= hoje.getTime();
     }
     function validarObservacao(valor) {
         return valor.length <= 500;
     }
     function validarSelecao(valor) { 
+        // Verifica se o valor não é a opção padrão vazia
         return valor !== '' && valor !== null && valor !== undefined; 
     }
     function validarIdNumerico(valor) { 
+        // Verifica se o valor é um número inteiro positivo
         return !isNaN(parseInt(valor)) && parseInt(valor) >= 1; 
     }
 
-    // ---------------- FEEDBACK VISUAL ----------------
+    // ---------------- FEEDBACK VISUAL (Mantido) ----------------
     function adicionarFeedbackObrigatorio(labelElement) {
         if (!labelElement) return;
         if (!labelElement.querySelector('.required-indicator')) {
@@ -55,11 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const labelElement = document.querySelector(`label[for="${inputElement.id}"]`);
         const indicator = labelElement ? labelElement.querySelector('.required-indicator') : null;
         
-        const isRequiredAndValid = isValid && inputElement.hasAttribute('required');
-
         inputElement.classList.remove('success', 'error');
         
-        // Verifica se é válido OU se não é obrigatório e está vazio
         if (isValid) {
             if (indicator) indicator.style.color = 'green';
             inputElement.classList.add('success');
@@ -84,8 +85,48 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ---------------- NOVO: CARREGAR LISTA DE DONATÁRIOS ----------------
+    async function carregarDonatarios() {
+        const doaSelect = document.getElementById(CAMPOS_MAP.doa_id.id);
+        doaSelect.innerHTML = '<option value="">Carregando Donatários...</option>';
+        doaSelect.disabled = true;
+
+        try {
+            const response = await fetch(API_DONATARIO_URL);
+            if (!response.ok) throw new Error('Erro ao buscar lista de donatários.');
+            
+            const listaDonatarios = await response.json();
+            
+            doaSelect.innerHTML = '<option value="">Selecione o Donatário...</option>';
+            
+            if (Array.isArray(listaDonatarios) && listaDonatarios.length > 0) {
+                listaDonatarios.forEach(donatario => {
+                    const option = document.createElement('option');
+                    // O valor enviado é o ID (doa_id)
+                    option.value = donatario.id; 
+                    // O texto visível é o Nome + ID
+                    option.textContent = `${donatario.nome} (ID: ${donatario.id})`;
+                    doaSelect.appendChild(option);
+                });
+                doaSelect.disabled = false;
+            } else {
+                 doaSelect.innerHTML = '<option value="">Nenhum Donatário cadastrado.</option>';
+                 doaSelect.disabled = true;
+            }
+        } catch (error) {
+            console.error('Erro ao carregar Donatários:', error);
+            doaSelect.innerHTML = '<option value="">Erro ao carregar lista.</option>';
+            doaSelect.disabled = true;
+            // Não exibe mensagem de erro na tela para não sobrepor a mensagem principal
+        }
+    }
+
+
     // ---------------- CARREGAR DADOS DA VERIFICAÇÃO ----------------
     async function carregarDadosVerificacao(id) {
+        // 1. Garante que a lista de donatários está carregada antes de tentar pré-selecionar
+        await carregarDonatarios(); 
+        
         try {
             const response = await fetch(`${API_BASE_URL}/${id}`);
             const data = await response.json();
@@ -100,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById(campo.id);
                 if (!el) continue;
 
-                // Mapeamento dos campos do JSON (data, observacao, vol_id) para os inputs
+                // Mapeamento dos campos do JSON (data, observacao, vol_id, doa_id) para os inputs
                 const valor = data[key] || ''; 
                 
                 if (valor !== '') {
@@ -112,7 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     
                     // Atualiza o feedback visual após preenchimento
-                    atualizarFeedback(el, campo.validate(el.value));
+                    // O valor é garantido de ser o ID correto, então a validação deve passar.
+                    atualizarFeedback(el, campo.validate(String(el.value))); 
                 }
             }
             
@@ -128,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ---------------- INICIALIZAR CAMPOS ----------------
+    // ---------------- INICIALIZAR CAMPOS (Mantido) ----------------
     function inicializarCampos() {
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
@@ -142,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 campo.element.addEventListener('input', () => {
                     atualizarFeedback(campo.element, campo.validate(campo.element.value));
                 });
-                campo.element.addEventListener('change', () => { // Essencial para inputs type=date e select
+                campo.element.addEventListener('change', () => { // Essencial para inputs type=date, select
                     atualizarFeedback(campo.element, campo.validate(campo.element.value));
                 });
             }
@@ -157,9 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     inicializarCampos();
-    carregarDadosVerificacao(verId);
+    carregarDadosVerificacao(verId); // Agora espera carregar os donatários internamente
 
-    // ---------------- SUBMIT DO FORM ----------------
+    // ---------------- SUBMIT DO FORM (Pequena alteração na validação) ----------------
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         let formIsValid = true;
@@ -175,6 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let valor = campo.element.value.trim();
             
             // Validação final e atualização de feedback
+            // Para select, o valor é o ID.
             const isValid = campo.validate(valor);
             if (!isValid && campo.required) formIsValid = false;
             atualizarFeedback(campo.element, isValid);

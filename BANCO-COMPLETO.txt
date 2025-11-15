@@ -420,3 +420,39 @@ INSERT INTO Parametrizacao (P_CNPJ, P_RAZAOSOCIAL, P_NOMEFANTASIA, P_RUA, P_BAIR
 ('12345678901234', 'ONG Ajuda Total Ltda', 'ONG Ajuda', 'Rua da Ajuda', 'Bairro Bom', 'Cidade Foco', 'SP', '000000000', 'contato@ongajudatotal.org', 'www.ongajudatotal.org', '1140028922', 'Financeiro', '/logos/grande.png', '/logos/pequeno.png'),
 ('98765432109876', 'Inst. Social S.A.', 'Instituto Social', 'Av. Solidariedade', 'Bairro Paz', 'Cidade Foco', 'RJ', '000000001', 'geral@institutosocial.org', 'www.institutosocial.org', '2133334444', 'Comercial', '/logos/grande2.png', '/logos/pequeno2.png'),
 ('11223344556677', 'Assoc. Beneficente', 'Associação do Bem', 'Rua Principal', 'Centro', 'Cidade Foco', 'MG', '000000002', 'info@associacaodobem.org', 'www.associacaodobem.org', '3155556666', 'Marketing', '/logos/grande3.png', '/logos/pequeno3.png');
+
+-- 1. APAGAR AS CHAVES ESTRANGEIRAS E DADOS EXISTENTES (NECESSÁRIO PARA ALTERAR AS COLUNAS)
+
+-- 1.1. Excluir os dados de exemplo incorretos da tabela Verificar_Necessidade
+DELETE FROM Verificar_Necessidade;
+
+-- 1.2. Remover a Chave Estrangeira incorreta que liga a Doadores
+-- Nota: O nome da FK é gerado automaticamente, então tentaremos remover a restrição mais facilmente.
+-- Se o comando abaixo falhar, encontre o nome da FK e use DROP CONSTRAINT <nome_da_fk>;
+ALTER TABLE Verificar_Necessidade 
+    DROP CONSTRAINT IF EXISTS verificar_necessidade_doa_id_fkey;
+
+
+-- 2. CORRIGIR A COLUNA
+
+-- 2.1. Renomear a coluna DOA_ID para DON_ID (para refletir a chave correta do Donatário)
+ALTER TABLE Verificar_Necessidade 
+    RENAME COLUMN DOA_ID TO DON_ID;
+
+
+-- 3. ADICIONAR A CHAVE ESTRANGEIRA CORRETA
+
+-- 3.1. Adicionar a Chave Estrangeira correta, referenciando a tabela Donatario
+ALTER TABLE Verificar_Necessidade 
+    ADD CONSTRAINT fk_verificar_necessidade_donatario
+    FOREIGN KEY (DON_ID)
+    REFERENCES Donatario(DON_ID);
+
+
+-- 4. REINSERIR DADOS CORRIGIDOS (Referenciando DON_ID da tabela Donatario)
+
+-- Reinserção dos dados corrigidos (Source 42 adaptado para DON_ID)
+INSERT INTO Verificar_Necessidade (VER_DATA, VER_OBS, VER_RESULTADO, VOL_ID, DON_ID) VALUES
+('15/09/2025', 'Verificação inicial da família 1.', 'Necessidade alta de alimentos.', 1, 1),
+('16/09/2025', 'Verificação da família 2 após doação.', 'Necessidade média de vestuário.', 2, 2),
+('17/09/2025', 'Verificação da família 3.', 'Necessidade alta de cobertores.', 3, 3);

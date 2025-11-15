@@ -15,13 +15,13 @@ public class VerificarNecessidadeDAO implements IDAO<VerificarNecessidade> {
     @Override
     public VerificarNecessidade gravar(VerificarNecessidade entidade, Conexao conexao) {
         String sql = String.format(
-                "INSERT INTO verificar_necessidade (ver_data, ver_obs, ver_resultado, vol_id, doa_id) " +
+                "INSERT INTO verificar_necessidade (ver_data, ver_obs, ver_resultado, vol_id, DON_ID) " + // CORREÇÃO DA COLUNA
                         "VALUES ('%s', '%s', '%s', %d, %d) RETURNING ver_id",
                 entidade.getVerData().replace("'", "''"),
                 entidade.getVerObs().replace("'", "''"),
                 entidade.getVerResultado().replace("'", "''"),
                 entidade.getVolId(),
-                entidade.getDoaId()
+                entidade.getDonaId() // CORREÇÃO
         );
 
         try (ResultSet rs = conexao.consultar(sql)) {
@@ -38,13 +38,13 @@ public class VerificarNecessidadeDAO implements IDAO<VerificarNecessidade> {
     @Override
     public VerificarNecessidade alterar(VerificarNecessidade entidade, Conexao conexao) {
         String sql = String.format(
-                "UPDATE verificar_necessidade SET ver_data='%s', ver_obs='%s', ver_resultado='%s', vol_id=%d, doa_id=%d " +
+                "UPDATE verificar_necessidade SET ver_data='%s', ver_obs='%s', ver_resultado='%s', vol_id=%d, DON_ID=%d " + // CORREÇÃO DA COLUNA
                         "WHERE ver_id=%d",
                 entidade.getVerData().replace("'", "''"),
                 entidade.getVerObs().replace("'", "''"),
                 entidade.getVerResultado().replace("'", "''"),
                 entidade.getVolId(),
-                entidade.getDoaId(),
+                entidade.getDonaId(), // CORREÇÃO
                 entidade.getVerId()
         );
 
@@ -97,7 +97,7 @@ public class VerificarNecessidadeDAO implements IDAO<VerificarNecessidade> {
         v.setVerObs(rs.getString("ver_obs"));
         v.setVerResultado(rs.getString("ver_resultado"));
         v.setVolId(rs.getInt("vol_id"));
-        v.setDoaId(rs.getInt("doa_id"));
+        v.setDonaId(rs.getInt("DON_ID")); // CORREÇÃO: Usando o nome da coluna do banco
         return v;
     }
 }

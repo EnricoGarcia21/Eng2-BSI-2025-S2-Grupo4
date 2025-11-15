@@ -34,7 +34,7 @@ public class VerificarNecessidadeController {
             json.put("observacao", v.getVerObs());
             json.put("resultado", v.getVerResultado());
             json.put("vol_id", v.getVolId());
-            json.put("doa_id", v.getDoaId());
+            json.put("dona_id", v.getDonaId()); // CORREÇÃO
             result.add(json);
         }
         return result;
@@ -52,14 +52,14 @@ public class VerificarNecessidadeController {
         json.put("observacao", v.getVerObs());
         json.put("resultado", v.getVerResultado());
         json.put("vol_id", v.getVolId());
-        json.put("doa_id", v.getDoaId());
+        json.put("dona_id", v.getDonaId()); // CORREÇÃO
         return json;
     }
 
     // --- ADD ---
-    public Map<String, Object> addVerificacao(String data, String observacao, String resultado, int volId, int doaId) {
+    public Map<String, Object> addVerificacao(String data, String observacao, String resultado, int volId, int donaId) { // CORREÇÃO
 
-        VerificarNecessidade nova = new VerificarNecessidade(data, observacao, resultado, volId, doaId);
+        VerificarNecessidade nova = new VerificarNecessidade(data, observacao, resultado, volId, donaId); // CORREÇÃO
 
         Conexao conexao = getConexao(); // INSTANCIA
         VerificarNecessidade gravada = verificarNecessidadeModel.gravar(nova, conexao); // PASSA CONEXAO
@@ -74,7 +74,7 @@ public class VerificarNecessidadeController {
     }
 
     // --- UPDATE ---
-    public Map<String, Object> updtVerificacao(int id, String data, String observacao, String resultado, int volId, int doaId) {
+    public Map<String, Object> updtVerificacao(int id, String data, String observacao, String resultado, int volId, int donaId) { // CORREÇÃO
 
         Conexao conexao = getConexao(); // INSTANCIA
 
@@ -85,7 +85,7 @@ public class VerificarNecessidadeController {
         existente.setVerObs(observacao);
         existente.setVerResultado(resultado);
         existente.setVolId(volId);
-        existente.setDoaId(doaId);
+        existente.setDonaId(donaId); // CORREÇÃO
 
         VerificarNecessidade atualizada = verificarNecessidadeModel.alterar(existente, conexao); // PASSA CONEXAO
         if (atualizada == null) return Map.of("erro", "Erro ao atualizar a Verificação de Necessidade");
