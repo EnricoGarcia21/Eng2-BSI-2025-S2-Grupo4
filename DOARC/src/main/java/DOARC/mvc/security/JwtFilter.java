@@ -44,6 +44,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // Log para debug
         System.out.println("🔍 JwtFilter - Path: " + path + " | Method: " + method);
 
+<<<<<<< HEAD
         // Adicionar CORS headers manualmente
         String origin = request.getHeader("Origin");
         if (origin != null) {
@@ -54,6 +55,8 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setHeader("Access-Control-Max-Age", "3600");
         }
 
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         // Permitir OPTIONS requests (CORS preflight)
         if ("OPTIONS".equalsIgnoreCase(method)) {
             response.setStatus(HttpServletResponse.SC_OK);

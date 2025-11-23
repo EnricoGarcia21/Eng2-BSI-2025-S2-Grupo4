@@ -186,8 +186,12 @@
             // Atualizar nome do usuário
             const user = Auth.getUser();
             if (user) {
+<<<<<<< HEAD
                 const displayName = user.nome || user.email || 'Administrador';
                 document.getElementById('userName').textContent = displayName;
+=======
+                document.getElementById('userName').textContent = user.email;
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             }
         });
 

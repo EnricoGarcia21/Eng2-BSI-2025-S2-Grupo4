@@ -25,11 +25,14 @@
             <li class="nav-item" id="adminNav" style="display: none;">
                 <a href="admin-dashboard.html" class="nav-link">Dashboard Admin</a>
             </li>
+<<<<<<< HEAD
             
             <li class="nav-item">
                 <a href="minha-area.html" class="nav-link">Minha Área</a>
             </li>
 
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             <li class="nav-item">
                 <a href="#" class="nav-link">Gerenciar</a>
                 <ul class="submenu">
@@ -72,6 +75,10 @@
 
         <h1 style="margin-bottom: 2rem; color: var(--primary-color);">Dashboard</h1>
 
+<<<<<<< HEAD
+=======
+        <!-- User Info -->
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         <div class="card mb-4">
             <div class="card-body">
                 <h3>Bem-vindo, <span id="userWelcome">Voluntário</span>!</h3>
@@ -80,6 +87,10 @@
             </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        <!-- Statistics Cards -->
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         <div class="dashboard-grid">
             <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
                 <div class="stat-icon">📦</div>
@@ -171,6 +182,10 @@
             </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        <!-- Voluntários List (for authenticated users) -->
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         <div class="card mt-4">
             <div class="card-header">
                 <h2 class="card-title">Lista de Voluntários</h2>
@@ -184,7 +199,9 @@
         </div>
     </main>
 
-    <script src="../js/app.js"></script>
+    <!-- Scripts -->
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Verificar autenticação
@@ -195,6 +212,7 @@
             // Carregar dados do usuário
             const user = Auth.getUser();
             if (user) {
+<<<<<<< HEAD
                 // Mostrar nome do voluntário (ou email se nome não disponível)
                 const displayName = user.nome || user.email;
                 document.getElementById('userName').textContent = displayName;
@@ -205,15 +223,27 @@
 
                 // Mostrar link admin se for admin
                 if (Auth.isAdmin()) {
+=======
+                document.getElementById('userName').textContent = user.email;
+                document.getElementById('userWelcome').textContent = user.email;
+                document.getElementById('userLevel').textContent = user.nivelAcesso;
+                
+                // Mostrar link admin se for admin
+                if (user.nivelAcesso === 'ADMIN') {
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
                     document.getElementById('adminNav').style.display = 'block';
                 }
+            }
 
+<<<<<<< HEAD
                 // Debug info
                 console.log('👤 Usuário:', displayName);
                 console.log('🔑 Nível de acesso:', user.nivelAcesso);
                 console.log('👑 É admin?', Auth.isAdmin());
             }
 
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             // Configurar logout
             document.getElementById('logoutBtn').addEventListener('click', function() {
                 if (confirm('Deseja realmente sair?')) {
@@ -274,6 +304,7 @@
             try {
                 voluntariosList.innerHTML = '<p class="text-center">Carregando voluntários...</p>';
                 
+<<<<<<< HEAD
                 // Ajustado para usar a rota pública de equipe se não for admin
                 // Se for admin, usa a rota completa. O backend (VoluntarioView) agora tem /equipe
                 const isAdmin = Auth.isAdmin();
@@ -291,12 +322,25 @@
                         <p><strong>Total de voluntários:</strong> ${lista.length}</p>
                         <div class="row">
                             ${lista.map(vol => `
+=======
+                const data = await API.voluntario.listar();
+                
+                if (data.voluntarios && data.voluntarios.length > 0) {
+                    voluntariosList.innerHTML = `
+                        <p><strong>Total de voluntários:</strong> ${data.total}</p>
+                        <div class="row">
+                            ${data.voluntarios.map(vol => `
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
                                 <div class="col-md-4 mb-3">
                                     <div class="card">
                                         <div class="card-body">
                                             <h6>${vol.vol_nome || vol.nome || 'Nome não informado'}</h6>
                                             <p class="text-muted">${vol.vol_email || vol.email || 'Email não informado'}</p>
+<<<<<<< HEAD
                                             <small>Tel: ${vol.vol_telefone || vol.telefone || '-'}</small>
+=======
+                                            <small>ID: ${vol.vol_id || vol.id}</small>
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
                                         </div>
                                     </div>
                                 </div>

@@ -332,18 +332,28 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     // ------------------------------
 
     try {
+<<<<<<< HEAD
         UI.showAlert("📝 Cadastrando voluntário...", "info");
 
         // CORREÇÃO CRÍTICA: Usar o endpoint de registro completo
         const response = await fetch(API_REGISTRO_URL, {
             method: "POST",
             headers: {
+=======
+        UI.showAlert("Cadastrando voluntário...", "info");
+        
+        // CORREÇÃO CRÍTICA: Usar o endpoint de registro completo
+        const response = await fetch(API_REGISTRO_URL, {
+            method: "POST",
+            headers: { 
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
                 "Content-Type": "application/json",
                 "Accept": "application/json"
             },
             body: JSON.stringify(dadosVoluntario)
         });
 
+<<<<<<< HEAD
         // Tentar parsear o JSON da resposta
         let result;
         try {
@@ -388,6 +398,24 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         } else {
             UI.showAlert("⚠️ Erro inesperado: " + error.message, "danger");
         }
+=======
+        const result = await response.json();
+        
+        if (response.ok) {
+            UI.showAlert("✅ Cadastro realizado com sucesso! Redirecionando para login...", "success");
+            setTimeout(() => {
+                // Redireciona para a página de login (index.html)
+                window.location.href = "index.html";
+            }, 3000);
+        } else {
+            // O backend retorna { "erro": "..." } em caso de falha de validação
+            const errorMessage = result.erro || "Erro desconhecido no servidor durante o cadastro.";
+            UI.showAlert("❌ " + errorMessage);
+        }
+    } catch (error) {   
+        console.error("Erro no registro:", error);
+        UI.showAlert("❌ Erro de conexão com o servidor. Verifique se o backend está rodando.");
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     }
 });
 

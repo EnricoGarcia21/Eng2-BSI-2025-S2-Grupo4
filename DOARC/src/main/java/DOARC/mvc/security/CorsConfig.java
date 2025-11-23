@@ -16,11 +16,18 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/apis/**")
+<<<<<<< HEAD
                 .allowedOriginPatterns("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
                 .allowedHeaders("*")
                 .exposedHeaders("Authorization", "Content-Type")
                 .allowCredentials(true)
+=======
+                .allowedOrigins("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(false)
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
                 .maxAge(3600);
     }
 
@@ -32,13 +39,21 @@ public class CorsConfig implements WebMvcConfigurer {
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
 
         // Métodos HTTP permitidos
+<<<<<<< HEAD
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+=======
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 
         // Headers permitidos
         configuration.setAllowedHeaders(Arrays.asList("*"));
 
         // Permitir credenciais (cookies, authorization headers)
+<<<<<<< HEAD
         configuration.setAllowCredentials(true);
+=======
+        configuration.setAllowCredentials(false);
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 
         // Tempo de cache para preflight requests
         configuration.setMaxAge(3600L);

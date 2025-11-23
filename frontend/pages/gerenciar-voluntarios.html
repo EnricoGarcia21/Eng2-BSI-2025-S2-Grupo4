@@ -234,6 +234,7 @@
     </div>
 
     <script src="../js/app.js"></script>
+<<<<<<< HEAD
     <script>
         // =======================================================================
         // Gerenciamento de Voluntários - DOARC
@@ -632,5 +633,441 @@
         }
         function closeModal(id) { UI.closeModal(id); }
     </script>
+=======
+<script>
+// =======================================================================
+// POLYFILLS/MOCKS para UI e Validator (Garantir que as funções chamadas existam)
+// O seu arquivo '../js/app.js' deve conter implementações mais robustas.
+// =======================================================================
+const UI = window.UI || {
+    showAlert: (message, type) => {
+        const container = document.getElementById('api-messages');
+        container.innerHTML = `<div class="alert ${type} fade show">${message}</div>`;
+        setTimeout(() => container.innerHTML = '', 5000);
+    },
+    confirm: (message, callback) => {
+        if (confirm(message)) {
+            callback();
+        }
+    },
+    openModal: (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'block';
+            modal.classList.add('open');
+        }
+    },
+    closeModal: (modalId) => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('open');
+            // Limpa erros do modalVoluntario ao fechar
+            if (modalId === 'modalVoluntario') {
+                const form = document.getElementById('formVoluntario');
+                if (form && window.Validator) Validator.clearAllErrors(form);
+            }
+        }
+    }
+};
+
+const Validator = window.Validator || {
+    isEmpty: value => !value || String(value).trim() === '',
+    isValidEmail: email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+    isValidCPF: cpf => /^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$/.test(cpf) && cpf.replace(/[^\d]/g, '').length === 11,
+    isValidPhone: phone => /[0-9]{2}[\s]?[9]?[0-9]{4}-?[0-9]{4}/.test(phone.replace(/[^\d]/g, '')),
+    showError: (inputElement, message) => {
+        inputElement.classList.add('error');
+        const errorDiv = inputElement.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains('form-error')) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    },
+    clearError: (inputElement) => {
+        inputElement.classList.remove('error');
+        const errorDiv = inputElement.nextElementSibling;
+        if (errorDiv && errorDiv.classList.contains('form-error')) {
+            errorDiv.textContent = '';
+            errorDiv.style.display = 'none';
+        }
+    },
+    clearAllErrors: (formElement) => {
+        formElement.querySelectorAll('.form-control.error').forEach(input => Validator.clearError(input));
+    }
+};
+// =======================================================================
+
+
+// Configuração base da API
+const API_BASE = "http://localhost:8080/apis";
+const API_VOLUNTARIOS = `${API_BASE}/voluntario`;
+
+/**
+ * Headers padrão com autenticação JWT.
+ * Redireciona para login se o token não existir.
+ */
+const getHeaders = () => {
+    const headers = new Headers();
+    headers.append("Content-Type", "application/json");
+    
+    // 🔑 JWT AUTHENTICATION
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+        headers.append("Authorization", `Bearer ${token}`);
+    } else {
+        // Se não houver token, força o logout e redireciona
+        UI.showAlert('Sessão expirada. Faça login novamente.', 'danger');
+        window.location.href = '../index.html'; 
+    }
+    return headers;
+};
+
+// Funções de formatação
+function formatarCPF(cpf) {
+    if (!cpf) return '';
+    return String(cpf).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+}
+
+function formatarTelefone(telefone) {
+    if (!telefone) return '';
+    // Formata para (XX) XXXXX-XXXX
+    const digits = String(telefone).replace(/[^\d]/g, '');
+    if (digits.length === 11) {
+        return digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+    // Formata para (XX) XXXX-XXXX (fixo)
+    if (digits.length === 10) {
+        return digits.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return telefone;
+}
+
+function formatarData(data) {
+    if (!data) return '';
+    // Converte de YYYY-MM-DD para DD/MM/YYYY
+    if (data.includes('-')) {
+        const parts = data.split('-');
+        // Tenta reverter de YYYY-MM-DD para o formato BR
+        if (parts.length === 3) {
+            return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+    }
+    // Se for uma string de data completa (ISO), usa toLocaleDateString
+    return new Date(data).toLocaleDateString('pt-BR');
+}
+
+// Função para carregar voluntários da API
+async function carregarVoluntarios() {
+    try {
+        const response = await fetch(API_VOLUNTARIOS, { headers: getHeaders() });
+        
+        if (!response.ok) {
+             // Tenta extrair a mensagem de erro do backend (ex: Acesso negado)
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.erro || `Erro de rede: ${response.status}`);
+        }
+        
+        const voluntarios = await response.json();
+        preencherTabela(voluntarios);
+    } catch (error) {
+        console.error('Erro ao carregar voluntários:', error);
+        UI.showAlert('❌ Erro ao carregar voluntários. ' + (error.message || ''), 'danger');
+        const tbody = document.getElementById('tabelaVoluntarios');
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Não foi possível carregar os dados.</td></tr>';
+    }
+}
+
+// Função para preencher a tabela com dados da API
+function preencherTabela(voluntarios) {
+    const tbody = document.getElementById('tabelaVoluntarios');
+    tbody.innerHTML = '';
+
+    if (voluntarios.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum voluntário encontrado.</td></tr>';
+        return;
+    }
+
+    voluntarios.forEach(vol => {
+        // Normaliza as chaves do objeto (supondo que a API retorne vol_id, vol_nome, etc.)
+        const id = vol.vol_id || vol.id;
+        const nome = vol.vol_nome || vol.nome || '';
+        const cpf = vol.vol_cpf || vol.cpf || '';
+        const email = vol.vol_email || vol.email || '';
+        const telefone = vol.vol_telefone || vol.telefone || '';
+        // Converte a data de 'YYYY-MM-DD' (ou similar) para 'DD/MM/YYYY'
+        const dataCadastro = formatarData(vol.vol_datacadastro || vol.dataCadastro || '');
+        const doacoesRealizadas = vol.doacoes_realizadas || vol.doacoesRealizadas || 0;
+        const status = (vol.status || 'ativo').toLowerCase();
+
+        const statusClass = status === 'ativo' ? 'success' : 'danger';
+        const statusText = status === 'ativo' ? 'Ativo' : 'Inativo';
+        const acaoIcone = status === 'ativo' ? '🔒' : '🔓';
+        const acaoClass = status === 'ativo' ? 'danger' : 'success';
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${nome}</td>
+            <td>${formatarCPF(cpf)}</td>
+            <td>${email}</td>
+            <td>${formatarTelefone(telefone)}</td>
+            <td>${dataCadastro}</td>
+            <td>${doacoesRealizadas}</td>
+            <td><span class="badge badge-${statusClass}">${statusText}</span></td>
+            <td>
+                <button class="btn btn-sm btn-info" onclick="editarVoluntario(${id})">✏️</button>
+                <button class="btn btn-sm btn-warning" onclick="verHistorico(${id})">📋</button>
+                <button class="btn btn-sm btn-${acaoClass}" onclick="toggleStatus(${id}, '${status}')">
+                    ${acaoIcone}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Função para buscar voluntário por ID
+async function buscarVoluntarioPorId(id) {
+    try {
+        const response = await fetch(`${API_VOLUNTARIOS}/${id}`, { headers: getHeaders() });
+        if (!response.ok) throw new Error('Voluntário não encontrado');
+        return await response.json();
+    } catch (error) {
+        console.error('Erro:', error);
+        UI.showAlert('Erro ao carregar dados do voluntário', 'danger');
+        return null;
+    }
+}
+
+// Função para salvar voluntário (criar ou atualizar)
+async function salvarVoluntario() {
+    const form = document.getElementById('formVoluntario');
+    const nome = document.getElementById('nome');
+    const cpf = document.getElementById('cpf');
+    const email = document.getElementById('email');
+    const telefone = document.getElementById('telefone');
+    const dataNascimento = document.getElementById('dataNascimento');
+    const endereco = document.getElementById('endereco'); // Usado como placeholder para vol_rua
+    const statusVoluntario = document.getElementById('statusVoluntario');
+
+    Validator.clearAllErrors(form);
+    let isValid = true;
+
+    // Validações
+    if (Validator.isEmpty(nome.value)) { Validator.showError(nome, 'Nome é obrigatório'); isValid = false; }
+    // A validação de CPF deve ser feita no formato puro (somente dígitos)
+    const cpfPuro = cpf.value.replace(/[^\d]/g, '');
+    if (Validator.isEmpty(cpfPuro) || !Validator.isValidCPF(cpfPuro)) { Validator.showError(cpf, 'CPF inválido'); isValid = false; }
+    if (Validator.isEmpty(email.value) || !Validator.isValidEmail(email.value)) { Validator.showError(email, 'E-mail inválido'); isValid = false; }
+    // A validação de telefone deve ser feita no formato puro (somente dígitos)
+    const telefonePuro = telefone.value.replace(/[^\d]/g, '');
+    if (Validator.isEmpty(telefonePuro) || !Validator.isValidPhone(telefonePuro)) { Validator.showError(telefone, 'Telefone inválido'); isValid = false; }
+    if (Validator.isEmpty(dataNascimento.value)) { Validator.showError(dataNascimento, 'Data é obrigatória'); isValid = false; }
+
+    if (!isValid) {
+        UI.showAlert('Corrija os erros do formulário.', 'danger');
+        return;
+    }
+
+    try {
+        const voluntarioId = document.getElementById('voluntarioId').value;
+        
+        // 🛠️ Mapeamento para o formato da API (utilizando as informações do form)
+        // Valores default/hardcoded são usados para campos não presentes no modal
+        const data = {
+            vol_nome: nome.value,
+            vol_cpf: cpfPuro,
+            vol_email: email.value,
+            vol_telefone: telefonePuro,
+            vol_datanasc: dataNascimento.value,
+            vol_rua: endereco.value || '', // Assumindo 'endereco' é 'vol_rua'
+            vol_bairro: "Não Informado", // Hardcoded
+            vol_numero: "S/N",   // Hardcoded
+            vol_cidade: "Não Informado", // Hardcoded
+            vol_cep: "00000000", // Hardcoded
+            vol_uf: "ND", // Hardcoded
+            vol_sexo: "N", // Hardcoded (Pode ser adicionado um campo 'Sexo' ao form)
+            status: statusVoluntario.value // Adicionando status no payload
+        };
+
+        const requestOptions = {
+            method: voluntarioId ? "PUT" : "POST",
+            headers: getHeaders(),
+            body: JSON.stringify(data)
+        };
+
+        const url = voluntarioId ? `${API_VOLUNTARIOS}/${voluntarioId}` : API_VOLUNTARIOS;
+
+        const response = await fetch(url, requestOptions);
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.erro || `Erro de rede: ${response.status}`);
+        }
+
+        UI.showAlert(voluntarioId ? '✅ Voluntário atualizado!' : '✅ Voluntário cadastrado!', 'success');
+        closeModal('modalVoluntario');
+        carregarVoluntarios(); // Recarrega a lista
+    } catch (error) {
+        console.error('Erro:', error);
+        UI.showAlert('❌ Erro ao salvar voluntário: ' + (error.message || ''), 'danger');
+    }
+}
+
+// Função para editar voluntário
+async function editarVoluntario(id) {
+    try {
+        const voluntario = await buscarVoluntarioPorId(id);
+        if (!voluntario) return;
+
+        // Limpa erros antes de popular
+        Validator.clearAllErrors(document.getElementById('formVoluntario'));
+
+        document.getElementById('voluntarioId').value = id;
+        document.getElementById('modalTitle').textContent = 'Editar Voluntário';
+        // Mapeamento das chaves da API para os campos do formulário
+        document.getElementById('nome').value = voluntario.vol_nome || voluntario.nome || '';
+        document.getElementById('cpf').value = voluntario.vol_cpf || voluntario.cpf || '';
+        document.getElementById('email').value = voluntario.vol_email || voluntario.email || '';
+        document.getElementById('telefone').value = voluntario.vol_telefone || voluntario.telefone || '';
+        document.getElementById('dataNascimento').value = (voluntario.vol_datanasc || voluntario.dataNascimento || '').split('T')[0]; // Pega apenas a data
+        document.getElementById('endereco').value = voluntario.vol_rua || voluntario.endereco || ''; // Assumindo 'vol_rua'
+        document.getElementById('statusVoluntario').value = (voluntario.status || 'ativo').toLowerCase();
+        document.getElementById('observacoes').value = voluntario.observacoes || ''; // Se tiver campo de observacoes
+
+        UI.openModal('modalVoluntario');
+    } catch (error) {
+        console.error('Erro:', error);
+        UI.showAlert('❌ Erro ao carregar dados do voluntário para edição', 'danger');
+    }
+}
+
+// Função para alternar status
+async function toggleStatus(id, statusAtual) {
+    const novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
+    const acao = novoStatus === 'ativo' ? 'ativar' : 'inativar';
+    
+    UI.confirm(`Deseja realmente ${acao} este voluntário?`, async function() {
+        try {
+            const data = { status: novoStatus };
+            
+            const requestOptions = {
+                method: "PUT",
+                headers: getHeaders(),
+                body: JSON.stringify(data)
+            };
+            // Endpoint de alteração de status (PATCH é mais semanticamente correto, mas PUT com corpo simplificado também é comum)
+            const response = await fetch(`${API_VOLUNTARIOS}/${id}/status`, requestOptions);
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.erro || `Erro de rede: ${response.status}`);
+            }
+
+            UI.showAlert(`✅ Status do voluntário alterado para ${acao} com sucesso!`, 'success');
+            carregarVoluntarios(); // Recarrega a lista
+        } catch (error) {
+            console.error('Erro:', error);
+            UI.showAlert('❌ Erro ao alterar status: ' + (error.message || ''), 'danger');
+        }
+    });
+}
+
+// Função para ver histórico (adaptar conforme sua API)
+async function verHistorico(id) {
+    try {
+        const response = await fetch(`${API_VOLUNTARIOS}/${id}/historico`, { headers: getHeaders() });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.erro || `Erro ao buscar histórico: ${response.status}`);
+        }
+
+        const historico = await response.json();
+        const tbody = document.getElementById('tabelaHistorico');
+        
+        tbody.innerHTML = historico.length > 0 
+            ? historico.map(item => {
+                const statusClass = item.status === 'concluido' ? 'success' : 'warning';
+                return `
+                    <tr>
+                        <td>${formatarData(item.data)}</td>
+                        <td>${item.tipo}</td>
+                        <td>${item.descricao}</td>
+                        <td><span class="badge badge-${statusClass}">${item.status}</span></td>
+                    </tr>
+                `;
+            }).join('')
+            : '<tr><td colspan="4" class="text-center">Nenhum histórico de doação encontrado.</td></tr>';
+            
+        UI.openModal('modalHistorico');
+    } catch (error) {
+        console.error('Erro:', error);
+        document.getElementById('tabelaHistorico').innerHTML = '<tr><td colspan="4" class="text-center">Erro ao carregar histórico</td></tr>';
+        UI.showAlert('❌ ' + (error.message || 'Erro ao buscar histórico.'), 'danger');
+        UI.openModal('modalHistorico'); // Abre o modal mesmo com erro para exibir a mensagem interna
+    }
+}
+
+
+// ============== EVENT LISTENERS E INICIALIZAÇÃO ==============
+
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Carregar Voluntários ao iniciar
+    carregarVoluntarios();
+    
+    // 2. Lógica de Logout
+    document.getElementById('logoutBtn').addEventListener('click', function() {
+        localStorage.removeItem('jwtToken');
+        window.location.href = '../index.html'; // Redireciona para a página de login
+    });
+
+    // 3. Event Listener para Busca
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+        rows.forEach(row => {
+            // Verifica se o texto da linha inclui o termo de busca E se está visível pelo filtro de status
+            const statusFilter = document.getElementById('filtroStatus').value.toLowerCase();
+            const matchesSearch = row.textContent.toLowerCase().includes(searchTerm);
+            const matchesStatus = !statusFilter || row.textContent.toLowerCase().includes(statusFilter);
+            
+            row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+        });
+    });
+});
+
+// Funções globais de UI (mantidas para compatibilidade com o HTML)
+
+function filtrarPorStatus() {
+    const status = document.getElementById('filtroStatus').value.toLowerCase();
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+    
+    rows.forEach(row => {
+        // Verifica se o texto da linha inclui o status filtrado E se está visível pela busca
+        const matchesStatus = !status || row.textContent.toLowerCase().includes(status);
+        const matchesSearch = row.textContent.toLowerCase().includes(searchTerm);
+
+        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
+    });
+}
+
+function openModal(modalId) {
+    if (modalId === 'modalVoluntario') {
+        // Limpa o formulário e erros ao abrir para "Novo Voluntário"
+        document.getElementById('formVoluntario').reset();
+        Validator.clearAllErrors(document.getElementById('formVoluntario'));
+        document.getElementById('voluntarioId').value = '';
+        document.getElementById('modalTitle').textContent = 'Novo Voluntário';
+    }
+    UI.openModal(modalId);
+}
+
+function closeModal(modalId) { 
+    UI.closeModal(modalId); 
+}
+</script>
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 </body>
 </html>

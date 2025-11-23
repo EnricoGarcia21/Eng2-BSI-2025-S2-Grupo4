@@ -7,8 +7,11 @@ import DOARC.mvc.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.HashMap;
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +28,7 @@ public class AdminController {
         return SingletonDB.conectar();
     }
 
+<<<<<<< HEAD
     // ==========================================
     // MÉTODO AUXILIAR PARA MAPEAR OBJETO -> JSON
     // (Atualizado com TODOS os campos do banco)
@@ -184,31 +188,96 @@ public class AdminController {
     // MÉTODOS JÁ EXISTENTES (MANTIDOS)
     // ==========================================
 
+=======
+    // ===== MÉTODOS PARA VOLUNTÁRIOS =====
+
+    public List<Map<String, Object>> listarUsuarios() {
+        // Sua implementação existente
+        return null; // placeholder
+    }
+
+    public Map<String, Object> getVoluntario(int id) {
+        // Sua implementação existente
+        return null; // placeholder
+    }
+
+    public Map<String, Object> updtVoluntario(Voluntario voluntario) {
+        // Sua implementação existente
+        return null; // placeholder
+    }
+
+    public Map<String, Object> deletarVoluntario(int id) {
+        // Sua implementação existente
+        return null; // placeholder
+    }
+
+    // ===== NOVOS MÉTODOS PARA LOGINS =====
+
+    /**
+     * Lista todos os logins do sistema
+     */
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     public List<Login> listarLogins() {
         return loginModel.consultar("", getConexao());
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Busca um login específico por ID do voluntário
+     */
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     public Login buscarLoginPorVoluntarioId(int voluntarioId) {
         return loginModel.buscarPorVoluntarioId(voluntarioId, getConexao());
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Atualiza o status de um login
+     */
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     public boolean atualizarStatusLogin(int voluntarioId, char novoStatus) {
         return loginModel.atualizarStatus(voluntarioId, novoStatus, getConexao());
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Atualiza o nível de acesso de um login
+     */
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     public Login atualizarNivelAcesso(int voluntarioId, String novoNivel) {
         Login login = loginModel.buscarPorVoluntarioId(voluntarioId, getConexao());
         if (login == null) {
             return null;
         }
+<<<<<<< HEAD
+=======
+
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         login.setNivelAcesso(novoNivel);
         return loginModel.alterar(login, getConexao());
     }
 
+<<<<<<< HEAD
+=======
+    // ===== NOVOS MÉTODOS PARA VOLUNTÁRIOS =====
+
+    /**
+     * Lista todos os voluntários
+     */
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     public List<Voluntario> listarTodosVoluntarios() {
         return voluntarioModel.consultar("", getConexao());
     }
 
+<<<<<<< HEAD
+=======
+    /**
+     * Busca um voluntário por ID
+     */
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     public Voluntario buscarVoluntarioPorId(int id) {
         return voluntarioModel.consultar(id, getConexao());
     }

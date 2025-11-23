@@ -53,7 +53,15 @@ public class Login {
 
     // Métodos de busca específicos
     public Login buscarPorLogin(String login, Conexao conexao) {
+<<<<<<< HEAD
         return dao.buscarPorLogin(login, conexao);
+=======
+        return dao.buscarPorLoginExato(login, conexao);
+    }
+
+    public Login buscarPorLoginExato(String login, Conexao conexao) {
+        return dao.buscarPorLoginExato(login, conexao);
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     }
 
     public Login buscarPorVoluntarioId(int voluntarioId, Conexao conexao) {
@@ -61,9 +69,13 @@ public class Login {
     }
 
     public boolean atualizarStatus(int loginId, char novoStatus, Conexao conexao) {
+<<<<<<< HEAD
         // Converter char para String para o DAO
         String statusStr = (novoStatus == 'A' || novoStatus == 'a') ? "Ativo" : "Inativo";
         return dao.atualizarStatus(loginId, statusStr, conexao);
+=======
+        return dao.atualizarStatus(loginId, novoStatus, conexao);
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     }
 
     public boolean atualizarSenha(int loginId, String novaSenhaHash, Conexao conexao) {

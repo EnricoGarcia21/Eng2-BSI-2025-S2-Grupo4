@@ -1,11 +1,15 @@
 package DOARC.mvc.view;
 
 import DOARC.mvc.controller.VoluntarioController;
+<<<<<<< HEAD
 import DOARC.mvc.model.Login;
 import DOARC.mvc.model.Voluntario;
 import DOARC.mvc.util.Conexao;
 import DOARC.mvc.util.SingletonDB;
 import jakarta.servlet.http.HttpServletRequest;
+=======
+import DOARC.mvc.model.Voluntario;
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +24,17 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/apis/voluntario")
+<<<<<<< HEAD
 @CrossOrigin
+=======
+@CrossOrigin(origins = "*")
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 public class VoluntarioView {
 
     @Autowired
     private VoluntarioController voluntarioController;
 
+<<<<<<< HEAD
     @Autowired
     private Login loginModel;
 
@@ -159,6 +168,13 @@ public class VoluntarioView {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
             }
 
+=======
+    // ===== PERFIL DO VOLUNTÁRIO =====
+
+    @GetMapping("/perfil/{id}")
+    public ResponseEntity<Map<String, Object>> obterPerfil(@PathVariable int id) {
+        try {
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             Map<String, Object> voluntario = voluntarioController.getVoluntario(id);
 
             if (voluntario.containsKey("erro")) {
@@ -174,6 +190,7 @@ public class VoluntarioView {
     }
 
     @PutMapping("/perfil/{id}")
+<<<<<<< HEAD
     public ResponseEntity<Map<String, Object>> atualizarPerfil(
             @PathVariable int id,
             @RequestBody Map<String, Object> dados,
@@ -188,6 +205,12 @@ public class VoluntarioView {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
 
+=======
+    public ResponseEntity<Map<String, Object>> atualizarPerfil(@PathVariable int id, @RequestBody Map<String, Object> dados) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             // ✅ Agora usa o controller para buscar
             Voluntario existente = voluntarioController.buscarVoluntarioPorId(id);
 
@@ -196,19 +219,41 @@ public class VoluntarioView {
                 return ResponseEntity.notFound().build();
             }
 
+<<<<<<< HEAD
             // Atualizar apenas campos que existem no DB
+=======
+            // Atualizar apenas campos permitidos (não críticos)
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             if (dados.containsKey("vol_nome")) {
                 existente.setVol_nome((String) dados.get("vol_nome"));
             }
             if (dados.containsKey("vol_telefone")) {
                 existente.setVol_telefone((String) dados.get("vol_telefone"));
             }
+<<<<<<< HEAD
+=======
+            if (dados.containsKey("vol_rua")) {
+                existente.setVol_rua((String) dados.get("vol_rua"));
+            }
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             if (dados.containsKey("vol_bairro")) {
                 existente.setVol_bairro((String) dados.get("vol_bairro"));
             }
             if (dados.containsKey("vol_cidade")) {
                 existente.setVol_cidade((String) dados.get("vol_cidade"));
             }
+<<<<<<< HEAD
+=======
+            if (dados.containsKey("vol_numero")) {
+                existente.setVol_numero((String) dados.get("vol_numero"));
+            }
+            if (dados.containsKey("vol_cep")) {
+                existente.setVol_cep((String) dados.get("vol_cep"));
+            }
+            if (dados.containsKey("vol_uf")) {
+                existente.setVol_uf((String) dados.get("vol_uf"));
+            }
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 
             // ✅ Agora usa o controller para atualizar
             Voluntario atualizado = voluntarioController.atualizarPerfil(existente);
@@ -217,6 +262,7 @@ public class VoluntarioView {
                 response.put("success", true);
                 response.put("message", "Perfil atualizado com sucesso!");
 
+<<<<<<< HEAD
                 // Retornar dados atualizados (apenas campos que existem no DB)
                 Map<String, Object> voluntarioMap = new HashMap<>();
                 voluntarioMap.put("vol_id", atualizado.getVol_id());
@@ -225,6 +271,23 @@ public class VoluntarioView {
                 voluntarioMap.put("vol_email", atualizado.getVol_email());
                 voluntarioMap.put("vol_cidade", atualizado.getVol_cidade());
                 voluntarioMap.put("vol_bairro", atualizado.getVol_bairro());
+=======
+                // Retornar dados atualizados
+                Map<String, Object> voluntarioMap = new HashMap<>();
+                voluntarioMap.put("vol_id", atualizado.getVol_id());
+                voluntarioMap.put("vol_nome", atualizado.getVol_nome());
+                voluntarioMap.put("vol_cpf", atualizado.getVol_cpf());
+                voluntarioMap.put("vol_email", atualizado.getVol_email());
+                voluntarioMap.put("vol_telefone", atualizado.getVol_telefone());
+                voluntarioMap.put("vol_datanasc", atualizado.getVol_datanasc());
+                voluntarioMap.put("vol_rua", atualizado.getVol_rua());
+                voluntarioMap.put("vol_bairro", atualizado.getVol_bairro());
+                voluntarioMap.put("vol_cidade", atualizado.getVol_cidade());
+                voluntarioMap.put("vol_numero", atualizado.getVol_numero());
+                voluntarioMap.put("vol_cep", atualizado.getVol_cep());
+                voluntarioMap.put("vol_uf", atualizado.getVol_uf());
+                voluntarioMap.put("vol_sexo", atualizado.getVol_sexo());
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 
                 response.put("voluntario", voluntarioMap);
                 return ResponseEntity.ok(response);
@@ -247,6 +310,7 @@ public class VoluntarioView {
     // private CampanhaController campanhaController;
 
     @GetMapping("/minhas-campanhas/{voluntarioId}")
+<<<<<<< HEAD
     public ResponseEntity<List<Map<String, Object>>> obterMinhasCampanhas(
             @PathVariable int voluntarioId,
             HttpServletRequest request) {
@@ -256,6 +320,13 @@ public class VoluntarioView {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ArrayList<>());
             }
 
+=======
+    public ResponseEntity<List<Map<String, Object>>> obterMinhasCampanhas(@PathVariable int voluntarioId) {
+        try {
+            // TODO: Quando o CampanhaController estiver pronto, use:
+            // List<Map<String, Object>> campanhas = campanhaController.listarCampanhasPorVoluntario(voluntarioId);
+            // return ResponseEntity.ok(campanhas);
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 
             return ResponseEntity.ok(new ArrayList<>());
         } catch (Exception e) {
@@ -263,6 +334,7 @@ public class VoluntarioView {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
     }
+<<<<<<< HEAD
 // ===== ÁREA DO VOLUNTÁRIO (PÚBLICO PARA LOGADOS) =====
 
     @GetMapping("/equipe")
@@ -310,6 +382,14 @@ public class VoluntarioView {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
             }
 
+=======
+
+    // ===== DASHBOARD DO VOLUNTÁRIO =====
+
+    @GetMapping("/dashboard/{voluntarioId}")
+    public ResponseEntity<Map<String, Object>> obterDashboard(@PathVariable int voluntarioId) {
+        try {
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             Map<String, Object> dashboard = new HashMap<>();
 
             // ✅ Agora usa o controller

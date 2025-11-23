@@ -17,7 +17,11 @@ import java.util.List;
 import java.util.Map;
 @RestController
 @RequestMapping("/apis/admin")
+<<<<<<< HEAD
 @CrossOrigin
+=======
+@CrossOrigin(origins = "*")
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 public class AdminView {
 
 
@@ -69,6 +73,7 @@ public class AdminView {
         Map<String, Object> response = new HashMap<>();
 
         try {
+<<<<<<< HEAD
             // Criar objeto Voluntario (apenas campos que existem no DB)
             Voluntario voluntario = new Voluntario();
             voluntario.setVol_id(id);
@@ -77,6 +82,23 @@ public class AdminView {
             voluntario.setVol_email((String) dados.get("vol_email"));
             voluntario.setVol_cidade((String) dados.get("vol_cidade"));
             voluntario.setVol_bairro((String) dados.get("vol_bairro"));
+=======
+            // Criar objeto Voluntario
+            Voluntario voluntario = new Voluntario();
+            voluntario.setVol_id(id);
+            voluntario.setVol_nome((String) dados.get("vol_nome"));
+            voluntario.setVol_cpf((String) dados.get("vol_cpf"));
+            voluntario.setVol_email((String) dados.get("vol_email"));
+            voluntario.setVol_telefone((String) dados.get("vol_telefone"));
+            voluntario.setVol_datanasc((String) dados.get("vol_datanasc"));
+            voluntario.setVol_rua((String) dados.get("vol_rua"));
+            voluntario.setVol_bairro((String) dados.get("vol_bairro"));
+            voluntario.setVol_cidade((String) dados.get("vol_cidade"));
+            voluntario.setVol_numero((String) dados.get("vol_numero"));
+            voluntario.setVol_cep((String) dados.get("vol_cep"));
+            voluntario.setVol_uf((String) dados.get("vol_uf"));
+            voluntario.setVol_sexo((String) dados.get("vol_sexo"));
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 
             Map<String, Object> resultado = adminController.updtVoluntario(voluntario);
 

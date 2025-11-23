@@ -3,7 +3,10 @@ package DOARC.mvc.view;
 import DOARC.mvc.controller.AcessoController;
 import DOARC.mvc.model.EmailNotification;
 import DOARC.mvc.model.Login;
+<<<<<<< HEAD
 import DOARC.mvc.model.Voluntario;
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +16,16 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+<<<<<<< HEAD
 
 @RestController
 @RequestMapping("/apis/acesso")
 @CrossOrigin
+=======
+@RestController
+@RequestMapping("/apis/acesso")
+@CrossOrigin(origins = "*")
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
 public class AcessoView {
 
     @Autowired
@@ -25,13 +34,17 @@ public class AcessoView {
     @Autowired
     private EmailNotification emailNotification;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     @PostMapping("/logar")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> dados) {
         Map<String, Object> response = new HashMap<>();
         String email = dados.get("email");
         String senha = dados.get("senha");
 
+<<<<<<< HEAD
         // Validações básicas
         if (email == null || email.trim().isEmpty()) {
             response.put("success", false);
@@ -69,11 +82,17 @@ public class AcessoView {
             Voluntario voluntario = acessoController.buscarVoluntarioPorId(usuario.getVoluntarioId());
             String nomeVoluntario = (voluntario != null) ? voluntario.getVol_nome() : "Voluntário";
 
+=======
+        String token = acessoController.autenticarGerarToken(email, senha);
+        if (token != null) {
+            Login usuario = acessoController.buscarPorEmail(email);
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             response.put("success", true);
             response.put("token", token);
             response.put("usuario", Map.of(
                     "email", usuario.getLogin(),
                     "nivelAcesso", usuario.getNivelAcesso(),
+<<<<<<< HEAD
                     "voluntarioId", usuario.getVoluntarioId(),
                     "nome", nomeVoluntario
             ));
@@ -81,20 +100,34 @@ public class AcessoView {
         } else {
             response.put("success", false);
             response.put("erro", "Senha incorreta. Tente novamente.");
+=======
+                    "voluntarioId", usuario.getVoluntarioId()
+            ));
+            return ResponseEntity.ok(response);
+        } else {
+            response.put("erro", "Email ou senha incorretos");
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     @PostMapping("/registrar")
     public ResponseEntity<Map<String, Object>> registrar(@RequestBody Map<String, String> dados) {
         Map<String, Object> response = new HashMap<>();
 
+<<<<<<< HEAD
         // Extrair dados do request
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         String nome = dados.get("nome");
         String cpf = dados.get("cpf");
         String telefone = dados.get("telefone");
         String dataNascimentoStr = dados.get("dataNascimento");
+<<<<<<< HEAD
 
         String rua = dados.getOrDefault("rua", "");
         String numero = dados.getOrDefault("numero", "");
@@ -135,33 +168,53 @@ public class AcessoView {
         }
 
         // Converter data de nascimento
+=======
+        String endereco = dados.get("endereco");
+        String email = dados.get("email");
+        String senha = dados.get("senha");
+        String nivelAcesso = dados.getOrDefault("nivelAcesso", "USER");
+        String sexo = dados.getOrDefault("sexo", "O"); // PADRÃO SEGURO
+
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         LocalDate dataNascimento = null;
         try {
             if (dataNascimentoStr != null && !dataNascimentoStr.isBlank()) {
                 dataNascimento = LocalDate.parse(dataNascimentoStr);
             }
         } catch (Exception e) {
+<<<<<<< HEAD
             response.put("success", false);
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             response.put("erro", "Data de nascimento inválida");
             return ResponseEntity.badRequest().body(response);
         }
 
+<<<<<<< HEAD
         // Chamar controller para registrar
         Login novoLogin = acessoController.registrarVoluntarioCompleto(
                 nome, cpf, telefone, dataNascimento,
                 rua, numero, bairro, cidade, cep, uf, complemento,
                 sexo, email, senha, nivelAcesso
+=======
+        Login novoLogin = acessoController.registrarVoluntarioCompleto(
+                nome, cpf, telefone, dataNascimento, endereco, sexo, email, senha, nivelAcesso
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         );
 
         if (novoLogin != null) {
             response.put("success", true);
+<<<<<<< HEAD
             response.put("message", "Conta criada com sucesso! Você será redirecionado para fazer login.");
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             response.put("user", Map.of(
                     "email", novoLogin.getLogin(),
                     "role", novoLogin.getNivelAcesso(),
                     "voluntarioId", novoLogin.getVoluntarioId()
             ));
 
+<<<<<<< HEAD
             // Tentar enviar email de boas-vindas (não bloquear em caso de erro)
             try {
                 emailNotification.enviarEmailBemVindo(email, nome);
@@ -173,20 +226,33 @@ public class AcessoView {
         } else {
             response.put("success", false);
             response.put("erro", "Erro ao criar conta. Email pode já estar cadastrado ou dados inválidos.");
+=======
+            try {
+                emailNotification.enviarEmailBemVindo(email, nome);
+            } catch (Exception ignored) {}
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } else {
+            response.put("erro", "Erro ao criar conta. Verifique os dados e tente novamente.");
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             return ResponseEntity.badRequest().body(response);
         }
     }
 
+<<<<<<< HEAD
     /**
      * POST /apis/acesso/registrar-admin
      * Cria admin (uso interno)
      */
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     @PostMapping("/registrar-admin")
     public ResponseEntity<Map<String, Object>> registrarAdmin(@RequestBody Map<String, String> dados) {
         Map<String, Object> response = new HashMap<>();
         String login = dados.get("login");
         String senha = dados.get("senha");
 
+<<<<<<< HEAD
         if (login == null || login.trim().isEmpty()) {
             response.put("success", false);
             response.put("erro", "Login é obrigatório");
@@ -201,6 +267,9 @@ public class AcessoView {
 
         Login novoAdmin = acessoController.registrarAdmin(login, senha);
 
+=======
+        Login novoAdmin = acessoController.registrarAdmin(login, senha);
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         if (novoAdmin != null) {
             response.put("success", true);
             response.put("user", Map.of(
@@ -210,13 +279,20 @@ public class AcessoView {
             ));
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } else {
+<<<<<<< HEAD
             response.put("success", false);
             response.put("erro", "Erro ao criar conta de administrador. Login pode já existir.");
+=======
+            response.put("erro", "Erro ao criar conta de administrador");
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             return ResponseEntity.badRequest().body(response);
         }
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
     @PostMapping("/alterar-senha")
     public ResponseEntity<Map<String, Object>> alterarSenha(@RequestBody Map<String, String> dados) {
         Map<String, Object> response = new HashMap<>();
@@ -224,6 +300,7 @@ public class AcessoView {
         String senhaAtual = dados.get("senhaAtual");
         String novaSenha = dados.get("novaSenha");
 
+<<<<<<< HEAD
         if (email == null || email.trim().isEmpty()) {
             response.put("success", false);
             response.put("erro", "Email é obrigatório");
@@ -244,12 +321,18 @@ public class AcessoView {
 
         boolean sucesso = acessoController.atualizarSenha(email, senhaAtual, novaSenha);
 
+=======
+        boolean sucesso = acessoController.atualizarSenha(email, senhaAtual, novaSenha);
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         if (sucesso) {
             response.put("success", true);
             response.put("message", "Senha alterada com sucesso!");
             return ResponseEntity.ok(response);
         } else {
+<<<<<<< HEAD
             response.put("success", false);
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             response.put("erro", "Senha atual incorreta ou erro ao alterar");
             return ResponseEntity.badRequest().body(response);
         }
