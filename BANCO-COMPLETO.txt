@@ -1,0 +1,497 @@
+-- TABELA 1: Categoria
+CREATE TABLE Categoria (
+    CAT_ID SERIAL PRIMARY KEY,
+    CAT_NOME_PROD VARCHAR(150),
+    CAT_ESPECIFICACAO VARCHAR(130)
+);
+
+-- TABELA 2: Produto
+CREATE TABLE Produto (
+    PROD_ID SERIAL PRIMARY KEY,
+    PROD_NOME VARCHAR(100),
+    PROD_DESCRICAO VARCHAR(150),
+    PROD_INFORMACOES_ADICIONAIS VARCHAR(150),
+    PROD_QUANT INTEGER,
+    CAT_ID INTEGER,
+    FOREIGN KEY (CAT_ID) REFERENCES Categoria(CAT_ID)
+);
+
+-- TABELA 3: Donatario
+CREATE TABLE Donatario (
+    DON_ID SERIAL PRIMARY KEY,
+    DON_NOME VARCHAR(100) NOT NULL,
+    DON_DATA_NASC DATE,
+    DON_RUA VARCHAR(80),
+    DON_BAIRRO VARCHAR(80),
+    DON_CIDADE VARCHAR(80),
+    DON_TELEFONE VARCHAR(12),
+    DON_CEP CHAR(8),
+    DON_UF CHAR(2),
+    DON_EMAIL VARCHAR(100),
+    DON_SEXO VARCHAR(20) CHECK (DON_SEXO IN ('Masculino', 'Feminino', 'Não Informado')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- INSERÇÃO DA TABELA VOLUNTARIO (Com dados cadastrais)
+CREATE TABLE Voluntario (
+    VOL_ID SERIAL PRIMARY KEY,
+    VOL_NOME VARCHAR(100) NOT NULL,
+    VOL_TELEFONE VARCHAR(12),
+    VOL_EMAIL VARCHAR(100),
+    VOL_CIDADE VARCHAR(80),
+    VOL_BAIRRO VARCHAR(80), -- Corrigido de VOL_BARRO para VOL_BAIRRO
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    -- Outros campos cadastrais do voluntário podem ser adicionados aqui (ex: CPF, Data de Nascimento, etc.)
+);
+
+-- TABELA 4: Login (Apenas dados de autenticação)
+CREATE TABLE Login (
+    VOL_ID INTEGER PRIMARY KEY, -- Agora é a chave primária e referência ao Voluntário
+    login VARCHAR(50) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL, -- Aumentado para suportar hashes maiores
+    nive_acesso VARCHAR(20) CHECK (nive_acesso IN ('Administrador', 'Logistica', 'Operacional')),
+    status VARCHAR(10) CHECK (status IN ('Ativo', 'Inativo')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID)
+);
+
+-- TABELA 5: Doadores
+CREATE TABLE Doadores (
+    DOA_ID SERIAL PRIMARY KEY,
+    DOA_NOME VARCHAR(200) NOT NULL,
+    DOA_TELEFONE VARCHAR(12),
+    DOA_EMAIL VARCHAR(100),
+    DOA_CEP CHAR(8),
+    DOA_UF CHAR(2),
+    DOA_CIDADE VARCHAR(150),
+    DOA_BAIRRO VARCHAR(150),
+    DOA_RUA VARCHAR(150),
+    DOA_CPF CHAR(11), -- CPF tem 11 dígitos
+    DOA_DATANASC DATE,
+    DOA_SEXO VARCHAR(10) CHECK (DOA_SEXO IN ('Masculino', 'Feminino', 'Jurídico')),
+    DOA_SITE VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Alteração de colunas removida pois já foi definido corretamente acima
+
+-- TABELA 6: Doados
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Doados (
+    DOA_ID SERIAL PRIMARY KEY,
+    DOA_DATA_AQUISICAO DATE NOT NULL,
+    DOA_TIPO_DOACAO VARCHAR(20) CHECK (DOA_TIPO_DOACAO IN ('Itens', 'Dinheiro', 'Misto')),
+    VOL_ID INTEGER NOT NULL,
+    DON_ID INTEGER,
+    OBS_DOADO VARCHAR(500),
+    VALOR_DOACAO NUMERIC(10, 2) DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID),
+    FOREIGN KEY (DON_ID) REFERENCES Donatario(DON_ID)
+);
+
+-- TABELA 7: Campanha
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Campanha (
+    CAM_ID SERIAL PRIMARY KEY,
+    CAM_DATA_INI DATE NOT NULL,
+    CAM_DATA_FIM DATE NOT NULL,
+    CAM_DESC VARCHAR(500) NOT NULL,
+    CAM_META_ARRECADACAO NUMERIC(10, 2) NOT NULL,
+    CAM_VALOR_ARRECADADO NUMERIC(10, 2) DEFAULT 0.00,
+    VOL_ID INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID),
+    CHECK (CAM_DATA_FIM >= CAM_DATA_INI)
+);
+
+-- TABELA 8: Agendar_Doados
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Agendar_Doados (
+    AG_ID SERIAL PRIMARY KEY,
+    AG_DATA DATE NOT NULL,
+    AG_HORA TIME NOT NULL,
+    AG_OBS VARCHAR(500),
+    DOA_ID INTEGER NOT NULL,
+    VOL_ID INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (DOA_ID) REFERENCES Doados(DOA_ID),
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID)
+);
+
+-- TABELA 9: Campanha_Responsavel
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Campanha_Responsavel (
+    CAMP_ID INTEGER,
+    VOL_ID INTEGER,
+    DATA_INICIO DATE NOT NULL,
+    DATA_FIM DATE NOT NULL,
+    OBS_TEXTO VARCHAR(500),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (CAMP_ID, VOL_ID),
+    FOREIGN KEY (CAMP_ID) REFERENCES Campanha(CAM_ID),
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID),
+    CHECK (DATA_FIM >= DATA_INICIO)
+);
+
+-- TABELA 10: Agendar_Retirada
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Agendar_Retirada (
+    AGENDA_ID SERIAL PRIMARY KEY,
+    DATA_RETIRO DATE NOT NULL,
+    HORA_RETIRO TIME NOT NULL,
+    OBS_RETIRO VARCHAR(500),
+    VOL_ID INTEGER NOT NULL,
+    DOA_ID INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID),
+    FOREIGN KEY (DOA_ID) REFERENCES Doados(DOA_ID)
+);
+
+-- TABELA 11: Notificacao
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Notificacao (
+    NOT_ID SERIAL PRIMARY KEY,
+    NOT_TEXTO VARCHAR(500) NOT NULL,
+    NOT_DATA DATE NOT NULL,
+    NOT_HORA TIME NOT NULL,
+    VOL_ID INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID)
+);
+
+-- TABELA 12: Notificacao_Donatario
+CREATE TABLE Notificacao_Donatario (
+    DON_ID INTEGER,
+    NOT_ID INTEGER,
+    PRIMARY KEY (DON_ID, NOT_ID),
+    FOREIGN KEY (DON_ID) REFERENCES Donatario(DON_ID),
+    FOREIGN KEY (NOT_ID) REFERENCES Notificacao(NOT_ID)
+);
+
+-- TABELA 13: DoadosProduto
+CREATE TABLE DoadosProduto (
+    DOA_ID INTEGER,
+    PROD_ID INTEGER,
+    DP_QTDE NUMERIC,
+    PRIMARY KEY (DOA_ID, PROD_ID),
+    FOREIGN KEY (DOA_ID) REFERENCES Doados(DOA_ID),
+    FOREIGN KEY (PROD_ID) REFERENCES Produto(PROD_ID)
+);
+
+-- TABELA 14: Higienizacao_Roupas
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Higienizacao_Roupas (
+    HIG_ID SERIAL PRIMARY KEY,
+    HIG_DATA_AGENDADA DATE NOT NULL,
+    HIG_DESCRICAO_ROUPA VARCHAR(200) NOT NULL,
+    VOL_ID INTEGER NOT NULL,
+    HIG_LOCAL VARCHAR(100),
+    HIG_HORA TIME NOT NULL,
+    HIG_VALORPAGO NUMERIC(10, 2) DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID)
+);
+
+-- TABELA 15: Doacao
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Doacao (
+    DOACAO_ID SERIAL PRIMARY KEY,
+    VOL_ID INTEGER NOT NULL,
+    DATA_DOACAO DATE NOT NULL,
+    OBS_DOACAO VARCHAR(500),
+    VALOR_DOADO NUMERIC(10, 2) DEFAULT 0.00,
+    DOA_ID INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID),
+    FOREIGN KEY (DOA_ID) REFERENCES Doadores(DOA_ID)
+);
+
+-- TABELA 16: Verificar_Necessidade
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+-- CORRIGIDO: FK DON_ID deveria referenciar Donatario, não Doadores
+CREATE TABLE Verificar_Necessidade (
+    VER_ID SERIAL PRIMARY KEY,
+    VER_DATA DATE NOT NULL,
+    VER_OBS VARCHAR(500),
+    VER_RESULTADO VARCHAR(100),
+    VOL_ID INTEGER NOT NULL,
+    DON_ID INTEGER NOT NULL, -- Corrigido de DOA_ID para DON_ID
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID),
+    FOREIGN KEY (DON_ID) REFERENCES Donatario(DON_ID) -- Corrigido para referenciar Donatario
+);
+
+-- TABELA 17: Acerto_Estoque
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Acerto_Estoque (
+    AC_ID SERIAL PRIMARY KEY,
+    AC_DATA DATE NOT NULL,
+    AC_MOTIVO VARCHAR(30) CHECK (AC_MOTIVO IN ('Perda', 'Ajuste', 'Roubo', 'Doação', 'Vencimento', 'Outro')),
+    AC_OBS VARCHAR(500),
+    AC_TIPO VARCHAR(40) CHECK (AC_TIPO IN ('Entrada', 'Saída')),
+    AC_QUANTIDADE NUMERIC(10, 2) NOT NULL,
+    VOL_ID INTEGER NOT NULL,
+    PROD_ID INTEGER NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID),
+    FOREIGN KEY (PROD_ID) REFERENCES Produto(PROD_ID)
+);
+
+-- TABELA 18: Compra
+-- FK VOL_ID AGORA REFERENCIA Voluntario
+CREATE TABLE Compra (
+    COMP_ID SERIAL PRIMARY KEY,
+    COMP_DATA_COMPRA DATE NOT NULL,
+    COMP_DESC VARCHAR(200),
+    VOL_ID INTEGER NOT NULL,
+    COM_VALOR_TOTAL NUMERIC(10, 2) NOT NULL,
+    COM_FORNECEDOR VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (VOL_ID) REFERENCES Voluntario(VOL_ID)
+);
+
+-- TABELA 19: DoacaoProduto
+CREATE TABLE DoacaoProduto (
+    DOACAO_ID INTEGER,
+    PROD_ID INTEGER,
+    QUANTIDADE_DOADA NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (DOACAO_ID, PROD_ID),
+    FOREIGN KEY (DOACAO_ID) REFERENCES Doacao(DOACAO_ID),
+    FOREIGN KEY (PROD_ID) REFERENCES Produto(PROD_ID)
+);
+
+-- TABELA 20: Compra_Produto
+CREATE TABLE Compra_Produto (
+    COMP_ID INTEGER,
+    PROD_ID INTEGER,
+    QTDE NUMERIC(10, 2) NOT NULL,
+    VALOR_UNITARIO NUMERIC(10, 2) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (COMP_ID, PROD_ID),
+    FOREIGN KEY (COMP_ID) REFERENCES Compra(COMP_ID),
+    FOREIGN KEY (PROD_ID) REFERENCES Produto(PROD_ID)
+);
+
+-- TABELA 21: Parametrizacao
+CREATE TABLE Parametrizacao (
+    P_ID SERIAL PRIMARY KEY,
+    P_CNPJ CHAR(14) UNIQUE NOT NULL,
+    P_RAZAOSOCIAL VARCHAR(100) NOT NULL,
+    P_NOMEFANTASIA VARCHAR(100),
+    P_RUA VARCHAR(150),
+    P_BAIRRO VARCHAR(150),
+    P_CIDADE VARCHAR(150),
+    P_UF CHAR(2),
+    P_CEP CHAR(8),
+    P_EMAIL VARCHAR(100),
+    P_SITE VARCHAR(255),
+    P_TELEFONE VARCHAR(12),
+    P_CONTATO VARCHAR(15),
+    P_LOGOTIPO_GRANDE VARCHAR(255),
+    P_LOGOTIPO_PEQUENO VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Adiciona a coluna Donatario_DON_ID na tabela Agendar_Doados
+ALTER TABLE Agendar_Doados
+ADD COLUMN Donatario_DON_ID INTEGER NOT NULL;
+
+-- Adiciona a Chave Estrangeira (Foreign Key) ligando Agendar_Doados à tabela Donatario
+ALTER TABLE Agendar_Doados
+ADD CONSTRAINT fk_agendar_doados_donatario
+FOREIGN KEY (Donatario_DON_ID)
+REFERENCES Donatario(DON_ID);
+
+-- ******************************************************
+-- * ÍNDICES PARA MELHOR PERFORMANCE                    *
+-- ******************************************************
+
+-- Índices para Foreign Keys
+CREATE INDEX idx_produto_cat_id ON Produto(CAT_ID);
+CREATE INDEX idx_doados_vol_id ON Doados(VOL_ID);
+CREATE INDEX idx_doados_don_id ON Doados(DON_ID);
+CREATE INDEX idx_campanha_vol_id ON Campanha(VOL_ID);
+CREATE INDEX idx_agendar_doados_doa_id ON Agendar_Doados(DOA_ID);
+CREATE INDEX idx_agendar_doados_vol_id ON Agendar_Doados(VOL_ID);
+CREATE INDEX idx_agendar_doados_donatario ON Agendar_Doados(Donatario_DON_ID);
+CREATE INDEX idx_campanha_responsavel_camp_id ON Campanha_Responsavel(CAMP_ID);
+CREATE INDEX idx_campanha_responsavel_vol_id ON Campanha_Responsavel(VOL_ID);
+CREATE INDEX idx_agendar_retirada_vol_id ON Agendar_Retirada(VOL_ID);
+CREATE INDEX idx_agendar_retirada_doa_id ON Agendar_Retirada(DOA_ID);
+CREATE INDEX idx_notificacao_vol_id ON Notificacao(VOL_ID);
+CREATE INDEX idx_notificacao_donatario_don_id ON Notificacao_Donatario(DON_ID);
+CREATE INDEX idx_notificacao_donatario_not_id ON Notificacao_Donatario(NOT_ID);
+CREATE INDEX idx_doados_produto_doa_id ON DoadosProduto(DOA_ID);
+CREATE INDEX idx_doados_produto_prod_id ON DoadosProduto(PROD_ID);
+CREATE INDEX idx_higienizacao_vol_id ON Higienizacao_Roupas(VOL_ID);
+CREATE INDEX idx_doacao_vol_id ON Doacao(VOL_ID);
+CREATE INDEX idx_doacao_doa_id ON Doacao(DOA_ID);
+CREATE INDEX idx_verificar_necessidade_vol_id ON Verificar_Necessidade(VOL_ID);
+CREATE INDEX idx_verificar_necessidade_don_id ON Verificar_Necessidade(DON_ID);
+CREATE INDEX idx_acerto_estoque_vol_id ON Acerto_Estoque(VOL_ID);
+CREATE INDEX idx_acerto_estoque_prod_id ON Acerto_Estoque(PROD_ID);
+CREATE INDEX idx_compra_vol_id ON Compra(VOL_ID);
+CREATE INDEX idx_doacao_produto_doacao_id ON DoacaoProduto(DOACAO_ID);
+CREATE INDEX idx_doacao_produto_prod_id ON DoacaoProduto(PROD_ID);
+CREATE INDEX idx_compra_produto_comp_id ON Compra_Produto(COMP_ID);
+CREATE INDEX idx_compra_produto_prod_id ON Compra_Produto(PROD_ID);
+
+-- Índices para campos de busca frequentes
+CREATE INDEX idx_donatario_nome ON Donatario(DON_NOME);
+CREATE INDEX idx_voluntario_nome ON Voluntario(VOL_NOME);
+CREATE INDEX idx_doadores_nome ON Doadores(DOA_NOME);
+CREATE INDEX idx_produto_nome ON Produto(PROD_NOME);
+CREATE INDEX idx_login_login ON Login(login);
+
+-- ******************************************************
+-- * INSERÇÃO DE 3 ELEMENTOS EM CADA TABELA (DADOS MOCK) *
+-- ******************************************************
+
+-- 1. TABELA Categoria
+INSERT INTO Categoria (CAT_NOME_PROD, CAT_ESPECIFICACAO) VALUES
+('Roupas', 'Vestuário Geral'),
+('Alimentos', 'Não-perecíveis'),
+('Higiene', 'Produtos de Limpeza Pessoal');
+
+-- 2. TABELA Produto
+INSERT INTO Produto (PROD_NOME, PROD_DESCRICAO, PROD_INFORMACOES_ADICIONAIS, PROD_QUANT, CAT_ID) VALUES
+('Camisa Masculina', 'Algodão, Tamanho M', 'Usada, boa condição', 100, 1),
+('Arroz (5kg)', 'Arroz Branco, tipo 1', 'Validade 2026', 50, 2),
+('Sabonete Barra', 'Neutro, 90g', 'Uso diário', 250, 3);
+
+-- 3. TABELA Donatario
+INSERT INTO Donatario (DON_NOME, DON_DATA_NASC, DON_RUA, DON_BAIRRO, DON_CIDADE, DON_TELEFONE, DON_CEP, DON_UF, DON_EMAIL, DON_SEXO) VALUES
+('Maria da Silva', '1980-03-15', 'Rua A', 'Centro', 'Cidade Alpha', '11988887777', '12345678', 'SP', 'maria@email.com', 'Feminino'),
+('João dos Santos', '1995-07-22', 'Avenida B', 'Vila Nova', 'Cidade Beta', '21977776666', '87654321', 'RJ', 'joao@email.com', 'Masculino'),
+('Família Oliveira', '2000-01-01', 'Travessa C', 'Jardim', 'Cidade Alpha', '11966665555', '12121212', 'SP', 'oliveira@email.com', 'Não Informado');
+
+-- 4. TABELA Voluntario
+INSERT INTO Voluntario (VOL_NOME, VOL_TELEFONE, VOL_EMAIL, VOL_CIDADE, VOL_BAIRRO) VALUES
+('Ana Clara Lima', '11912345678', 'ana.clara@ong.org', 'Sao Paulo', 'Pinheiros'),
+('Bruno Mendes', '11987654321', 'bruno.mendes@ong.org', 'Sao Paulo', 'Morumbi'),
+('Carlos Rocha', '19955554444', 'carlos.rocha@ong.org', 'Campinas', 'Centro');
+
+-- 5. TABELA Login (Referencia VOL_ID da tabela Voluntario)
+INSERT INTO Login (VOL_ID, login, senha, nive_acesso, status) VALUES
+(1, 'anaclara.adm', 'senha123hashed', 'Administrador', 'Ativo'),
+(2, 'bruno.log', 'senha456hashed', 'Logistica', 'Ativo'),
+(3, 'carlos.op', 'senha789hashed', 'Operacional', 'Inativo');
+
+-- 6. TABELA Doadores
+INSERT INTO Doadores (DOA_NOME, DOA_TELEFONE, DOA_EMAIL, DOA_CEP, DOA_UF, DOA_CIDADE, DOA_BAIRRO, DOA_RUA, DOA_CPF, DOA_DATANASC, DOA_SEXO, DOA_SITE) VALUES
+('Empresa Solidária LTDA', '1130303030', 'contato@empresa.com', '01000000', 'SP', 'Sao Paulo', 'Centro', 'Rua Principal', '00000000000', '2010-01-01', 'Jurídico', 'www.site.com.br'),
+('Pedro Souza', '31999998888', 'pedro@email.com', '30000000', 'MG', 'Belo Horizonte', 'Savassi', 'Rua Secundária', '12345678901', '1975-05-10', 'Masculino', NULL),
+('ONG Ajuda', '4132323232', 'doacao@ongajuda.org', '80000000', 'PR', 'Curitiba', 'Rebouças', 'Rua Terceira', '00000000000', '2020-01-01', 'Jurídico', 'www.ongajuda.org');
+
+-- 7. TABELA Doados
+INSERT INTO Doados (DOA_DATA_AQUISICAO, DOA_TIPO_DOACAO, VOL_ID, DON_ID, OBS_DOADO, VALOR_DOACAO) VALUES
+('2025-08-20', 'Itens', 1, 1, 'Entrega de roupas e alimentos.', 0.00),
+('2025-08-21', 'Itens', 2, 2, 'Entrega de kit higiene.', 0.00),
+('2025-08-22', 'Itens', 3, 3, 'Entrega de cobertores.', 0.00);
+
+-- 8. TABELA Campanha
+INSERT INTO Campanha (CAM_DATA_INI, CAM_DATA_FIM, CAM_DESC, CAM_META_ARRECADACAO, CAM_VALOR_ARRECADADO, VOL_ID) VALUES
+('2025-10-01', '2025-10-31', 'Campanha do Agasalho 2025', 10000.00, 7500.50, 1),
+('2025-11-01', '2025-11-30', 'Arrecadação de Alimentos', 5000.00, 1200.00, 2),
+('2025-12-01', '2025-12-31', 'Natal Solidário', 20000.00, 0.00, 3);
+
+-- 9. TABELA Agendar_Doados (inclui a nova coluna Donatario_DON_ID)
+INSERT INTO Agendar_Doados (AG_DATA, AG_HORA, AG_OBS, DOA_ID, VOL_ID, Donatario_DON_ID) VALUES
+('2025-08-25', '14:00:00', 'Agendamento de visita mensal.', 1, 1, 1),
+('2025-08-26', '09:30:00', 'Entrega urgente de itens de higiene.', 2, 2, 2),
+('2025-08-27', '16:00:00', 'Agendamento de visita trimestral.', 3, 3, 3);
+
+-- 10. TABELA Campanha_Responsavel
+INSERT INTO Campanha_Responsavel (CAMP_ID, VOL_ID, DATA_INICIO, DATA_FIM, OBS_TEXTO) VALUES
+(1, 1, '2025-10-01', '2025-10-31', 'Voluntário principal da campanha.'),
+(1, 2, '2025-10-15', '2025-10-31', 'Apoio na logística.'),
+(2, 3, '2025-11-01', '2025-11-30', 'Responsável pela comunicação.');
+
+-- 11. TABELA Agendar_Retirada
+INSERT INTO Agendar_Retirada (DATA_RETIRO, HORA_RETIRO, OBS_RETIRO, VOL_ID, DOA_ID) VALUES
+('2025-09-05', '10:00:00', 'Retirada de doação agendada com Doador 1.', 1, 1),
+('2025-09-06', '15:30:00', 'Retirada de doação com Doador 2.', 2, 2),
+('2025-09-07', '11:00:00', 'Retirada de doação com Doador 3.', 3, 3);
+
+-- 12. TABELA Notificacao
+INSERT INTO Notificacao (NOT_TEXTO, NOT_DATA, NOT_HORA, VOL_ID) VALUES
+('Nova doação agendada por Doador 1.', '2025-09-01', '10:00:00', 1),
+('Estoque de Arroz baixo.', '2025-09-02', '14:30:00', 2),
+('Lembrete: Reunião da Campanha do Agasalho amanhã.', '2025-09-03', '09:00:00', 3);
+
+-- 13. TABELA Notificacao_Donatario
+INSERT INTO Notificacao_Donatario (DON_ID, NOT_ID) VALUES
+(1, 1),
+(2, 2),
+(3, 3);
+
+-- 14. TABELA DoadosProduto
+INSERT INTO DoadosProduto (DOA_ID, PROD_ID, DP_QTDE) VALUES
+(1, 1, 50), -- 50 Camisas doadas no Doados 1
+(1, 2, 25), -- 25 Arrozes doados no Doados 1
+(2, 3, 100); -- 100 Sabonetes doados no Doados 2
+
+-- 15. TABELA Higienizacao_Roupas
+INSERT INTO Higienizacao_Roupas (HIG_DATA_AGENDADA, HIG_DESCRICAO_ROUPA, VOL_ID, HIG_LOCAL, HIG_HORA, HIG_VALORPAGO) VALUES
+('2025-09-10', 'Lote 1: Roupas de cama e banho.', 1, 'Lavanderia A', '10:00:00', 150.00),
+('2025-09-11', 'Lote 2: Roupas infantis.', 2, 'Lavanderia B', '15:00:00', 200.00),
+('2025-09-12', 'Lote 3: Agasalhos pesados.', 3, 'Lavanderia A', '09:30:00', 250.00);
+
+-- 16. TABELA Doacao
+INSERT INTO Doacao (VOL_ID, DATA_DOACAO, OBS_DOACAO, VALOR_DOADO, DOA_ID) VALUES
+(1, '2025-09-01', 'Doação financeira para Campanha do Agasalho.', 500.00, 1),
+(2, '2025-09-05', 'Doação para compra de leite.', 100.00, 2),
+(3, '2025-09-10', 'Doação anônima.', 250.00, 3);
+
+-- 17. TABELA Verificar_Necessidade (Corrigido para usar DON_ID)
+INSERT INTO Verificar_Necessidade (VER_DATA, VER_OBS, VER_RESULTADO, VOL_ID, DON_ID) VALUES
+('2025-09-15', 'Verificação inicial da família 1.', 'Necessidade alta de alimentos.', 1, 1),
+('2025-09-16', 'Verificação da família 2 após doação.', 'Necessidade média de vestuário.', 2, 2),
+('2025-09-17', 'Verificação da família 3.', 'Necessidade alta de cobertores.', 3, 3);
+
+-- 18. TABELA Acerto_Estoque
+INSERT INTO Acerto_Estoque (AC_DATA, AC_MOTIVO, AC_OBS, AC_TIPO, AC_QUANTIDADE, VOL_ID, PROD_ID) VALUES
+('2025-09-20', 'Perda', 'Deterioração de item', 'Saída', 5.00, 1, 2), -- 5 Arrozes perdidos
+('2025-09-21', 'Ajuste', 'Contagem incorreta', 'Entrada', 10.00, 2, 1), -- 10 Camisas a mais
+('2025-09-22', 'Roubo', 'Item sumiu', 'Saída', 2.00, 3, 3); -- 2 Sabonetes sumiram
+
+-- 19. TABELA Compra
+INSERT INTO Compra (COMP_DATA_COMPRA, COMP_DESC, VOL_ID, COM_VALOR_TOTAL, COM_FORNECEDOR) VALUES
+('2025-09-25', 'Compra de cobertores novos.', 1, 1200.00, 'Fornecedor X'),
+('2025-09-26', 'Compra de cestas básicas.', 2, 850.00, 'Atacado Y'),
+('2025-09-27', 'Compra de material de escritório.', 3, 150.00, 'Papelaria Z');
+
+-- 20. TABELA DoacaoProduto
+INSERT INTO DoacaoProduto (DOACAO_ID, PROD_ID, QUANTIDADE_DOADA) VALUES
+(1, 1, 5), -- Assumindo que a doação financeira 1 comprou 5 produtos
+(2, 2, 10), -- Assumindo que a doação financeira 2 comprou 10 produtos
+(3, 3, 2); -- Assumindo que a doação financeira 3 comprou 2 produtos
+
+-- 21. TABELA Compra_Produto
+INSERT INTO Compra_Produto (COMP_ID, PROD_ID, QTDE, VALOR_UNITARIO) VALUES
+(1, 1, 20, 35.00), -- 20 Camisas compradas no Compra 1
+(2, 2, 50, 15.00), -- 50 Arrozes comprados no Compra 2
+(3, 3, 10, 5.00); -- 10 Sabonetes comprados no Compra 3
+
+-- 22. TABELA Parametrizacao
+INSERT INTO Parametrizacao (P_CNPJ, P_RAZAOSOCIAL, P_NOMEFANTASIA, P_RUA, P_BAIRRO, P_CIDADE, P_UF, P_CEP, P_EMAIL, P_SITE, P_TELEFONE, P_CONTATO, P_LOGOTIPO_GRANDE, P_LOGOTIPO_PEQUENO) VALUES
+('12345678901234', 'ONG Ajuda Total Ltda', 'ONG Ajuda', 'Rua da Ajuda', 'Bairro Bom', 'Cidade Foco', 'SP', '00000000', 'contato@ongajudatotal.org', 'www.ongajudatotal.org', '1140028922', 'Financeiro', '/logos/grande.png', '/logos/pequeno.png'),
+('98765432109876', 'Inst. Social S.A.', 'Instituto Social', 'Av. Solidariedade', 'Bairro Paz', 'Cidade Foco', 'RJ', '00000001', 'geral@institutosocial.org', 'www.institutosocial.org', '2133334444', 'Comercial', '/logos/grande2.png', '/logos/pequeno2.png'),
+('11223344556677', 'Assoc. Beneficente', 'Associação do Bem', 'Rua Principal', 'Centro', 'Cidade Foco', 'MG', '00000002', 'info@associacaodobem.org', 'www.associacaodobem.org', '3155556666', 'Marketing', '/logos/grande3.png', '/logos/pequeno3.png');

@@ -14,6 +14,9 @@
                 <p class="login-subtitle">Doações, Organização e Apoio para a Rede Ceifeiros</p>
             </div>
 
+            <!-- Alert Area -->
+            <div id="alertArea"></div>
+
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email" class="form-label required">E-mail</label>
@@ -23,8 +26,8 @@
                         class="form-control"
                         placeholder="seu@email.com"
                         required
+                        autocomplete="email"
                     >
-                    <div class="form-error">E-mail inválido</div>
                 </div>
 
                 <div class="form-group">
@@ -35,8 +38,8 @@
                         class="form-control"
                         placeholder="Digite sua senha"
                         required
+                        autocomplete="current-password"
                     >
-                    <div class="form-error">Senha é obrigatória</div>
                 </div>
 
                 <div class="form-group">
@@ -62,50 +65,101 @@
         document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const email = document.getElementById('email');
-            const password = document.getElementById('password');
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const alertArea = document.getElementById('alertArea');
 
-            // Limpa erros anteriores
-            Validator.clearAllErrors(this);
+            // Limpar alertas anteriores
+            alertArea.innerHTML = '';
 
-            // Validações
-            let isValid = true;
-
-            if (Validator.isEmpty(email.value)) {
-                Validator.showError(email, 'E-mail é obrigatório');
-                isValid = false;
-            } else if (!Validator.isValidEmail(email.value)) {
-                Validator.showError(email, 'E-mail inválido');
-                isValid = false;
+            // Validações básicas
+            if (!email) {
+                UI.showAlert('E-mail é obrigatório', 'danger');
+                return;
             }
 
-            if (Validator.isEmpty(password.value)) {
-                Validator.showError(password, 'Senha é obrigatória');
-                isValid = false;
+            if (!password) {
+                UI.showAlert('Senha é obrigatória', 'danger');
+                return;
             }
 
-            if (!isValid) return;
+            if (!Validator.isValidEmail(email)) {
+                UI.showAlert('E-mail inválido', 'danger');
+                return;
+            }
 
             try {
-                // TODO: Integrar com API real
-                // const response = await API.post('/auth/login', {
-                //     email: email.value,
-                //     password: password.value
-                // });
+                // Mostrar loading
+                UI.showAlert('Autenticando...', 'info');
 
-                // Simulação de login para desenvolvimento
-                const userData = {
-                    id: 1,
-                    nome: 'Voluntário Teste',
-                    email: email.value,
-                    tipo: 'voluntario'
-                };
+                // Chamar API de login
+                const response = await fetch('http://localhost:8080/apis/acesso/logar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        senha: password
+                    })
+                });
 
-                Auth.setUser(userData);
-                window.location.href = 'pages/dashboard.html';
+                // Tentar parsear o JSON da resposta
+                let result;
+                try {
+                    result = await response.json();
+                } catch (parseError) {
+                    console.error('Erro ao parsear resposta JSON:', parseError);
+                    UI.showAlert('⚠️ Erro no servidor. Resposta inválida recebida.', 'danger');
+                    return;
+                }
+
+                // Verificar status HTTP
+                if (response.ok && result.success) {
+                    // LOGIN SUCESSO
+                    localStorage.setItem('token', result.token);
+                    localStorage.setItem('loggedIn', 'true');
+                    localStorage.setItem('user', JSON.stringify({
+                        email: result.usuario.email,
+                        nivelAcesso: result.usuario.nivelAcesso,
+                        voluntarioId: result.usuario.voluntarioId,
+                        nome: result.usuario.nome || result.usuario.email
+                    }));
+
+                    UI.showAlert('✅ Login realizado com sucesso! Redirecionando...', 'success');
+
+                    setTimeout(() => {
+                        window.location.href = 'pages/dashboard.html';
+                    }, 1000);
+                } else {
+                    // LOGIN FALHOU - Mostrar erro específico
+                    const errorMessage = result.erro || 'Erro ao fazer login';
+
+                    // Identificar tipo de erro baseado no status HTTP
+                    let warningIcon = '❌';
+                    if (response.status === 401) {
+                        warningIcon = '🔒'; // Não autorizado (credenciais inválidas)
+                    } else if (response.status === 403) {
+                        warningIcon = '🚫'; // Proibido (conta inativa)
+                    } else if (response.status === 400) {
+                        warningIcon = '⚠️'; // Requisição inválida
+                    } else if (response.status >= 500) {
+                        warningIcon = '💥'; // Erro no servidor
+                    }
+
+                    console.warn(`Login falhou - Status ${response.status}:`, errorMessage);
+                    UI.showAlert(`${warningIcon} ${errorMessage}`, 'danger');
+                }
 
             } catch (error) {
-                UI.showAlert('Erro ao fazer login. Verifique suas credenciais.', 'danger');
+                // ERRO DE CONEXÃO
+                console.error('❌ Erro de conexão:', error);
+
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    UI.showAlert('🔌 Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:8080', 'danger');
+                } else {
+                    UI.showAlert('⚠️ Erro inesperado: ' + error.message, 'danger');
+                }
             }
         });
     </script>

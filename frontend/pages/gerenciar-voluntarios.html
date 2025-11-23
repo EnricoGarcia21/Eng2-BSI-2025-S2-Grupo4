@@ -86,42 +86,14 @@
                                 <th>CPF</th>
                                 <th>E-mail</th>
                                 <th>Telefone</th>
-                                <th>Data Cadastro</th>
-                                <th>Doações Realizadas</th>
+                                <th>Cidade/UF</th>
+                                <th>Doações</th>
                                 <th>Status</th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaVoluntarios">
-                            <tr>
-                                <td>João Silva</td>
-                                <td>123.456.789-00</td>
-                                <td>joao@email.com</td>
-                                <td>(18) 99999-9999</td>
-                                <td>10/01/2023</td>
-                                <td>45</td>
-                                <td><span class="badge badge-success">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(1)">✏️</button>
-                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(1)">📋</button>
-                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(1)">🔒</button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Maria Santos</td>
-                                <td>987.654.321-00</td>
-                                <td>maria@email.com</td>
-                                <td>(18) 98888-8888</td>
-                                <td>15/03/2022</td>
-                                <td>68</td>
-                                <td><span class="badge badge-success">Ativo</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-info" onclick="editarVoluntario(2)">✏️</button>
-                                    <button class="btn btn-sm btn-warning" onclick="verHistorico(2)">📋</button>
-                                    <button class="btn btn-sm btn-danger" onclick="toggleStatus(2)">🔒</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
@@ -129,7 +101,7 @@
     </main>
 
     <div id="modalVoluntario" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 700px;">
             <div class="modal-header">
                 <h2 class="modal-title" id="modalTitle">Novo Voluntário</h2>
                 <button class="modal-close" onclick="closeModal('modalVoluntario')">&times;</button>
@@ -137,6 +109,8 @@
             <div class="modal-body">
                 <form id="formVoluntario">
                     <input type="hidden" id="voluntarioId">
+                    
+                    <h4 style="color: var(--primary-color); margin-bottom: 10px; font-size: 1.1rem;">Dados Pessoais</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="nome" class="form-label required">Nome Completo</label>
@@ -149,6 +123,7 @@
                             <div class="form-error">CPF inválido</div>
                         </div>
                     </div>
+                    
                     <div class="form-row">
                         <div class="form-group">
                             <label for="email" class="form-label required">E-mail</label>
@@ -161,11 +136,21 @@
                             <div class="form-error">Telefone inválido</div>
                         </div>
                     </div>
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="dataNascimento" class="form-label required">Data de Nascimento</label>
                             <input type="date" id="dataNascimento" class="form-control" required>
                             <div class="form-error">Data é obrigatória</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sexo" class="form-label required">Sexo</label>
+                            <select id="sexo" class="form-control form-select" required>
+                                <option value="">Selecione</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Feminino</option>
+                                <option value="O">Outro</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="statusVoluntario" class="form-label required">Status</label>
@@ -175,13 +160,40 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label for="endereco" class="form-label">Endereço</label>
-                        <input type="text" id="endereco" class="form-control">
+
+                    <h4 style="color: var(--primary-color); margin: 15px 0 10px; font-size: 1.1rem;">Endereço</h4>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="cep" class="form-label">CEP</label>
+                            <input type="text" id="cep" class="form-control" data-mask="cep" onblur="buscarCep(this.value)">
+                        </div>
+                        <div class="form-group" style="flex: 2;">
+                            <label for="endereco" class="form-label">Rua</label>
+                            <input type="text" id="endereco" class="form-control">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="numero" class="form-label">Número</label>
+                            <input type="text" id="numero" class="form-control">
+                        </div>
                     </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bairro" class="form-label">Bairro</label>
+                            <input type="text" id="bairro" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="cidade" class="form-label">Cidade</label>
+                            <input type="text" id="cidade" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label for="uf" class="form-label">UF</label>
+                            <input type="text" id="uf" class="form-control" maxlength="2" style="text-transform: uppercase;">
+                        </div>
+                    </div>
+
                     <div class="form-group">
                         <label for="observacoes" class="form-label">Observações</label>
-                        <textarea id="observacoes" class="form-control" rows="3"></textarea>
+                        <textarea id="observacoes" class="form-control" rows="2"></textarea>
                     </div>
                 </form>
             </div>
@@ -223,136 +235,402 @@
 
     <script src="../js/app.js"></script>
     <script>
-        document.getElementById('searchInput').addEventListener('input', function(e) {
-            const searchTerm = e.target.value.toLowerCase();
+        // =======================================================================
+        // Gerenciamento de Voluntários - DOARC
+        // =======================================================================
+
+        const API_BASE = "http://localhost:8080/apis";
+        const API_ADMIN = `${API_BASE}/admin`; 
+        const API_CRIAR_VOLUNTARIO = `${API_BASE}/voluntario`; 
+
+        let voluntarioEmEdicao = null;
+
+        // Headers com Token JWT
+        const getHeaders = () => {
+            const headers = new Headers();
+            headers.append("Content-Type", "application/json");
+            const token = localStorage.getItem('token') || localStorage.getItem('jwtToken');
+            if (token) {
+                headers.append("Authorization", `Bearer ${token}`);
+            } else {
+                UI.showAlert('Sessão expirada. Faça login novamente.', 'danger');
+            }
+            return headers;
+        };
+
+        // --- Formatadores ---
+        function formatarCPF(v){if(!v)return'';return String(v).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');}
+        function formatarTelefone(v){if(!v)return'';v=String(v).replace(/\D/g,'');if(v.length===11)return v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');if(v.length===10)return v.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3');return v;}
+        function formatarData(v){if(!v)return'';if(v.includes('-')){const p=v.split('-');if(p.length===3)return`${p[2]}/${p[1]}/${p[0]}`;}return new Date(v).toLocaleDateString('pt-BR');}
+
+        // --- Busca e Filtros ---
+        function aplicarFiltros() {
+            const termoBusca = document.getElementById('searchInput').value.toLowerCase();
+            const statusFiltro = document.getElementById('filtroStatus').value.toLowerCase(); // '' (todos), 'ativo', 'inativo'
+            
             const rows = document.querySelectorAll('#tabelaVoluntarios tr');
+
             rows.forEach(row => {
-                row.style.display = row.textContent.toLowerCase().includes(searchTerm) ? '' : 'none';
+                // 1. Verifica Busca
+                const textoLinha = row.textContent.toLowerCase();
+                const correspondeBusca = textoLinha.includes(termoBusca);
+                
+                // 2. Verifica Status
+                let correspondeStatus = true;
+                if (statusFiltro) {
+                    const badge = row.querySelector('.badge');
+                    if (badge) {
+                        const textoBadge = badge.textContent.trim().toLowerCase();
+                        if (statusFiltro === 'ativo') {
+                            correspondeStatus = (textoBadge === 'ativo');
+                        } else {
+                            correspondeStatus = (textoBadge !== 'ativo');
+                        }
+                    } else {
+                        correspondeStatus = false;
+                    }
+                }
+
+                row.style.display = (correspondeBusca && correspondeStatus) ? '' : 'none';
             });
-        });
+        }
 
         function filtrarPorStatus() {
-            const status = document.getElementById('filtroStatus').value.toLowerCase();
-            const rows = document.querySelectorAll('#tabelaVoluntarios tr');
-            rows.forEach(row => {
-                if (!status || row.textContent.toLowerCase().includes(status)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
+            aplicarFiltros();
         }
 
-        function openModal(modalId) {
-            if (modalId === 'modalVoluntario') {
-                document.getElementById('formVoluntario').reset();
-                document.getElementById('voluntarioId').value = '';
-                document.getElementById('modalTitle').textContent = 'Novo Voluntário';
+        // --- API CEP ---
+        async function buscarCep(cep) {
+            cep = cep.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
+                if (!data.erro) {
+                    document.getElementById('endereco').value = data.logradouro;
+                    document.getElementById('bairro').value = data.bairro;
+                    document.getElementById('cidade').value = data.localidade;
+                    document.getElementById('uf').value = data.uf;
+                    document.getElementById('numero').focus();
+                }
+            } catch (e) {
+                console.error("Erro ao buscar CEP", e);
             }
-            UI.openModal(modalId);
         }
 
-        function closeModal(modalId) { UI.closeModal(modalId); }
-
-        function editarVoluntario(id) {
-            document.getElementById('voluntarioId').value = id;
-            document.getElementById('modalTitle').textContent = 'Editar Voluntário';
-            document.getElementById('nome').value = 'João Silva';
-            document.getElementById('cpf').value = '123.456.789-00';
-            document.getElementById('email').value = 'joao@email.com';
-            document.getElementById('telefone').value = '(18) 99999-9999';
-            UI.openModal('modalVoluntario');
+        // 1. CARREGAR LISTA
+        async function carregarVoluntarios() {
+            try {
+                const response = await fetch(`${API_ADMIN}/voluntarios`, { headers: getHeaders() });
+                if (!response.ok) throw new Error('Erro ao buscar lista de voluntários');
+                const lista = await response.json();
+                preencherTabela(lista);
+            } catch (error) {
+                console.error(error);
+                document.getElementById('tabelaVoluntarios').innerHTML = '<tr><td colspan="8" class="text-center text-danger">Erro ao carregar dados. Verifique o servidor.</td></tr>';
+            }
         }
 
-        function verHistorico(id) {
-            // TODO: Carregar histórico da API
-            document.getElementById('tabelaHistorico').innerHTML = `
-                <tr>
-                    <td>10/10/2025</td>
-                    <td>Recebimento</td>
-                    <td>Recebeu 50kg de arroz</td>
-                    <td><span class="badge badge-success">Concluído</span></td>
-                </tr>
-                <tr>
-                    <td>05/10/2025</td>
-                    <td>Distribuição</td>
-                    <td>Distribuiu 10 cestas básicas</td>
-                    <td><span class="badge badge-success">Concluído</span></td>
-                </tr>
-            `;
-            UI.openModal('modalHistorico');
+        function preencherTabela(lista) {
+            const tbody = document.getElementById('tabelaVoluntarios');
+            tbody.innerHTML = '';
+            
+            if (!lista || lista.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum voluntário encontrado.</td></tr>'; 
+                return; 
+            }
+
+            lista.forEach(vol => {
+                const id = vol.vol_id || vol.id;
+                const nome = vol.vol_nome || vol.nome || '';
+                const cpf = vol.vol_cpf || vol.cpf || '';
+                const email = vol.vol_email || vol.email || '';
+                const telefone = vol.vol_telefone || vol.telefone || '';
+                // Formata a data ou mostra traço
+                const dataCadastro = vol.vol_datacadastro ? formatarData(vol.vol_datacadastro) : '-'; 
+                const doacoes = vol.doacoes_realizadas || 0;
+                const cidade = vol.vol_cidade || '';
+                const uf = vol.vol_uf || '';
+
+                // Lógica de Status
+                const temLogin = (vol.status !== undefined && vol.status !== "N/A" && vol.status !== null);
+                const isAtivo = (vol.status === 'A' || vol.status === 'Ativo');
+                
+                let badgeClass = 'secondary';
+                let badgeText = 'Sem Acesso';
+                
+                if (temLogin) {
+                    badgeClass = isAtivo ? 'success' : 'danger';
+                    badgeText = isAtivo ? 'Ativo' : 'Inativo';
+                }
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${nome}</td>
+                    <td>${formatarCPF(cpf)}</td>
+                    <td>${email}</td>
+                    <td>${formatarTelefone(telefone)}</td>
+                    <td>${cidade}/${uf}</td>
+                    <td>${doacoes}</td>
+                    <td><span class="badge badge-${badgeClass}">${badgeText}</span></td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-sm btn-info" onclick="editarVoluntario(${id})" title="Editar">✏️</button>
+                            <button class="btn btn-sm btn-warning" onclick="verHistorico(${id})" title="Histórico">📋</button>
+                            <button class="btn btn-sm btn-${isAtivo ? 'danger' : 'success'}" 
+                                    onclick="toggleStatus(${id}, '${isAtivo ? 'ativo' : 'inativo'}', ${temLogin})" 
+                                    title="${temLogin ? (isAtivo ? 'Desativar Acesso' : 'Ativar Acesso') : 'Usuário sem login'}"
+                                    ${!temLogin ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : ''}>
+                                ${isAtivo ? '🔒' : '🔓'}
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="excluirVoluntario(${id})" title="Excluir">🗑️</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            aplicarFiltros();
         }
 
-        function toggleStatus(id) {
-            UI.confirm('Deseja alterar o status deste voluntário?', async function() {
+        // 2. PREPARAR EDIÇÃO
+        async function editarVoluntario(id) {
+            try {
+                const response = await fetch(`${API_ADMIN}/voluntarios/${id}`, { headers: getHeaders() });
+                if (!response.ok) throw new Error('Erro ao buscar voluntário');
+                
+                const vol = await response.json();
+                voluntarioEmEdicao = vol;
+
+                Validator.clearAllErrors(document.getElementById('formVoluntario'));
+                document.getElementById('voluntarioId').value = id;
+                document.getElementById('modalTitle').textContent = 'Editar Voluntário';
+                
+                // Preencher Campos
+                document.getElementById('nome').value = vol.vol_nome || '';
+                document.getElementById('cpf').value = vol.vol_cpf || ''; 
+                document.getElementById('email').value = vol.vol_email || '';
+                document.getElementById('telefone').value = vol.vol_telefone || '';
+                document.getElementById('sexo').value = vol.vol_sexo || 'O'; // Novo campo
+                
+                if (vol.vol_datanasc) {
+                    document.getElementById('dataNascimento').value = vol.vol_datanasc.split('T')[0];
+                } else {
+                    document.getElementById('dataNascimento').value = '';
+                }
+
+                // Endereço completo
+                document.getElementById('cep').value = vol.vol_cep || '';
+                document.getElementById('endereco').value = vol.vol_rua || ''; // mapeia para von_rua
+                document.getElementById('numero').value = vol.vol_numero || '';
+                document.getElementById('bairro').value = vol.vol_bairro || '';
+                document.getElementById('cidade').value = vol.vol_cidade || '';
+                document.getElementById('uf').value = vol.vol_uf || '';
+
+                const isAtivo = (vol.status === 'A' || vol.status === 'Ativo');
+                const selectStatus = document.getElementById('statusVoluntario');
+                selectStatus.value = isAtivo ? 'ativo' : 'inativo';
+                
+                const temLogin = (vol.status !== undefined && vol.status !== "N/A");
+                selectStatus.disabled = !temLogin;
+
+                UI.openModal('modalVoluntario');
+            } catch (error) {
+                console.error(error);
+                UI.showAlert('Erro ao carregar edição.', 'danger');
+            }
+        }
+
+        // 3. EXCLUIR VOLUNTÁRIO
+        async function excluirVoluntario(id) {
+            UI.confirm('⚠️ Tem certeza? Isso excluirá o voluntário e seu acesso permanentemente.', async () => {
                 try {
-                    // await API.put(`/voluntarios/${id}/toggle-status`);
-                    UI.showAlert('Status atualizado!', 'success');
-                } catch (error) {
-                    console.error('Erro:', error);
+                    const response = await fetch(`${API_ADMIN}/voluntarios/${id}`, { 
+                        method: 'DELETE',
+                        headers: getHeaders() 
+                    });
+
+                    if (!response.ok) {
+                        const err = await response.json().catch(() => ({}));
+                        throw new Error(err.erro || 'Erro ao excluir');
+                    }
+
+                    UI.showAlert('Voluntário removido com sucesso!', 'success');
+                    carregarVoluntarios();
+                } catch (e) {
+                    console.error(e);
+                    UI.showAlert('Erro ao excluir: ' + e.message, 'danger');
                 }
             });
         }
 
+        // 4. SALVAR (Com novos campos)
         async function salvarVoluntario() {
+            const id = document.getElementById('voluntarioId').value;
             const form = document.getElementById('formVoluntario');
-            const nome = document.getElementById('nome');
-            const cpf = document.getElementById('cpf');
-            const email = document.getElementById('email');
-            const telefone = document.getElementById('telefone');
-            const dataNascimento = document.getElementById('dataNascimento');
+            
+            // Coletar Dados
+            const nome = document.getElementById('nome').value;
+            const cpf = document.getElementById('cpf').value;
+            const email = document.getElementById('email').value;
+            const telefone = document.getElementById('telefone').value;
+            const dataNasc = document.getElementById('dataNascimento').value;
+            const sexo = document.getElementById('sexo').value;
+            
+            // Endereço
+            const cep = document.getElementById('cep').value;
+            const rua = document.getElementById('endereco').value;
+            const numero = document.getElementById('numero').value;
+            const bairro = document.getElementById('bairro').value;
+            const cidade = document.getElementById('cidade').value;
+            const uf = document.getElementById('uf').value;
 
             Validator.clearAllErrors(form);
             let isValid = true;
 
-            if (Validator.isEmpty(nome.value)) {
-                Validator.showError(nome, 'Nome é obrigatório');
-                isValid = false;
-            }
-            if (Validator.isEmpty(cpf.value) || !Validator.isValidCPF(cpf.value)) {
-                Validator.showError(cpf, 'CPF inválido');
-                isValid = false;
-            }
-            if (Validator.isEmpty(email.value) || !Validator.isValidEmail(email.value)) {
-                Validator.showError(email, 'E-mail inválido');
-                isValid = false;
-            }
-            if (Validator.isEmpty(telefone.value) || !Validator.isValidPhone(telefone.value)) {
-                Validator.showError(telefone, 'Telefone inválido');
-                isValid = false;
-            }
-            if (Validator.isEmpty(dataNascimento.value)) {
-                Validator.showError(dataNascimento, 'Data é obrigatória');
+            if(Validator.isEmpty(nome)) { Validator.showError(document.getElementById('nome'), 'Obrigatório'); isValid=false; }
+            if(Validator.isEmpty(email)) { Validator.showError(document.getElementById('email'), 'Obrigatório'); isValid=false; }
+            if(Validator.isEmpty(cpf)) { Validator.showError(document.getElementById('cpf'), 'Obrigatório'); isValid=false; }
+            
+            if (dataNasc) {
+                const d = new Date(dataNasc);
+                const hoje = new Date();
+                let idade = hoje.getFullYear() - d.getFullYear();
+                if (hoje < new Date(hoje.getFullYear(), d.getMonth(), d.getDate())) idade--;
+                if (idade < 18) {
+                    Validator.showError(document.getElementById('dataNascimento'), 'Mínimo 18 anos.');
+                    isValid = false;
+                }
+            } else {
+                Validator.showError(document.getElementById('dataNascimento'), 'Obrigatório');
                 isValid = false;
             }
 
-            if (!isValid) return;
+            if (!isValid) { UI.showAlert('Verifique os erros.', 'danger'); return; }
+
+            const payload = {
+                vol_id: id ? parseInt(id) : 0,
+                vol_nome: nome,
+                vol_cpf: cpf.replace(/\D/g,''), // Limpa formatação
+                vol_email: email,
+                vol_telefone: telefone.replace(/\D/g,''),
+                vol_datanasc: dataNasc,
+                vol_sexo: sexo,
+                // Endereço completo
+                vol_cep: cep.replace(/\D/g,''),
+                vol_rua: rua,
+                vol_numero: numero,
+                vol_bairro: bairro,
+                vol_cidade: cidade,
+                vol_uf: uf
+            };
 
             try {
-                const voluntarioId = document.getElementById('voluntarioId').value;
-                const data = {
-                    nome: nome.value,
-                    cpf: cpf.value.replace(/[^\d]/g, ''),
-                    email: email.value,
-                    telefone: telefone.value.replace(/[^\d]/g, ''),
-                    dataNascimento: dataNascimento.value,
-                    endereco: document.getElementById('endereco').value,
-                    status: document.getElementById('statusVoluntario').value,
-                    observacoes: document.getElementById('observacoes').value
-                };
-
-                if (voluntarioId) {
-                    // await API.put(`/voluntarios/${voluntarioId}`, data);
-                    UI.showAlert('Voluntário atualizado!', 'success');
+                let url, method;
+                if (id) {
+                    url = `${API_ADMIN}/voluntarios/${id}`;
+                    method = 'PUT';
                 } else {
-                    // await API.post('/voluntarios', data);
-                    UI.showAlert('Voluntário cadastrado!', 'success');
+                    url = API_CRIAR_VOLUNTARIO;
+                    method = 'POST';
                 }
-                closeModal('modalVoluntario');
-            } catch (error) {
-                console.error('Erro:', error);
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: getHeaders(),
+                    body: JSON.stringify(payload)
+                });
+
+                const json = await res.json();
+
+                if (!res.ok) throw new Error(json.erro || 'Erro ao salvar');
+
+                UI.showAlert(json.message || 'Salvo com sucesso!', 'success');
+                UI.closeModal('modalVoluntario');
+                carregarVoluntarios();
+
+            } catch (e) {
+                console.error(e);
+                UI.showAlert('Erro: ' + e.message, 'danger');
             }
         }
+
+        // 5. TOGGLE STATUS
+        async function toggleStatus(id, statusAtual, temLogin) {
+            if (!temLogin) {
+                UI.showAlert('Este voluntário não possui Login.', 'warning');
+                return;
+            }
+
+            const isAtivo = (statusAtual === 'ativo');
+            const novoStatusChar = isAtivo ? 'I' : 'A';
+            const acao = isAtivo ? 'desativar' : 'ativar';
+            
+            UI.confirm(`Deseja realmente ${acao} o acesso deste usuário?`, async () => {
+                try {
+                    const res = await fetch(`${API_ADMIN}/logins/${id}/status`, {
+                        method: 'PUT',
+                        headers: getHeaders(),
+                        body: JSON.stringify({ status: novoStatusChar })
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.json();
+                        throw new Error(err.erro || 'Erro ao alterar status');
+                    }
+
+                    UI.showAlert('Status alterado com sucesso!', 'success');
+                    carregarVoluntarios();
+                } catch (e) {
+                    UI.showAlert(e.message, 'danger');
+                }
+            });
+        }
+
+        // 6. HISTÓRICO
+        function verHistorico(id) {
+            UI.showAlert('Funcionalidade de histórico em desenvolvimento.', 'warning');
+            UI.openModal('modalHistorico');
+        }
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            // 🔒 PROTEÇÃO: Apenas Admin pode acessar esta página
+            if (!Auth.guardAdminRoute()) {
+                return; 
+            }
+            
+            // Nome do usuário no header
+            const user = Auth.getUser();
+            if(user) document.getElementById('userName').textContent = user.nome || "Voluntário";
+
+            carregarVoluntarios();
+            
+            // Event listener para a barra de pesquisa
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', aplicarFiltros);
+            }
+            
+            const btnLogout = document.getElementById('logoutBtn');
+            if(btnLogout) btnLogout.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('Deseja realmente sair?')) Auth.logout();
+            });
+        });
+
+        function openModal(id) { 
+            if(id==='modalVoluntario') {
+                document.getElementById('formVoluntario').reset();
+                document.getElementById('voluntarioId').value = '';
+                document.getElementById('modalTitle').textContent='Novo Voluntário';
+                voluntarioEmEdicao = null; 
+                document.getElementById('statusVoluntario').disabled = true; 
+            }
+            UI.openModal(id); 
+        }
+        function closeModal(id) { UI.closeModal(id); }
     </script>
 </body>
 </html>
