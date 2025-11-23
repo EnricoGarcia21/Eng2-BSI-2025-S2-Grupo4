@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <a href="dashboard.html" class="logo">DOARC</a>
@@ -18,12 +17,22 @@
         </div>
     </header>
 
-    <!-- Navigation -->
     <nav class="nav">
         <ul class="nav-list">
             <li class="nav-item">
                 <a href="dashboard.html" class="nav-link active">Dashboard</a>
             </li>
+            <li class="nav-item" id="adminNav" style="display: none;">
+                <a href="admin-dashboard.html" class="nav-link">Dashboard Admin</a>
+            </li>
+<<<<<<< HEAD
+            
+            <li class="nav-item">
+                <a href="minha-area.html" class="nav-link">Minha Área</a>
+            </li>
+
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
             <li class="nav-item">
                 <a href="#" class="nav-link">Gerenciar</a>
                 <ul class="submenu">
@@ -59,7 +68,6 @@
         </ul>
     </nav>
 
-    <!-- Main Content -->
     <main class="container">
         <div class="breadcrumb">
             <div class="breadcrumb-item active">Dashboard</div>
@@ -67,7 +75,22 @@
 
         <h1 style="margin-bottom: 2rem; color: var(--primary-color);">Dashboard</h1>
 
+<<<<<<< HEAD
+=======
+        <!-- User Info -->
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>Bem-vindo, <span id="userWelcome">Voluntário</span>!</h3>
+                <p>Nível de acesso: <strong id="userLevel">USER</strong></p>
+                <p>Status: <span class="badge badge-success">Ativo</span></p>
+            </div>
+        </div>
+
+<<<<<<< HEAD
+=======
         <!-- Statistics Cards -->
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         <div class="dashboard-grid">
             <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
                 <div class="stat-icon">📦</div>
@@ -106,7 +129,6 @@
             </div>
         </div>
 
-        <!-- Quick Actions -->
         <div class="card mt-4">
             <div class="card-header">
                 <h2 class="card-title">Ações Rápidas</h2>
@@ -132,7 +154,6 @@
             </div>
         </div>
 
-        <!-- Recent Activities -->
         <div class="card mt-4">
             <div class="card-header">
                 <h2 class="card-title">Atividades Recentes</h2>
@@ -161,90 +182,180 @@
             </div>
         </div>
 
-        <!-- Pending Schedules -->
+<<<<<<< HEAD
+=======
+        <!-- Voluntários List (for authenticated users) -->
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
         <div class="card mt-4">
             <div class="card-header">
-                <h2 class="card-title">Agendamentos Pendentes</h2>
+                <h2 class="card-title">Lista de Voluntários</h2>
+                <button class="btn btn-primary" onclick="loadVoluntarios()">🔄 Atualizar</button>
             </div>
             <div class="card-body">
-                <div class="table-container">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Data/Hora</th>
-                                <th>Tipo</th>
-                                <th>Pessoa</th>
-                                <th>Responsável</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="agendamentosPendentes">
-                            <tr>
-                                <td colspan="5" class="text-center" style="padding: 2rem; color: var(--text-light);">
-                                    Nenhum agendamento pendente
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div id="voluntariosList">
+                    <p class="text-center">Carregue a lista de voluntários...</p>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="../js/app.js"></script>
+    <!-- Scripts -->
+    <script src="../js/auth.js"></script>
+    <script src="../js/api.js"></script>
     <script>
-        // Carrega dados do dashboard
-        async function loadDashboardData() {
-            try {
-                // TODO: Integrar com API real
-                // const stats = await API.get('/dashboard/stats');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticação
+            if (!Auth.checkAuth()) {
+                return;
+            }
 
-                // Dados simulados para desenvolvimento
-                document.getElementById('totalProdutos').textContent = '150';
-                document.getElementById('doacoesRecebidas').textContent = '45';
-                document.getElementById('doacoesEfetuadas').textContent = '32';
-                document.getElementById('voluntariosAtivos').textContent = '12';
-                document.getElementById('campanhasAtivas').textContent = '3';
-                document.getElementById('donatariosAtivos').textContent = '78';
+            // Carregar dados do usuário
+            const user = Auth.getUser();
+            if (user) {
+<<<<<<< HEAD
+                // Mostrar nome do voluntário (ou email se nome não disponível)
+                const displayName = user.nome || user.email;
+                document.getElementById('userName').textContent = displayName;
+                document.getElementById('userWelcome').textContent = displayName;
 
-                // Simula atividades recentes
-                const atividades = [
-                    {
-                        data: '14/10/2025',
-                        tipo: 'Doação Recebida',
-                        descricao: 'Recebimento de 50kg de alimentos',
-                        voluntario: 'João Silva',
-                        status: 'Concluído'
-                    },
-                    {
-                        data: '13/10/2025',
-                        tipo: 'Doação Efetuada',
-                        descricao: 'Distribuição de cestas básicas',
-                        voluntario: 'Maria Santos',
-                        status: 'Concluído'
-                    }
-                ];
+                // Mostrar nível de acesso
+                document.getElementById('userLevel').textContent = user.nivelAcesso;
 
-                const tbody = document.getElementById('atividadesRecentes');
-                if (atividades.length > 0) {
-                    tbody.innerHTML = atividades.map(ativ => `
-                        <tr>
-                            <td>${ativ.data}</td>
-                            <td>${ativ.tipo}</td>
-                            <td>${ativ.descricao}</td>
-                            <td>${ativ.voluntario}</td>
-                            <td><span class="badge badge-success">${ativ.status}</span></td>
-                        </tr>
-                    `).join('');
+                // Mostrar link admin se for admin
+                if (Auth.isAdmin()) {
+=======
+                document.getElementById('userName').textContent = user.email;
+                document.getElementById('userWelcome').textContent = user.email;
+                document.getElementById('userLevel').textContent = user.nivelAcesso;
+                
+                // Mostrar link admin se for admin
+                if (user.nivelAcesso === 'ADMIN') {
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
+                    document.getElementById('adminNav').style.display = 'block';
                 }
+            }
 
-            } catch (error) {
-                console.error('Erro ao carregar dados do dashboard:', error);
+<<<<<<< HEAD
+                // Debug info
+                console.log('👤 Usuário:', displayName);
+                console.log('🔑 Nível de acesso:', user.nivelAcesso);
+                console.log('👑 É admin?', Auth.isAdmin());
+            }
+
+=======
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
+            // Configurar logout
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('Deseja realmente sair?')) {
+                    Auth.logout();
+                }
+            });
+
+            // Carregar dados iniciais
+            loadDashboardData();
+        });
+
+        // Carregar dados do dashboard
+        function loadDashboardData() {
+            // Dados simulados - integrar com API real posteriormente
+            document.getElementById('totalProdutos').textContent = '150';
+            document.getElementById('doacoesRecebidas').textContent = '45';
+            document.getElementById('doacoesEfetuadas').textContent = '32';
+            document.getElementById('voluntariosAtivos').textContent = '12';
+            document.getElementById('campanhasAtivas').textContent = '3';
+            document.getElementById('donatariosAtivos').textContent = '78';
+
+            // Simular atividades recentes
+            const atividades = [
+                {
+                    data: '14/11/2025',
+                    tipo: 'Doação Recebida',
+                    descricao: 'Recebimento de 50kg de alimentos',
+                    voluntario: 'João Silva',
+                    status: 'Concluído'
+                },
+                {
+                    data: '13/11/2025',
+                    tipo: 'Doação Efetuada',
+                    descricao: 'Distribuição de cestas básicas',
+                    voluntario: 'Maria Santos',
+                    status: 'Concluído'
+                }
+            ];
+
+            const tbody = document.getElementById('atividadesRecentes');
+            if (atividades.length > 0) {
+                tbody.innerHTML = atividades.map(ativ => `
+                    <tr>
+                        <td>${ativ.data}</td>
+                        <td>${ativ.tipo}</td>
+                        <td>${ativ.descricao}</td>
+                        <td>${ativ.voluntario}</td>
+                        <td><span class="badge badge-success">${ativ.status}</span></td>
+                    </tr>
+                `).join('');
             }
         }
 
-        // Carrega dados ao inicializar
-        loadDashboardData();
+        // Carregar lista de voluntários
+        async function loadVoluntarios() {
+            const voluntariosList = document.getElementById('voluntariosList');
+            
+            try {
+                voluntariosList.innerHTML = '<p class="text-center">Carregando voluntários...</p>';
+                
+<<<<<<< HEAD
+                // Ajustado para usar a rota pública de equipe se não for admin
+                // Se for admin, usa a rota completa. O backend (VoluntarioView) agora tem /equipe
+                const isAdmin = Auth.isAdmin();
+                const endpoint = isAdmin ? '/admin/voluntarios' : '/voluntario/equipe';
+                
+                const data = await API.get(endpoint);
+                
+                // O endpoint /admin/voluntarios retorna lista direta, 
+                // mas o código original esperava {voluntarios: [], total: 0}
+                // Vamos normalizar:
+                let lista = Array.isArray(data) ? data : (data.voluntarios || []);
+                
+                if (lista.length > 0) {
+                    voluntariosList.innerHTML = `
+                        <p><strong>Total de voluntários:</strong> ${lista.length}</p>
+                        <div class="row">
+                            ${lista.map(vol => `
+=======
+                const data = await API.voluntario.listar();
+                
+                if (data.voluntarios && data.voluntarios.length > 0) {
+                    voluntariosList.innerHTML = `
+                        <p><strong>Total de voluntários:</strong> ${data.total}</p>
+                        <div class="row">
+                            ${data.voluntarios.map(vol => `
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
+                                <div class="col-md-4 mb-3">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6>${vol.vol_nome || vol.nome || 'Nome não informado'}</h6>
+                                            <p class="text-muted">${vol.vol_email || vol.email || 'Email não informado'}</p>
+<<<<<<< HEAD
+                                            <small>Tel: ${vol.vol_telefone || vol.telefone || '-'}</small>
+=======
+                                            <small>ID: ${vol.vol_id || vol.id}</small>
+>>>>>>> f920d7edf7db4e47bf74d5fa54468951ca65c13a
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    voluntariosList.innerHTML = '<p class="text-center">Nenhum voluntário encontrado.</p>';
+                }
+                
+            } catch (error) {
+                console.error('Erro ao carregar voluntários:', error);
+                voluntariosList.innerHTML = '<p class="text-center text-danger">Erro ao carregar voluntários.</p>';
+            }
+        }
     </script>
 </body>
 </html>
