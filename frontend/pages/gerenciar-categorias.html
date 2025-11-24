@@ -217,23 +217,26 @@
             }
         }
 
-        function excluirCategoria(id) {
+        async function excluirCategoria(id) {
             if (confirm('Tem certeza que deseja excluir esta categoria?')) {
-                fetch(`${API_BASE}/${id}`, {
-                    method: 'DELETE'
-                })
-                .then(response => {
+                try {
+                    const response = await fetch(`${API_BASE}/${id}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+
                     if (response.ok) {
-                        alert('Categoria excluída com sucesso!');
+                        alert(data.mensagem || 'Categoria excluída com sucesso!');
                         carregarCategorias();
                     } else {
-                        throw new Error('Erro ao excluir categoria');
+                        // Mostra o erro específico retornado pelo backend (vem no campo "mensagem")
+                        alert(data.mensagem || 'Erro ao excluir categoria');
                     }
-                })
-                .catch(error => {
+                } catch (error) {
                     console.error('Erro:', error);
-                    alert('Erro ao excluir categoria');
-                });
+                    alert('Erro ao excluir categoria: ' + error.message);
+                }
             }
         }
 
