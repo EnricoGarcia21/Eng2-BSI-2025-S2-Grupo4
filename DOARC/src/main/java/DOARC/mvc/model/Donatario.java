@@ -1,5 +1,9 @@
 package DOARC.mvc.model;
 
+import DOARC.mvc.dao.DonatarioDAO;
+import java.sql.Connection;
+import java.util.List;
+
 public class Donatario {
 
     private int donId;          // ID gerado pelo banco
@@ -121,5 +125,69 @@ public class Donatario {
 
     public void setDonSexo(String donSexo) {
         this.donSexo = donSexo;
+    }
+
+    // --- MÉTODOS DE NEGÓCIO (Model instancia DAO e passa Connection) ---
+
+    /**
+     * Grava este donatário no banco
+     * @param conn Conexão recebida do Control
+     * @return Donatário gravado com ID ou null se erro
+     */
+    public Donatario gravar(Connection conn) {
+        DonatarioDAO dao = new DonatarioDAO(conn);
+        return dao.gravar(this);
+    }
+
+    /**
+     * Altera este donatário no banco
+     * @param conn Conexão recebida do Control
+     * @return Donatário alterado ou null se erro
+     */
+    public Donatario alterar(Connection conn) {
+        DonatarioDAO dao = new DonatarioDAO(conn);
+        return dao.alterar(this);
+    }
+
+    /**
+     * Apaga este donatário do banco
+     * @param conn Conexão recebida do Control
+     * @return true se removido, false se erro
+     */
+    public boolean apagar(Connection conn) {
+        DonatarioDAO dao = new DonatarioDAO(conn);
+        return dao.apagar(this);
+    }
+
+    /**
+     * Busca um donatário por ID
+     * @param conn Conexão recebida do Control
+     * @param id ID do donatário
+     * @return Donatário encontrado ou null
+     */
+    public static Donatario get(Connection conn, int id) {
+        DonatarioDAO dao = new DonatarioDAO(conn);
+        return dao.get(id);
+    }
+
+    /**
+     * Busca donatários com filtro
+     * @param conn Conexão recebida do Control
+     * @param filtro Texto para filtrar
+     * @return Lista de donatários
+     */
+    public static List<Donatario> get(Connection conn, String filtro) {
+        DonatarioDAO dao = new DonatarioDAO(conn);
+        return dao.get(filtro);
+    }
+
+    /**
+     * Busca todos os donatários
+     * @param conn Conexão recebida do Control
+     * @return Lista de todos os donatários
+     */
+    public static List<Donatario> getAll(Connection conn) {
+        DonatarioDAO dao = new DonatarioDAO(conn);
+        return dao.getAll();
     }
 }

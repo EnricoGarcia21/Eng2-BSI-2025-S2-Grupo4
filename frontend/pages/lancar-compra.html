@@ -93,7 +93,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="dataLancamento" class="form-label required">Data</label>
-                            <input type="date" id="dataLancamento" class="form-control" required>
+                            <input type="date" id="dataLancamento" class="form-control" required max="">
                             <div class="form-error">Data é obrigatória</div>
                         </div>
 
@@ -101,36 +101,6 @@
                             <label for="numeroDocumento" class="form-label">Nº Documento/Nota</label>
                             <input type="text" id="numeroDocumento" class="form-control" placeholder="Ex: NF 12345">
                             <div class="form-text">Número da nota fiscal ou comprovante (opcional)</div>
-                        </div>
-                    </div>
-
-                    <!-- Seção Compra -->
-                    <div id="secaoCompra" style="display: none;">
-                        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Dados da Compra</h3>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="fornecedor" class="form-label required">Fornecedor</label>
-                                <input type="text" id="fornecedor" class="form-control" placeholder="Nome do fornecedor">
-                                <div class="form-error">Fornecedor é obrigatório</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="valorTotal" class="form-label required">Valor Total (R$)</label>
-                                <input type="number" id="valorTotal" class="form-control" step="0.01" min="0" placeholder="0,00">
-                                <div class="form-error">Valor é obrigatório</div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="formaPagamento" class="form-label">Forma de Pagamento</label>
-                                <select id="formaPagamento" class="form-control form-select">
-                                    <option value="dinheiro">Dinheiro</option>
-                                    <option value="cartao">Cartão</option>
-                                    <option value="pix">PIX</option>
-                                    <option value="boleto">Boleto</option>
-                                    <option value="transferencia">Transferência</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
 
@@ -153,10 +123,7 @@
                             <label for="categoria" class="form-label required">Categoria</label>
                             <select id="categoria" class="form-control form-select" onchange="carregarProdutos()">
                                 <option value="">Selecione uma categoria</option>
-                                <option value="1">Alimentos</option>
-                                <option value="2">Roupas</option>
-                                <option value="3">Higiene</option>
-                                <option value="4">Móveis</option>
+                                <!-- Categorias carregadas dinamicamente -->
                             </select>
                         </div>
 
@@ -171,7 +138,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="quantidade" class="form-label required">Quantidade</label>
-                            <input type="number" id="quantidade" class="form-control" min="1" step="0.01">
+                            <input type="number" id="quantidade" class="form-control" min="0.01" step="0.01">
                         </div>
 
                         <div class="form-group">
@@ -224,6 +191,46 @@
                         </div>
                     </div>
 
+                    <!-- Seção Compra (movida para o final) -->
+                    <div id="secaoCompra" style="display: none;">
+                        <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Dados do Pagamento</h3>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fornecedor" class="form-label required">Fornecedor</label>
+                                <input type="text" id="fornecedor" class="form-control" placeholder="Nome do fornecedor">
+                                <div class="form-error">Fornecedor é obrigatório</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="formaPagamento" class="form-label">Forma de Pagamento</label>
+                                <select id="formaPagamento" class="form-control form-select">
+                                    <option value="dinheiro">Dinheiro</option>
+                                    <option value="cartao">Cartão</option>
+                                    <option value="pix">PIX</option>
+                                    <option value="boleto">Boleto</option>
+                                    <option value="transferencia">Transferência</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="valorTotal" class="form-label required">Valor Total da Compra (R$)</label>
+                                <input type="number" id="valorTotal" class="form-control" step="0.01" min="0" placeholder="0,00">
+                                <div class="form-error">Valor total é obrigatório</div>
+                                <div class="form-text">Valor total da compra conforme nota fiscal</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="valorPago" class="form-label required">Valor Pago (R$)</label>
+                                <input type="number" id="valorPago" class="form-control" step="0.01" min="0" placeholder="0,00">
+                                <div class="form-error">Valor pago é obrigatório</div>
+                                <div class="form-text">Valor efetivamente pago</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Informações Adicionais -->
                     <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações Adicionais</h3>
 
@@ -260,11 +267,45 @@
 
     <script src="../js/app.js"></script>
     <script>
-        // Definir data de hoje como padrão
-        document.getElementById('dataLancamento').valueAsDate = new Date();
+        // API Base URLs
+        const API_COMPRA = 'http://localhost:8080/apis/compra';
+        const API_PRODUTO = 'http://localhost:8080/apis/produto';
+        const API_CATEGORIA = 'http://localhost:8080/apis/categoria';
+
+        // Definir data de hoje como padrão e máximo
+        const hoje = new Date();
+        const dataInput = document.getElementById('dataLancamento');
+        dataInput.valueAsDate = hoje;
+        dataInput.max = hoje.toISOString().split('T')[0];
 
         // Array para produtos adicionados
         let produtosAdicionados = [];
+        let produtosCache = {}; // Cache de produtos por categoria
+
+        // Carrega categorias ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarCategorias();
+        });
+
+        async function carregarCategorias() {
+            try {
+                const response = await fetch(API_CATEGORIA);
+                if (!response.ok) throw new Error('Erro ao buscar categorias');
+
+                const categorias = await response.json();
+                const categoriaSelect = document.getElementById('categoria');
+
+                categorias.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.nome;
+                    categoriaSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+                alert('Erro ao carregar categorias. Verifique se o backend está rodando.');
+            }
+        }
 
         function toggleTipoLancamento() {
             const tipo = document.getElementById('tipoLancamento').value;
@@ -278,10 +319,12 @@
             if (tipo === 'arrecadacao') {
                 document.getElementById('valorUnitario').value = '';
                 document.getElementById('valorTotal').value = '';
+                document.getElementById('valorPago').value = '';
+                document.getElementById('fornecedor').value = '';
             }
         }
 
-        function carregarProdutos() {
+        async function carregarProdutos() {
             const categoriaId = document.getElementById('categoria').value;
             const selectProduto = document.getElementById('produto');
 
@@ -289,51 +332,82 @@
 
             if (!categoriaId) return;
 
-            // TODO: Carregar produtos da API
-            const produtos = {
-                '1': ['Arroz', 'Feijão', 'Macarrão', 'Óleo', 'Açúcar'],
-                '2': ['Camiseta', 'Calça', 'Agasalho', 'Sapatos'],
-                '3': ['Sabonete', 'Shampoo', 'Pasta de Dente', 'Desodorante'],
-                '4': ['Mesa', 'Cadeira', 'Cama', 'Guarda-roupa']
-            };
+            try {
+                const response = await fetch(`${API_PRODUTO}?categoria_id=${categoriaId}`);
+                if (!response.ok) throw new Error('Erro ao buscar produtos');
 
-            if (produtos[categoriaId]) {
-                produtos[categoriaId].forEach((produto, index) => {
+                const produtos = await response.json();
+                produtosCache = {}; // Limpa o cache
+
+                produtos.forEach(prod => {
                     const option = document.createElement('option');
-                    option.value = `${categoriaId}_${index}`;
-                    option.textContent = produto;
+                    option.value = prod.id;
+                    option.textContent = prod.nome;
                     selectProduto.appendChild(option);
+
+                    // Armazena no cache para uso posterior
+                    produtosCache[prod.id] = prod;
                 });
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                alert('Erro ao carregar produtos da categoria selecionada.');
             }
         }
 
         function adicionarProduto() {
             const produto = document.getElementById('produto');
             const quantidade = document.getElementById('quantidade');
-            const unidade = document.getElementById('unidadeMedida');
             const valorUnitario = document.getElementById('valorUnitario');
             const dataValidade = document.getElementById('dataValidade');
+            const dataLancamento = document.getElementById('dataLancamento');
 
+            // Validações
             if (!produto.value || !quantidade.value) {
-                UI.showAlert('Selecione um produto e informe a quantidade', 'warning');
+                alert('Selecione um produto e informe a quantidade');
                 return;
             }
 
-            const produtoTexto = produto.options[produto.selectedIndex].text;
-            const unidadeTexto = unidade.options[unidade.selectedIndex].text;
-            const valorUnit = parseFloat(valorUnitario.value) || 0;
             const qtd = parseFloat(quantidade.value);
-            const subtotal = valorUnit * qtd;
+            if (qtd <= 0) {
+                alert('A quantidade deve ser maior que zero');
+                return;
+            }
 
-            produtosAdicionados.push({
-                produtoId: produto.value,
-                produto: produtoTexto,
-                quantidade: qtd,
-                unidade: unidadeTexto,
-                valorUnitario: valorUnit,
-                subtotal: subtotal,
-                dataValidade: dataValidade.value
-            });
+            // Validar data de validade se informada
+            if (dataValidade.value && dataLancamento.value) {
+                if (dataValidade.value < dataLancamento.value) {
+                    alert('Data de validade não pode ser anterior à data da compra');
+                    return;
+                }
+            }
+
+            const produtoId = parseInt(produto.value);
+            const produtoTexto = produto.options[produto.selectedIndex].text;
+            const valorUnit = parseFloat(valorUnitario.value) || 0;
+            const subtotal = valorUnit * qtd;
+            const validade = dataValidade.value || null;
+
+            // Verificar se já existe produto com mesmo ID e mesma validade
+            const produtoExistente = produtosAdicionados.find(p =>
+                p.prodId === produtoId && p.dataValidade === validade
+            );
+
+            if (produtoExistente) {
+                // Somar quantidades ao invés de criar novo item
+                produtoExistente.qtde += qtd;
+                produtoExistente.subtotal = produtoExistente.valorUnit * produtoExistente.qtde;
+                alert(`Produto já adicionado. Quantidade atualizada para ${produtoExistente.qtde}`);
+            } else {
+                // Adicionar novo produto
+                produtosAdicionados.push({
+                    prodId: produtoId,
+                    produto: produtoTexto,
+                    qtde: qtd,
+                    valorUnit: valorUnit,
+                    subtotal: subtotal,
+                    dataValidade: validade
+                });
+            }
 
             atualizarTabelaProdutos();
 
@@ -359,13 +433,16 @@
 
             tbody.innerHTML = produtosAdicionados.map((item, index) => {
                 totalGeral += item.subtotal;
+                const validadeFormatada = item.dataValidade
+                    ? new Date(item.dataValidade + 'T00:00:00').toLocaleDateString('pt-BR')
+                    : '-';
                 return `
                     <tr>
                         <td>${item.produto}</td>
-                        <td>${item.quantidade} ${item.unidade}</td>
-                        <td>R$ ${item.valorUnitario.toFixed(2)}</td>
+                        <td>${item.qtde}</td>
+                        <td>R$ ${item.valorUnit.toFixed(2)}</td>
                         <td>R$ ${item.subtotal.toFixed(2)}</td>
-                        <td>${item.dataValidade ? Formatter.formatDate(item.dataValidade) : '-'}</td>
+                        <td>${validadeFormatada}</td>
                         <td>
                             <button class="btn btn-sm btn-danger" onclick="removerProduto(${index})">
                                 🗑️ Remover
@@ -401,10 +478,19 @@
             if (!dataLancamento.value) {
                 Validator.showError(dataLancamento, 'Informe a data');
                 isValid = false;
+            } else {
+                // Validar se data não é futura
+                const hoje = new Date();
+                hoje.setHours(0, 0, 0, 0);
+                const dataCompra = new Date(dataLancamento.value + 'T00:00:00');
+                if (dataCompra > hoje) {
+                    Validator.showError(dataLancamento, 'Data não pode ser futura');
+                    isValid = false;
+                }
             }
 
             if (produtosAdicionados.length === 0) {
-                UI.showAlert('Adicione pelo menos um produto', 'warning');
+                alert('Adicione pelo menos um produto');
                 isValid = false;
             }
 
@@ -412,6 +498,7 @@
             if (tipoLancamento.value === 'compra') {
                 const fornecedor = document.getElementById('fornecedor');
                 const valorTotal = document.getElementById('valorTotal');
+                const valorPago = document.getElementById('valorPago');
 
                 if (!fornecedor.value) {
                     Validator.showError(fornecedor, 'Fornecedor é obrigatório');
@@ -419,38 +506,90 @@
                 }
 
                 if (!valorTotal.value || parseFloat(valorTotal.value) <= 0) {
-                    Validator.showError(valorTotal, 'Valor é obrigatório');
+                    Validator.showError(valorTotal, 'Valor total é obrigatório');
                     isValid = false;
+                }
+
+                if (!valorPago.value || parseFloat(valorPago.value) <= 0) {
+                    Validator.showError(valorPago, 'Valor pago é obrigatório');
+                    isValid = false;
+                }
+
+                // Validar se valor pago é diferente do total
+                if (valorTotal.value && valorPago.value) {
+                    const vTotal = parseFloat(valorTotal.value);
+                    const vPago = parseFloat(valorPago.value);
+                    if (Math.abs(vTotal - vPago) > 0.01) {
+                        const confirmar = confirm(
+                            `Atenção: Valor pago (R$ ${vPago.toFixed(2)}) é diferente do valor total (R$ ${vTotal.toFixed(2)}).\n\n` +
+                            `Diferença: R$ ${Math.abs(vTotal - vPago).toFixed(2)}\n\n` +
+                            `Deseja continuar mesmo assim?`
+                        );
+                        if (!confirmar) {
+                            isValid = false;
+                        }
+                    }
                 }
             }
 
             if (!isValid) return;
 
             try {
-                const data = {
-                    tipo: tipoLancamento.value,
-                    data: dataLancamento.value,
-                    numeroDocumento: document.getElementById('numeroDocumento').value,
-                    fornecedor: document.getElementById('fornecedor').value,
-                    valorTotal: parseFloat(document.getElementById('valorTotal').value) || 0,
-                    formaPagamento: document.getElementById('formaPagamento').value,
-                    origemArrecadacao: document.getElementById('origemArrecadacao').value,
-                    produtos: produtosAdicionados,
-                    campanhaId: document.getElementById('campanha').value,
-                    observacoes: document.getElementById('observacoes').value
-                };
+                // Monta os parâmetros para o backend
+                const fornecedor = tipoLancamento.value === 'compra' ? document.getElementById('fornecedor').value : '';
+                const valorTotal = tipoLancamento.value === 'compra' ? parseFloat(document.getElementById('valorTotal').value) : 0;
+                const observacoes = tipoLancamento.value === 'arrecadacao'
+                    ? `Arrecadação - ${document.getElementById('origemArrecadacao').value}`
+                    : document.getElementById('observacoes').value;
 
-                // TODO: Integrar com API
-                // await API.post('/estoque/lancamento', data);
+                // Prepara os produtos para envio
+                // IMPORTANTE: Mesclar produtos com mesmo ID (DB não suporta duplicatas)
+                const produtosMesclados = {};
+                produtosAdicionados.forEach(p => {
+                    if (produtosMesclados[p.prodId]) {
+                        // Produto já existe, somar quantidade
+                        produtosMesclados[p.prodId].qtde += p.qtde;
+                        produtosMesclados[p.prodId].subtotal += p.subtotal;
+                    } else {
+                        // Novo produto
+                        produtosMesclados[p.prodId] = {
+                            prodId: p.prodId,
+                            qtde: p.qtde,
+                            valorUnit: p.valorUnit
+                        };
+                    }
+                });
 
-                UI.showAlert('Lançamento registrado com sucesso! Estoque atualizado.', 'success');
+                // Converter objeto para array
+                const produtosParaEnvio = Object.values(produtosMesclados);
+                const produtosJSON = JSON.stringify(produtosParaEnvio);
 
-                setTimeout(() => {
+                const params = new URLSearchParams();
+                params.append('comp_data_compra', dataLancamento.value);
+                params.append('comp_desc', observacoes || '');
+                params.append('vol_id', '1'); // TODO: Usar ID do voluntário logado
+                params.append('com_valor_total', valorTotal);
+                params.append('com_fornecedor', fornecedor);
+                params.append('produtos', produtosJSON);
+
+                const response = await fetch(`${API_COMPRA}?${params.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+
+                if (response.ok) {
+                    alert('Lançamento registrado com sucesso! Estoque atualizado.');
                     window.location.href = 'visualizar-estoque.html';
-                }, 2000);
+                } else {
+                    const error = await response.json();
+                    throw new Error(error.mensagem || 'Erro ao registrar lançamento');
+                }
 
             } catch (error) {
                 console.error('Erro ao registrar lançamento:', error);
+                alert('Erro ao registrar lançamento: ' + error.message);
             }
         });
     </script>
