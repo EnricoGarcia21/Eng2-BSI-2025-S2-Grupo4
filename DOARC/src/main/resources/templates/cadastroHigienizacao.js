@@ -3,7 +3,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const submitErrorMessage = document.getElementById("submitErrorMessage");
     const submitSuccessMessage = document.getElementById("submitSuccessMessage");
 
-    // Mapeamento dos campos baseado no HigienizacaoRoupaView
+    // ---------------- AUXILIARES DE MOEDA ----------------
+    
+    // Formata visualmente: 1500 -> R$ 15,00
+    function aplicarMascaraMoeda(valor) {
+        if (!valor) return "";
+        let valorStr = valor.toString().replace(/\D/g, ""); // Remove tudo que não for dígito
+        if (valorStr === "") return "";
+        
+        const numero = parseFloat(valorStr) / 100;
+        
+        return numero.toLocaleString('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        });
+    }
+
+    // Limpa formatação para validação e envio: R$ 1.500,00 -> 1500.00
+    function limparValorMoeda(valorFormatado) {
+        if (!valorFormatado) return "";
+        // Remove tudo que não for número ou vírgula, depois troca vírgula por ponto
+        return valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
+    }
+
+    // ---------------- CONFIGURAÇÃO DOS CAMPOS ----------------
     const CAMPOS_MAP = {
         dataAgendada: {
             id: 'hig_data_agendada',
@@ -30,7 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
             id: 'hig_valorpago',
             name: 'valor_pago',
             required: true,
-            validate: validarValorNumerico,
+            validate: validarValorMoeda, // Validador especial
+            isMoeda: true, // Flag para ativar máscara
             exemplo: 'Valor deve ser positivo.'
         },
         descricaoRoupa: {
@@ -54,9 +78,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function validarHora(valor) { return /^\d{2}:\d{2}$/.test(valor); }
     function validarValorNumerico(valor) { return !isNaN(parseFloat(valor)) && isFinite(valor) && parseFloat(valor) >= 0; }
     function validarIdNumerico(valor) { return validarValorNumerico(valor) && parseInt(valor) > 0; }
+    
+    // Validador que limpa a máscara antes de checar se é número
+    function validarValorMoeda(valorComMascara) {
+        const valorLimpo = limparValorMoeda(valorComMascara);
+        return validarValorNumerico(valorLimpo);
+    }
+
     function validarDataFuturaOuHoje(valor) {
         if (!valor) return false;
-        const dataInput = new Date(valor + 'T00:00:00'); // Adiciona T00 para garantir que a comparação seja feita no fuso correto (meia-noite)
+        const dataInput = new Date(valor + 'T00:00:00'); 
         const hoje = new Date();
         hoje.setHours(0, 0, 0, 0); 
         return !(isNaN(dataInput.getTime()) || dataInput.getTime() < hoje.getTime());
@@ -86,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function mostrarExemplo(element, exemplo) {
         esconderExemplo(element);
-        
         const exemploDiv = document.createElement('div');
         exemploDiv.classList.add('exemplo-message');
         exemploDiv.style.color = 'red';
@@ -96,14 +126,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function esconderExemplo(element) {
         const exemploDiv = element.parentElement.querySelector('.exemplo-message');
-        if (exemploDiv) {
-            exemploDiv.remove();
-        }
+        if (exemploDiv) exemploDiv.remove();
     }
 
     // ---------------- INICIALIZAÇÃO E EVENTOS ----------------
     function inicializarCampos() {
-        // --- NOVIDADE: Pré-preencher a data da URL ---
         const urlParams = new URLSearchParams(window.location.search);
         const dataUrl = urlParams.get('data_agendada');
 
@@ -111,11 +138,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const campo = CAMPOS_MAP[key];
             campo.element = document.getElementById(campo.id);
             
-            // Pré-preenche se o parâmetro de URL 'data_agendada' existir
+            // Pré-preenche data da URL
             if (campo.id === 'hig_data_agendada' && dataUrl) {
-                // O valor da URL está no formato YYYY-MM-DD
                 campo.element.value = dataUrl;
-                // Executa a validação após pré-preencher
                 const isValid = campo.validate(dataUrl);
                 if (isValid) {
                     campo.element.classList.add('success');
@@ -125,15 +150,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
             
-            // Adiciona asterisco para campos obrigatórios
+            // Adiciona asterisco
             if (campo.required) {
                 const label = document.querySelector(`label[for=${campo.id}]`);
                 if (label) label.innerHTML = `${label.innerHTML} <span style="color: red;">*</span>`;
             }
             
-            // Adiciona validação em tempo real
             if (campo.element) {
-                campo.element.addEventListener('input', () => {
+                // Evento de INPUT
+                campo.element.addEventListener('input', (e) => {
+                    // SE FOR MOEDA: Aplica máscara visual
+                    if (campo.isMoeda) {
+                        e.target.value = aplicarMascaraMoeda(e.target.value);
+                    }
+
                     const valor = campo.element.value.trim();
                     const campoValido = campo.validate(valor);
 
@@ -145,7 +175,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         campo.element.classList.add('success');
                         esconderExemplo(campo.element);
                     } else {
-                         esconderExemplo(campo.element);
+                        esconderExemplo(campo.element);
                     }
                 });
             }
@@ -157,6 +187,7 @@ document.addEventListener("DOMContentLoaded", () => {
         event.preventDefault();
         hideMessage(submitErrorMessage);
         hideMessage(submitSuccessMessage);
+        
         let formValido = true;
         const params = new URLSearchParams();
 
@@ -167,20 +198,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const campoValido = campo.validate(valor);
             
-            // Força a exibição de erro no submit
             if (!campoValido && campo.required) {
                 formValido = false;
                 campoElement.classList.add('error');
                 campoElement.classList.remove('success');
                 mostrarExemplo(campoElement, campo.exemplo);
             } else if (campoValido) {
-                 campoElement.classList.add('success');
-                 campoElement.classList.remove('error');
-                 esconderExemplo(campoElement);
+                campoElement.classList.add('success');
+                campoElement.classList.remove('error');
+                esconderExemplo(campoElement);
             }
 
-            // O nome do parâmetro deve ser o nome esperado pelo Controller/View
-            params.append(campo.name, valor); 
+            // --- LÓGICA DE ENVIO DO VALOR ---
+            let valorParaEnvio = valor;
+            if (campo.isMoeda) {
+                // Limpa o R$ e converte para ponto flutuante string (1500.50)
+                valorParaEnvio = limparValorMoeda(valor);
+            }
+
+            params.append(campo.name, valorParaEnvio); 
         }
 
         if (!formValido) {
@@ -199,15 +235,15 @@ document.addEventListener("DOMContentLoaded", () => {
             
             if (!response.ok) throw new Error(result.erro || result.mensagem || `Erro HTTP: ${response.status}`);
 
-            exibirMensagem('sucesso', result.mensagem || 'Registro de Higienização cadastrado com sucesso!');
+            exibirMensagem('sucesso', result.mensagem || 'Registro cadastrado com sucesso!');
             higienizacaoForm.reset();
-            // Limpa o feedback visual após reset
+            
             document.querySelectorAll('.form-control').forEach(el => el.classList.remove('success', 'error'));
             document.querySelectorAll('.exemplo-message').forEach(el => el.remove());
             
         } catch (error) {
-            console.error("Erro ao enviar Higienização:", error);
-            exibirMensagem('erro', `Erro ao cadastrar Registro: ${error.message || "Erro desconhecido."}`);
+            console.error("Erro ao enviar:", error);
+            exibirMensagem('erro', `Erro ao cadastrar: ${error.message || "Erro desconhecido."}`);
         }
     });
 

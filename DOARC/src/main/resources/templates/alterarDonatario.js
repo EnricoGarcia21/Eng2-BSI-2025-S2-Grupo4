@@ -6,17 +6,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const donId = urlParams.get('id');
 
+    // ---------------- CONFIGURAÇÃO DOS CAMPOS ----------------
     const CAMPOS_MAP = {
-        donNome: { id: 'don_nome', required: true, validate: validarNome },
-        donDataNasc: { id: 'don_data_nasc', required: true, validate: validarDataNascimento },
-        donSexo: { id: 'don_sexo', required: true, validate: validarSelecao },
-        donTelefone: { id: 'don_telefone', required: true, validate: validarTelefone },
-        donEmail: { id: 'don_email', required: true, validate: validarEmail },
-        donCep: { id: 'don_cep', required: true, validate: validarCEP },
-        donUf: { id: 'don_uf', required: true, validate: validarUF },
-        donCidade: { id: 'don_cidade', required: true, validate: validarCidadeSemNumero },
-        donBairro: { id: 'don_bairro', required: true, validate: validarCampoTexto },
-        donRua: { id: 'don_rua', required: true, validate: validarCampoTexto }
+        donNome: { 
+            id: 'don_nome', 
+            jsonProp: 'don_nome',       // Tenta buscar com esse nome
+            submitProp: 'don_nome',     // NOME EXATO DO JAVA @RequestParam
+            required: true, 
+            validate: validarNome 
+        },
+        donDataNasc: { 
+            id: 'don_data_nasc', 
+            jsonProp: 'don_data_nasc', 
+            submitProp: 'don_data_nasc', // NOME EXATO DO JAVA
+            required: true, 
+            validate: validarDataNascimento 
+        },
+        donSexo: { 
+            id: 'don_sexo', 
+            jsonProp: 'don_sexo', 
+            submitProp: 'don_sexo', 
+            required: true, 
+            validate: validarSelecao 
+        },
+        donTelefone: { 
+            id: 'don_telefone', 
+            jsonProp: 'don_telefone', 
+            submitProp: 'don_telefone', 
+            required: true, 
+            validate: validarTelefone 
+        },
+        donEmail: { 
+            id: 'don_email', 
+            jsonProp: 'don_email', 
+            submitProp: 'don_email', 
+            required: true, 
+            validate: validarEmail 
+        },
+        donCep: { 
+            id: 'don_cep', 
+            jsonProp: 'don_cep', 
+            submitProp: 'don_cep', 
+            required: true, 
+            validate: validarCEP 
+        },
+        donUf: { 
+            id: 'don_uf', 
+            jsonProp: 'don_uf', 
+            submitProp: 'don_uf', 
+            required: true, 
+            validate: validarUF 
+        },
+        donCidade: { 
+            id: 'don_cidade', 
+            jsonProp: 'don_cidade', 
+            submitProp: 'don_cidade', 
+            required: true, 
+            validate: validarCidadeSemNumero 
+        },
+        donBairro: { 
+            id: 'don_bairro', 
+            jsonProp: 'don_bairro', 
+            submitProp: 'don_bairro', 
+            required: true, 
+            validate: validarCampoTexto 
+        },
+        donRua: { 
+            id: 'don_rua', 
+            jsonProp: 'don_rua', 
+            submitProp: 'don_rua', 
+            required: true, 
+            validate: validarCampoTexto 
+        }
     };
 
     // ---------------- VALIDADORES ----------------
@@ -49,19 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function atualizarFeedback(inputElement, isValid) {
         if (!inputElement) return;
-        const labelElement = document.querySelector(`label[for="${inputElement.id}"]`);
-        const indicator = labelElement ? labelElement.querySelector('.required-indicator') : null;
-
         inputElement.classList.remove('success', 'error');
-        if (isValid) {
-            if (indicator) indicator.style.color = 'green';
-            inputElement.classList.add('success');
-        } else if (inputElement.value.trim() !== '') {
-            if (indicator) indicator.style.color = 'red';
-            inputElement.classList.add('error');
-        } else {
-            if (indicator) indicator.style.color = 'red';
-        }
+        if (isValid) inputElement.classList.add('success');
+        else if (inputElement.value.trim() !== '') inputElement.classList.add('error');
     }
 
     function exibirMensagem(tipo, mensagem) {
@@ -86,6 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (id) {
             case 'don_telefone':
                 if (value.length > 11) value = value.substring(0, 11);
+                if (value.length > 10) { 
+                    value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+                } else if (value.length > 5) {
+                    value = `(${value.substring(0, 2)}) ${value.substring(2, 6)}-${value.substring(6)}`;
+                }
                 input.value = value;
                 break;
             case 'don_cep':
@@ -99,83 +155,86 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ---------------- CARREGAR DADOS DO DONATÁRIO ----------------
+    // ---------------- CARREGAR DADOS (GET) ----------------
     async function carregarDadosDonatario(id) {
         try {
             const response = await fetch(`http://localhost:8080/apis/donatario/${id}`);
             const data = await response.json();
 
-            console.log('📦 Dados recebidos da API:', data);
+            console.log('📦 JSON do GET:', data); // Verifique no F12
 
-            if (!response.ok) throw new Error(data.mensagem || 'Erro ao carregar os dados do Donatário.');
+            if (!response.ok) throw new Error(data.mensagem || 'Erro ao carregar dados.');
 
-            // Preenche cada campo com o valor retornado
             for (const key in CAMPOS_MAP) {
                 const campo = CAMPOS_MAP[key];
                 const el = document.getElementById(campo.id);
                 if (!el) continue;
 
-                // Verifica se o backend retornou um campo com o mesmo nome
-                const valor = data[campo.id] || data[key] || data[campo.id.replace('don_', '')] || '';
+                // 1. Tenta pelo nome exato (don_nome)
+                let valor = data[campo.jsonProp];
+                
+                // 2. Se não achar, tenta sem o prefixo (nome)
+                if (valor === undefined) valor = data[campo.jsonProp.replace('don_', '')];
+                
+                // 3. Fallbacks comuns
+                if (valor === undefined && campo.id === 'don_data_nasc') valor = data['dataNascimento'] || data['nascimento'];
+                if (valor === undefined && campo.id === 'don_rua') valor = data['logradouro'] || data['rua'];
 
-                if (valor) {
-                    el.value = valor;
-                    if (campo.id === 'don_data_nasc' && valor.length >= 10) {
-                        el.value = valor.substring(0, 10);
+                if (valor !== undefined && valor !== null) {
+                    if (campo.id === 'don_data_nasc' && typeof valor === 'string') {
+                        valor = valor.split('T')[0];
                     }
-                    aplicarMascara(campo.id);
+                    
+                    el.value = valor;
+                    
+                    if (['don_telefone', 'don_cep', 'don_uf'].includes(campo.id)) {
+                        aplicarMascara(campo.id);
+                    }
                     atualizarFeedback(el, campo.validate(el.value));
                 }
             }
         } catch (error) {
+            console.error('❌ Erro GET:', error);
             const container = document.querySelector('.form-container');
-            if (container) container.innerHTML = `<h1>Erro: ${error.message}</h1>`;
-            console.error('❌ Erro ao carregar dados:', error);
-            if (form) form.style.display = 'none';
+            if (container) container.innerHTML = `<h1>Erro ao carregar: ${error.message}</h1>`;
         }
     }
 
-    // ---------------- INICIALIZAR CAMPOS ----------------
+    // ---------------- INICIALIZAR ----------------
     function inicializarCampos() {
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
             campo.element = document.getElementById(campo.id);
             campo.label = document.querySelector(`label[for="${campo.id}"]`);
-            if (campo.required) adicionarFeedbackObrigatorio(campo.label);
+            if (campo.required && campo.label) adicionarFeedbackObrigatorio(campo.label);
 
             if (campo.element) {
                 campo.element.addEventListener('input', () => {
                     aplicarMascara(campo.id);
                     atualizarFeedback(campo.element, campo.validate(campo.element.value));
                 });
-                campo.element.addEventListener('change', () => {
-                    atualizarFeedback(campo.element, campo.validate(campo.element.value));
-                });
             }
         }
     }
 
-    // ---------------- FLUXO PRINCIPAL ----------------
-    if (!form) { console.error('Form #donatarioForm não encontrado.'); return; }
-    if (!donId) {
-        document.querySelector('.form-container').innerHTML = '<h1>Erro: ID do Donatário não encontrado na URL.</h1>';
-        return;
-    }
+    if (!form || !donId) return;
 
     const titulo = document.querySelector('h1');
     if (titulo) titulo.textContent = `Alterar Donatário (ID: ${donId})`;
-    const btn = document.querySelector('.btn-gradient');
-    if (btn) btn.textContent = "Salvar Alterações";
 
     inicializarCampos();
     carregarDadosDonatario(donId);
 
-    // ---------------- SUBMIT DO FORM ----------------
+    // ---------------- SUBMIT (PUT) ----------------
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         let formIsValid = true;
 
         const formData = new URLSearchParams();
+        
+        // !!! IMPORTANTE !!!
+        // O Java espera @RequestParam int don_id
+        // Não pode ser apenas 'id', tem que ser 'don_id'
         formData.append('don_id', donId);
 
         for (const key in CAMPOS_MAP) {
@@ -184,24 +243,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let valor = campo.element.value.trim();
 
+            // Limpeza de Máscaras (para enviar apenas números ou formato limpo)
             switch (campo.id) {
                 case 'don_uf': valor = valor.substring(0, 2).toUpperCase(); break;
+                // Remove caracteres especiais de CEP e Telefone se o backend esperar apenas números/letras
                 case 'don_cep': valor = valor.replace(/\D/g, '').substring(0, 8); break;
                 case 'don_telefone': valor = valor.replace(/\D/g, '').substring(0, 11); break;
             }
 
-            if (!campo.validate(valor) && campo.required) formIsValid = false;
-            atualizarFeedback(campo.element, campo.validate(valor));
+            if (campo.required && !campo.validate(valor)) {
+                formIsValid = false;
+                atualizarFeedback(campo.element, false);
+            } else {
+                atualizarFeedback(campo.element, true);
+            }
 
-            formData.append(campo.id, valor);
+            // Usa 'submitProp' para garantir que o nome enviado é 'don_nome', 'don_rua', etc.
+            formData.append(campo.submitProp, valor);
         }
 
         if (!formIsValid) {
-            exibirMensagem('erro', 'Preencha corretamente todos os campos obrigatórios.');
+            exibirMensagem('erro', 'Preencha corretamente os campos.');
             return;
         }
 
         try {
+            // O Java @PutMapping usa Params na URL/Body form-urlencoded
             const response = await fetch('http://localhost:8080/apis/donatario', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -211,10 +278,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json().catch(() => ({}));
 
             if (response.ok) {
-                exibirMensagem('sucesso', 'Donatário alterado com sucesso! Redirecionando...');
-                setTimeout(() => window.location.href = 'gerenciarDonatarios.html', 1200);
+                exibirMensagem('sucesso', 'Donatário alterado com sucesso!');
+                setTimeout(() => window.location.href = 'gerenciarDonatarios.html', 1500);
             } else {
-                exibirMensagem('erro', result.mensagem || `Erro HTTP ${response.status}`);
+                // Tenta mostrar mensagem de erro do backend
+                exibirMensagem('erro', result.mensagem || result.erro || `Erro ${response.status}: Verifique os dados.`);
             }
         } catch (error) {
             exibirMensagem('erro', 'Erro de conexão com o servidor.');

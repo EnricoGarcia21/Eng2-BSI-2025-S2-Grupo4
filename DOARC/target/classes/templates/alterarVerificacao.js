@@ -13,13 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mapeamento dos campos: Chave (Controller/Backend) -> ID do elemento no Front
     const CAMPOS_MAP = {
-        // Campos do Controller: data, observacao, resultado, vol_id, doa_id
+        // Campos do Controller: data, observacao, resultado, vol_id, dona_id
         data: { id: 'ver_data', required: true, validate: validarDataHojeOuPassada, name: 'data' },
         observacao: { id: 'ver_obs', required: false, validate: validarObservacao, name: 'observacao' },
         resultado: { id: 'ver_resultado', required: true, validate: validarSelecao, name: 'resultado' },
         vol_id: { id: 'vol_id', required: true, validate: validarIdNumerico, name: 'vol_id' },
-        // ALTERADO: ID do elemento agora é 'doa_select', mas o nome para o backend continua 'doa_id'
-        doa_id: { id: 'doa_select', required: true, validate: validarIdNumerico, name: 'doa_id' }
+        // CORREÇÃO: Chave do backend agora é 'dona_id'
+        dona_id: { id: 'doa_select', required: true, validate: validarIdNumerico, name: 'dona_id' } 
     };
 
     // ---------------- VALIDADORES (Mantidos) ----------------
@@ -85,9 +85,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ---------------- NOVO: CARREGAR LISTA DE DONATÁRIOS ----------------
+    // ---------------- CARREGAR LISTA DE DONATÁRIOS ----------------
     async function carregarDonatarios() {
-        const doaSelect = document.getElementById(CAMPOS_MAP.doa_id.id);
+        const doaSelect = document.getElementById(CAMPOS_MAP.dona_id.id); // CORREÇÃO: Usa 'dona_id'
         doaSelect.innerHTML = '<option value="">Carregando Donatários...</option>';
         doaSelect.disabled = true;
 
@@ -97,12 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const listaDonatarios = await response.json();
             
-            doaSelect.innerHTML = '<option value="">Selecione o Donatário...</option>';
+            doaSelect.innerHTML = '<option value="" disabled selected>Selecione</option>'; // Opção padrão para Alterar
             
             if (Array.isArray(listaDonatarios) && listaDonatarios.length > 0) {
                 listaDonatarios.forEach(donatario => {
                     const option = document.createElement('option');
-                    // O valor enviado é o ID (doa_id)
+                    // O valor enviado é o ID (dona_id)
                     option.value = donatario.id; 
                     // O texto visível é o Nome + ID
                     option.textContent = `${donatario.nome} (ID: ${donatario.id})`;
@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Erro ao carregar Donatários:', error);
             doaSelect.innerHTML = '<option value="">Erro ao carregar lista.</option>';
             doaSelect.disabled = true;
-            // Não exibe mensagem de erro na tela para não sobrepor a mensagem principal
         }
     }
 
@@ -131,18 +130,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`${API_BASE_URL}/${id}`);
             const data = await response.json();
 
-            console.log('📦 Dados recebidos da API:', data);
-
             if (!response.ok) throw new Error(data.mensagem || 'Erro ao carregar os dados da Verificação.');
 
             // Preenche cada campo com o valor retornado
-            for (const key in CAMPOS_MAP) {
-                const campo = CAMPOS_MAP[key];
+            // Usamos Object.entries para iterar sobre o CAMPOS_MAP e garantir que 'dona_id' seja usado corretamente.
+            for (const [backendKey, campo] of Object.entries(CAMPOS_MAP)) {
                 const el = document.getElementById(campo.id);
                 if (!el) continue;
 
-                // Mapeamento dos campos do JSON (data, observacao, vol_id, doa_id) para os inputs
-                const valor = data[key] || ''; 
+                // A chave no objeto de dados retornado é a chave do backend (ex: 'dona_id')
+                const valor = data[backendKey] || ''; 
                 
                 if (valor !== '') {
                     el.value = valor;
@@ -199,9 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     inicializarCampos();
-    carregarDadosVerificacao(verId); // Agora espera carregar os donatários internamente
+    carregarDadosVerificacao(verId);
 
-    // ---------------- SUBMIT DO FORM (Pequena alteração na validação) ----------------
+    // ---------------- SUBMIT DO FORM ----------------
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         let formIsValid = true;
@@ -216,13 +213,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let valor = campo.element.value.trim();
             
-            // Validação final e atualização de feedback
-            // Para select, o valor é o ID.
+            // Validação final
             const isValid = campo.validate(valor);
             if (!isValid && campo.required) formIsValid = false;
             atualizarFeedback(campo.element, isValid);
 
-            // Adiciona ao payload. Usa campo.name (data, observacao, etc.)
+            // Adiciona ao payload. Usa campo.name (data, observacao, dona_id, etc.)
             formData.append(campo.name, valor);
         }
 
@@ -245,6 +241,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Redireciona para a tela de consulta
                 setTimeout(() => window.location.href = 'consultaVerificacao.html', 1200); 
             } else {
+                // O backend (View) espera o ID na URL para o PUT, mas estamos enviando no corpo.
+                // Se o backend espera o ID na URL, a View deve ser ajustada.
                 exibirMensagem('erro', result.mensagem || `Erro HTTP ${response.status}`);
             }
         } catch (error) {

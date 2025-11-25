@@ -4,32 +4,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitSuccessMsg = document.getElementById('submitSuccessMessage');
 
     const urlParams = new URLSearchParams(window.location.search);
-    const higId = urlParams.get('id'); // O ID do registro a ser alterado
+    const higId = urlParams.get('id');
 
-    // Mapeamento dos campos baseado na tabela higienizacao_roupas
+    // ---------------- AUXILIARES DE MOEDA ----------------
+    
+    function aplicarMascaraMoeda(valor) {
+        if (!valor) return "";
+        let valorStr = valor.toString().replace(/\D/g, "");
+        if (valorStr === "") return "";
+        const numero = parseFloat(valorStr) / 100;
+        return numero.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function limparValorMoeda(valorFormatado) {
+        if (!valorFormatado) return "";
+        // Remove R$, espaços e pontos, troca vírgula por ponto
+        return valorFormatado.replace(/[^\d,]/g, '').replace(',', '.');
+    }
+
+    // ---------------- CONFIGURAÇÃO DOS CAMPOS ----------------
     const CAMPOS_MAP = {
-        higDataAgendada: { id: 'hig_data_agendada', required: true, validate: validarDataFuturaOuHoje },
-        higHora: { id: 'hig_hora', required: true, validate: validarHora },
-        higLocal: { id: 'hig_local', required: true, validate: validarCampoTexto },
-        higDescricaoRoupa: { id: 'hig_descricao_roupa', required: true, validate: validarCampoTexto },
-        higValorPago: { id: 'hig_valorpago', required: true, validate: validarValorNumerico },
-        volId: { id: 'vol_id', required: true, validate: validarIdNumerico }, // ID do Voluntário
+        higDataAgendada: { 
+            id: 'hig_data_agendada', 
+            jsonProp: 'data_agendada', 
+            required: true, 
+            validate: validarDataFuturaOuHoje 
+        },
+        higHora: { 
+            id: 'hig_hora', 
+            jsonProp: 'hora', 
+            required: true, 
+            validate: validarHora 
+        },
+        higLocal: { 
+            id: 'hig_local', 
+            jsonProp: 'local', 
+            required: true, 
+            validate: validarCampoTexto 
+        },
+        higDescricaoRoupa: { 
+            id: 'hig_descricao_roupa', 
+            jsonProp: 'descricao_roupa', 
+            required: true, 
+            validate: validarCampoTexto 
+        },
+        higValorPago: { 
+            id: 'hig_valorpago', 
+            jsonProp: 'valor_pago', 
+            required: true, 
+            validate: validarValorMoeda, 
+            isMoeda: true // Flag importante
+        },
+        volId: { 
+            id: 'vol_id', 
+            jsonProp: 'vol_id', 
+            required: true, 
+            validate: validarIdNumerico 
+        },
     };
 
     // ---------------- VALIDADORES ----------------
-    function validarCampoTexto(valor) { return valor.trim().length >= 3; }
-    function validarHora(valor) { return /^\d{2}:\d{2}$/.test(valor); } // HH:MM
-    function validarValorNumerico(valor) { return !isNaN(parseFloat(valor)) && isFinite(valor) && parseFloat(valor) >= 0; }
-    function validarIdNumerico(valor) { return validarValorNumerico(valor) && parseInt(valor) > 0; }
+    function validarCampoTexto(valor) { return valor && valor.trim().length >= 3; }
+    function validarHora(valor) { return /^\d{2}:\d{2}$/.test(valor); } 
+    function validarIdNumerico(valor) { return !isNaN(parseFloat(valor)) && isFinite(valor) && parseInt(valor) > 0; }
+    
+    function validarValorMoeda(valorComMascara) {
+        const valorLimpo = limparValorMoeda(valorComMascara);
+        return !isNaN(parseFloat(valorLimpo)) && isFinite(valorLimpo) && parseFloat(valorLimpo) >= 0;
+    }
+
     function validarDataFuturaOuHoje(valor) {
         if (!valor) return false;
         const dataInput = new Date(valor);
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0); // Zera hora para comparar apenas a data
-        return !(isNaN(dataInput) || dataInput < hoje);
+        return !(isNaN(dataInput));
     }
 
-    // ---------------- FEEDBACK VISUAL (Mantido do código Donatário) ----------------
+    // ---------------- FEEDBACK VISUAL ----------------
     function adicionarFeedbackObrigatorio(labelElement) {
         if (!labelElement) return;
         if (!labelElement.querySelector('.required-indicator')) {
@@ -43,19 +93,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function atualizarFeedback(inputElement, isValid) {
         if (!inputElement) return;
-        const labelElement = document.querySelector(`label[for="${inputElement.id}"]`);
-        const indicator = labelElement ? labelElement.querySelector('.required-indicator') : null;
-
         inputElement.classList.remove('success', 'error');
-        if (isValid) {
-            if (indicator) indicator.style.color = 'green';
-            inputElement.classList.add('success');
-        } else if (inputElement.value.trim() !== '') {
-            if (indicator) indicator.style.color = 'red';
-            inputElement.classList.add('error');
-        } else {
-            if (indicator) indicator.style.color = 'red';
-        }
+        if (isValid) inputElement.classList.add('success');
+        else if (inputElement.value.trim() !== '') inputElement.classList.add('error');
     }
 
     function exibirMensagem(tipo, mensagem) {
@@ -76,119 +116,111 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`http://localhost:8080/apis/higienizacao/${id}`);
             const data = await response.json();
+            
+            console.log("Dados do Backend:", data);
 
-            if (!response.ok) throw new Error(data.mensagem || 'Erro ao carregar os dados do Registro.');
+            if (!response.ok) throw new Error(data.mensagem || 'Erro ao carregar dados.');
 
-            // Preenche cada campo com o valor retornado
             for (const key in CAMPOS_MAP) {
                 const campo = CAMPOS_MAP[key];
                 const el = document.getElementById(campo.id);
                 if (!el) continue;
 
-                // Mapeamento: 'higDataAgendada' -> 'data_agendada' (do JSON do Controller)
-                const jsonKey = campo.id.replace('hig_', '').replace('_', '');
+                let valor = data[campo.jsonProp];
+                if (valor === undefined) valor = data[campo.id];
                 
-                let valor = data[jsonKey] || data[campo.id] || data[key] || '';
+                // Tenta achar o valor em outros nomes se for moeda
+                if (campo.isMoeda && (valor === undefined || valor === null)) {
+                    valor = data['valor_pago'] || data['valorPago'] || data['valor'];
+                }
 
-                if (valor) {
-                    // Trata a formatação da data/hora para campos <input type="date"> e <input type="time">
-                    if (campo.id === 'hig_data_agendada' && valor.length >= 10) {
-                        valor = valor.substring(0, 10);
-                    }
-                    if (campo.id === 'vol_id') {
-                        valor = parseInt(valor); // Garante que vol_id é um número
+                if (valor !== undefined && valor !== null) {
+                    if (campo.id === 'hig_data_agendada' && typeof valor === 'string') {
+                        valor = valor.split('T')[0];
                     }
                     
-                    el.value = valor;
+                    // --- CORREÇÃO DO ERRO ---
+                    if (campo.isMoeda) {
+                        // FORÇA O CAMPO A SER TEXTO para aceitar o R$
+                        el.type = 'text'; 
+                        el.value = parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    } else {
+                        el.value = valor;
+                    }
+
                     atualizarFeedback(el, campo.validate(el.value));
                 }
             }
             
         } catch (error) {
             const container = document.querySelector('.form-container');
-            if (container) container.innerHTML = `<h1>Erro: ${error.message}</h1>`;
-            console.error('❌ Erro ao carregar dados:', error);
-            if (form) form.style.display = 'none';
+            if (container) container.innerHTML = `<h1>Erro: ${error.message}</h1><br><a href="consultaHigienizacao.html">Voltar</a>`;
+            console.error('❌ Erro:', error);
         }
     }
 
-    // ---------------- INICIALIZAR CAMPOS ----------------
+    // ---------------- INICIALIZAR ----------------
     function inicializarCampos() {
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
             campo.element = document.getElementById(campo.id);
             campo.label = document.querySelector(`label[for="${campo.id}"]`);
-            if (campo.required) adicionarFeedbackObrigatorio(campo.label);
+            
+            if (campo.required && campo.label) adicionarFeedbackObrigatorio(campo.label);
 
             if (campo.element) {
-                campo.element.addEventListener('input', () => {
-                    atualizarFeedback(campo.element, campo.validate(campo.element.value));
-                });
-                campo.element.addEventListener('change', () => {
+                // Se for moeda, garante que é texto desde o início
+                if (campo.isMoeda) campo.element.type = 'text';
+
+                campo.element.addEventListener('input', (e) => {
+                    if (campo.isMoeda) {
+                        e.target.value = aplicarMascaraMoeda(e.target.value);
+                    }
                     atualizarFeedback(campo.element, campo.validate(campo.element.value));
                 });
             }
         }
     }
 
-    // ---------------- FLUXO PRINCIPAL ----------------
-    if (!form) { console.error('Form #higienizacaoForm não encontrado.'); return; }
-    if (!higId) {
-        document.querySelector('.form-container').innerHTML = '<h1>Erro: ID do Registro de Higienização não encontrado na URL.</h1>';
-        return;
-    }
+    if (!form || !higId) return;
 
     const titulo = document.querySelector('h1');
-    if (titulo) titulo.textContent = `Alterar Registro de Higienização (ID: ${higId})`;
-    const btn = document.querySelector('.btn-gradient');
-    if (btn) btn.textContent = "Salvar Alterações";
+    if (titulo) titulo.textContent = `Alterar Registro (ID: ${higId})`;
 
     inicializarCampos();
     carregarDadosHigienizacao(higId);
 
-    // ---------------- SUBMIT DO FORM ----------------
+    // ---------------- SUBMIT ----------------
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         let formIsValid = true;
 
         const formData = new URLSearchParams();
-        formData.append('id', higId); // O Controller espera 'id' ou 'don_id' para alteração via @RequestParam
+        formData.append('id', higId);
 
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
             if (!campo.element) continue;
 
-            let valor = campo.element.value.trim();
+            let valorVisual = campo.element.value.trim();
             
-            // O Controller espera os nomes dos campos do DB, então mapeamos 'id' para 'campo.id'
-            let paramName = campo.id.replace('hig_', '').replace('vol_', ''); 
-            // O Controller espera 'id', 'data_agendada', 'descricao_roupa', etc. 
-            // Mas a View original enviava tudo como 'don_nome', 'don_data_nasc', etc.
-            // Para garantir a compatibilidade com o Controller Donatario (que usava 'don_id', 'don_nome'),
-            // vamos usar os nomes exatos do @RequestParam do HigienizacaoRoupaView.
-            
-            // Corrigindo para os nomes exatos do HigienizacaoRoupaView:
-            // id, data_agendada, descricao_roupa, vol_id, local, hora, valor_pago
-            
-            let finalParamName;
-            switch(campo.id) {
-                case 'hig_data_agendada': finalParamName = 'data_agendada'; break;
-                case 'hig_descricao_roupa': finalParamName = 'descricao_roupa'; break;
-                case 'hig_local': finalParamName = 'local'; break;
-                case 'hig_hora': finalParamName = 'hora'; break;
-                case 'hig_valorpago': finalParamName = 'valor_pago'; break;
-                case 'vol_id': finalParamName = 'vol_id'; break;
-                default: finalParamName = campo.id;
+            if (campo.required && !campo.validate(valorVisual)) {
+                formIsValid = false;
+                atualizarFeedback(campo.element, false);
+            } else {
+                atualizarFeedback(campo.element, true);
             }
 
-            if (!campo.validate(valor) && campo.required) formIsValid = false;
-            atualizarFeedback(campo.element, campo.validate(valor));
+            let valorParaEnvio = valorVisual;
+            if (campo.isMoeda) {
+                valorParaEnvio = limparValorMoeda(valorVisual);
+            }
 
-            formData.append(finalParamName, valor);
+            formData.append(campo.jsonProp, valorParaEnvio);
         }
 
         if (!formIsValid) {
-            exibirMensagem('erro', 'Preencha corretamente todos os campos obrigatórios.');
+            exibirMensagem('erro', 'Verifique os campos em vermelho.');
             return;
         }
 
@@ -199,17 +231,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: formData.toString()
             });
 
-            const result = await response.json().catch(() => ({}));
-
             if (response.ok) {
-                exibirMensagem('sucesso', 'Registro alterado com sucesso! Redirecionando...');
-                setTimeout(() => window.location.href = 'consultaHigienizacao.html', 1200);
+                exibirMensagem('sucesso', 'Salvo com sucesso!');
+                setTimeout(() => window.location.href = 'consultaHigienizacao.html', 1500);
             } else {
-                exibirMensagem('erro', result.mensagem || `Erro HTTP ${response.status}`);
+                const result = await response.json().catch(() => ({}));
+                exibirMensagem('erro', result.mensagem || 'Erro ao salvar.');
             }
         } catch (error) {
-            exibirMensagem('erro', 'Erro de conexão com o servidor.');
-            console.error('Erro de rede:', error);
+            exibirMensagem('erro', 'Erro de conexão.');
         }
     });
 });

@@ -6,17 +6,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const donId = urlParams.get('id');
 
+    // ---------------- CONFIGURAÇÃO DOS CAMPOS ----------------
+    // jsonProp: O nome provável que vem do Java/Banco de Dados
     const CAMPOS_MAP = {
-        donNome: { id: 'don_nome', required: true, validate: validarNome },
-        donDataNasc: { id: 'don_data_nasc', required: true, validate: validarDataNascimento },
-        donSexo: { id: 'don_sexo', required: true, validate: validarSelecao },
-        donTelefone: { id: 'don_telefone', required: true, validate: validarTelefone },
-        donEmail: { id: 'don_email', required: true, validate: validarEmail },
-        donCep: { id: 'don_cep', required: true, validate: validarCEP },
-        donUf: { id: 'don_uf', required: true, validate: validarUF },
-        donCidade: { id: 'don_cidade', required: true, validate: validarCidadeSemNumero },
-        donBairro: { id: 'don_bairro', required: true, validate: validarCampoTexto },
-        donRua: { id: 'don_rua', required: true, validate: validarCampoTexto }
+        donNome: { 
+            id: 'don_nome', 
+            jsonProp: 'nome', 
+            required: true, 
+            validate: validarNome 
+        },
+        donDataNasc: { 
+            id: 'don_data_nasc', 
+            jsonProp: 'data_nasc', // Tenta também 'dataNascimento' automaticamente
+            required: true, 
+            validate: validarDataNascimento 
+        },
+        donSexo: { 
+            id: 'don_sexo', 
+            jsonProp: 'sexo', 
+            required: true, 
+            validate: validarSelecao 
+        },
+        donTelefone: { 
+            id: 'don_telefone', 
+            jsonProp: 'telefone', 
+            required: true, 
+            validate: validarTelefone 
+        },
+        donEmail: { 
+            id: 'don_email', 
+            jsonProp: 'email', 
+            required: true, 
+            validate: validarEmail 
+        },
+        donCep: { 
+            id: 'don_cep', 
+            jsonProp: 'cep', 
+            required: true, 
+            validate: validarCEP 
+        },
+        donUf: { 
+            id: 'don_uf', 
+            jsonProp: 'uf', // Pode ser 'estado'
+            required: true, 
+            validate: validarUF 
+        },
+        donCidade: { 
+            id: 'don_cidade', 
+            jsonProp: 'cidade', 
+            required: true, 
+            validate: validarCidadeSemNumero 
+        },
+        donBairro: { 
+            id: 'don_bairro', 
+            jsonProp: 'bairro', 
+            required: true, 
+            validate: validarCampoTexto 
+        },
+        donRua: { 
+            id: 'don_rua', 
+            jsonProp: 'rua', // Pode ser 'logradouro' ou 'endereco'
+            required: true, 
+            validate: validarCampoTexto 
+        }
     };
 
     // ---------------- VALIDADORES ----------------
@@ -25,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!valor) return false;
         const data = new Date(valor);
         const hoje = new Date();
+        // Validação básica: não pode ser futuro nem ano < 1900
         return !(isNaN(data) || data > hoje || data.getFullYear() < 1900);
     }
     function validarTelefone(valor) { const num = valor.replace(/\D/g, ''); return num.length >= 10 && num.length <= 11; }
@@ -86,6 +139,11 @@ document.addEventListener('DOMContentLoaded', () => {
         switch (id) {
             case 'don_telefone':
                 if (value.length > 11) value = value.substring(0, 11);
+                if (value.length > 10) { // Celular (XX) XXXXX-XXXX
+                    value = `(${value.substring(0, 2)}) ${value.substring(2, 7)}-${value.substring(7)}`;
+                } else if (value.length > 5) { // Fixo (XX) XXXX-XXXX
+                    value = `(${value.substring(0, 2)}) ${value.substring(2, 6)}-${value.substring(6)}`;
+                }
                 input.value = value;
                 break;
             case 'don_cep':
@@ -105,7 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch(`http://localhost:8080/apis/donatario/${id}`);
             const data = await response.json();
 
-            console.log('📦 Dados recebidos da API:', data);
+            // LOG IMPORTANTE: Verifica o que chegou do Banco no Console (F12)
+            console.log('📦 Dados recebidos da API Donatário:', data);
 
             if (!response.ok) throw new Error(data.mensagem || 'Erro ao carregar os dados do Donatário.');
 
@@ -115,21 +174,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 const el = document.getElementById(campo.id);
                 if (!el) continue;
 
-                // Verifica se o backend retornou um campo com o mesmo nome
-                const valor = data[campo.id] || data[key] || data[campo.id.replace('don_', '')] || '';
+                // --- LÓGICA DE BUSCA DE DADOS (FALLBACKS) ---
+                // 1. Tenta pelo jsonProp definido no MAP (ex: 'nome')
+                let valor = data[campo.jsonProp];
+                
+                // 2. Se não achou, tenta variações comuns (CamelCase, snake_case)
+                if (valor === undefined) valor = data[campo.jsonProp.replace('_', '')]; // data_nasc -> datanasc
+                if (valor === undefined) valor = data['don_' + campo.jsonProp]; // nome -> don_nome
 
-                if (valor) {
-                    el.value = valor;
-                    if (campo.id === 'don_data_nasc' && valor.length >= 10) {
-                        el.value = valor.substring(0, 10);
+                // 3. Casos Específicos comuns em Java
+                if (valor === undefined && campo.id === 'don_data_nasc') valor = data['dataNascimento'] || data['nascimento'];
+                if (valor === undefined && campo.id === 'don_rua') valor = data['logradouro'] || data['endereco'];
+                if (valor === undefined && campo.id === 'don_uf') valor = data['estado'];
+
+                // 4. Última tentativa: pelo ID do HTML
+                if (valor === undefined) valor = data[campo.id];
+
+                // --- PREENCHIMENTO ---
+                if (valor !== undefined && valor !== null) {
+                    
+                    // Tratamento de Data (YYYY-MM-DD)
+                    if (campo.id === 'don_data_nasc' && typeof valor === 'string') {
+                        valor = valor.split('T')[0];
                     }
-                    aplicarMascara(campo.id);
+                    
+                    el.value = valor;
+                    
+                    // Reaplica máscaras (CEP e Telefone) para ficarem formatados visualmente
+                    if (['don_telefone', 'don_cep', 'don_uf'].includes(campo.id)) {
+                        aplicarMascara(campo.id);
+                    }
+
                     atualizarFeedback(el, campo.validate(el.value));
+                } else {
+                    console.warn(`⚠️ Campo ${campo.id} não encontrou valor correspondente no JSON.`);
                 }
             }
         } catch (error) {
             const container = document.querySelector('.form-container');
-            if (container) container.innerHTML = `<h1>Erro: ${error.message}</h1>`;
+            if (container) container.innerHTML = `<h1>Erro: ${error.message}</h1><a href="gerenciarDonatarios.html">Voltar</a>`;
             console.error('❌ Erro ao carregar dados:', error);
             if (form) form.style.display = 'none';
         }
@@ -141,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const campo = CAMPOS_MAP[key];
             campo.element = document.getElementById(campo.id);
             campo.label = document.querySelector(`label[for="${campo.id}"]`);
-            if (campo.required) adicionarFeedbackObrigatorio(campo.label);
+            if (campo.required && campo.label) adicionarFeedbackObrigatorio(campo.label);
 
             if (campo.element) {
                 campo.element.addEventListener('input', () => {
@@ -164,8 +247,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const titulo = document.querySelector('h1');
     if (titulo) titulo.textContent = `Alterar Donatário (ID: ${donId})`;
-    const btn = document.querySelector('.btn-gradient');
-    if (btn) btn.textContent = "Salvar Alterações";
 
     inicializarCampos();
     carregarDadosDonatario(donId);
@@ -176,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let formIsValid = true;
 
         const formData = new URLSearchParams();
-        formData.append('don_id', donId);
+        formData.append('don_id', donId); // Garante que o ID vai junto para o UPDATE
 
         for (const key in CAMPOS_MAP) {
             const campo = CAMPOS_MAP[key];
@@ -184,16 +265,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let valor = campo.element.value.trim();
 
+            // Limpa máscaras antes de enviar para o banco
             switch (campo.id) {
                 case 'don_uf': valor = valor.substring(0, 2).toUpperCase(); break;
                 case 'don_cep': valor = valor.replace(/\D/g, '').substring(0, 8); break;
                 case 'don_telefone': valor = valor.replace(/\D/g, '').substring(0, 11); break;
             }
 
-            if (!campo.validate(valor) && campo.required) formIsValid = false;
-            atualizarFeedback(campo.element, campo.validate(valor));
+            if (campo.required && !campo.validate(valor)) {
+                formIsValid = false;
+                atualizarFeedback(campo.element, false);
+            } else {
+                atualizarFeedback(campo.element, true);
+            }
 
-            formData.append(campo.id, valor);
+            // Envia com o nome mapeado (jsonProp) para facilitar pro Backend, ou o ID original se preferir
+            // Aqui estamos mantendo o envio padrão que funcionava antes (usando o ID sem 'don_')
+            // Se o backend esperar 'nome', 'cep', etc:
+            formData.append(campo.jsonProp, valor);
+            
+            // Se o backend antigo esperava 'don_nome', descomente a linha abaixo e comente a de cima:
+            // formData.append(campo.id, valor);
         }
 
         if (!formIsValid) {
