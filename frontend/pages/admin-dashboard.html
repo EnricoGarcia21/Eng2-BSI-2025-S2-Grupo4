@@ -9,9 +9,10 @@
         .admin-header {
             background: linear-gradient(135deg, #e74c3c, #c0392b);
             color: white;
-            padding: 1rem;
+            padding: 1.5rem;
             border-radius: 8px;
             margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .user-management {
             background: white;
@@ -27,37 +28,34 @@
         }
         .user-table th,
         .user-table td {
-            padding: 0.75rem;
+            padding: 1rem;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #eee;
         }
         .user-table th {
             background-color: #f8f9fa;
             font-weight: 600;
+            color: #2c3e50;
         }
         .status-badge {
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
-            font-size: 0.875rem;
-            font-weight: 500;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
-        .status-active {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-            margin: 0 0.25rem;
+        .badge-admin { background-color: #e74c3c; color: white; }
+        .badge-user { background-color: #3498db; color: white; }
+        .badge-active { background-color: #d4edda; color: #155724; }
+        .badge-inactive { background-color: #f8d7da; color: #721c24; }
+        
+        .actions-cell {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header class="header">
         <div class="header-content">
             <a href="admin-dashboard.html" class="logo">DOARC - ADMIN</a>
@@ -68,253 +66,206 @@
         </div>
     </header>
 
-    <!-- Navigation -->
     <nav class="nav">
         <ul class="nav-list">
-            <li class="nav-item">
-                <a href="admin-dashboard.html" class="nav-link active">Dashboard Admin</a>
-            </li>
-            <li class="nav-item">
-                <a href="dashboard.html" class="nav-link">Dashboard Voluntário</a>
-            </li>
-            <li class="nav-item">
-                <a href="gerenciar-voluntarios.html" class="nav-link">Gerenciar Voluntários</a>
-            </li>
+            <li class="nav-item"><a href="admin-dashboard.html" class="nav-link active">Dashboard Admin</a></li>
+            <li class="nav-item"><a href="dashboard.html" class="nav-link">Dashboard Voluntário</a></li>
+            <li class="nav-item"><a href="gerenciar-voluntarios.html" class="nav-link">Gerenciar Voluntários</a></li>
+            <li class="nav-item"><a href="relatorios.html" class="nav-link">Relatórios</a></li>
         </ul>
     </nav>
 
-    <!-- Main Content -->
     <main class="container">
         <div class="admin-header">
-            <h1>🛡️ Painel Administrativo</h1>
-            <p>Controle total do sistema DOARC</p>
+            <h1>🛡️ Painel de Controle</h1>
+            <p>Gerencie usuários, permissões e configurações do sistema.</p>
         </div>
 
-        <!-- Statistics Cards -->
         <div class="dashboard-grid">
             <div class="stat-card" style="background: linear-gradient(135deg, #3498db, #2980b9);">
                 <div class="stat-icon">👥</div>
                 <div class="stat-value" id="totalUsuarios">0</div>
                 <div class="stat-label">Total de Usuários</div>
             </div>
-
+            <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #d68910);">
+                <div class="stat-icon">👑</div>
+                <div class="stat-value" id="totalAdmins">0</div>
+                <div class="stat-label">Administradores</div>
+            </div>
             <div class="stat-card" style="background: linear-gradient(135deg, #2ecc71, #27ae60);">
                 <div class="stat-icon">✅</div>
                 <div class="stat-value" id="usuariosAtivos">0</div>
-                <div class="stat-label">Usuários Ativos</div>
-            </div>
-
-            <div class="stat-card" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
-                <div class="stat-icon">❌</div>
-                <div class="stat-value" id="usuariosInativos">0</div>
-                <div class="stat-label">Usuários Inativos</div>
-            </div>
-
-            <div class="stat-card" style="background: linear-gradient(135deg, #f39c12, #d68910);">
-                <div class="stat-icon">👑</div>
-                <div class="stat-value" id="admins">0</div>
-                <div class="stat-label">Administradores</div>
+                <div class="stat-label">Logins Ativos</div>
             </div>
         </div>
 
-        <!-- User Management -->
         <div class="user-management">
-            <h2>Gerenciamento de Usuários</h2>
-            <button class="btn btn-primary" onclick="loadUsuarios()">🔄 Atualizar Lista</button>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Gerenciamento de Usuários</h2>
+                <button class="btn btn-primary" onclick="loadUsuarios()">🔄 Atualizar Lista</button>
+            </div>
             
             <div id="loadingUsers" style="display: none; text-align: center; padding: 2rem;">
-                Carregando usuários...
+                <div class="spinner"></div> Carregando dados...
             </div>
 
-            <table class="user-table" id="userTable" style="display: none;">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Email</th>
-                        <th>Nível</th>
-                        <th>Status</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="userTableBody">
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="card">
-            <div class="card-header">
-                <h2 class="card-title">Ações Administrativas</h2>
-            </div>
-            <div class="card-body">
-                <div class="btn-group">
-                    <button class="btn btn-success" onclick="criarAdmin()">
-                        👑 Criar Admin
-                    </button>
-                    <button class="btn btn-info" onclick="loadDashboard()">
-                        📊 Atualizar Dashboard
-                    </button>
-                    <button class="btn btn-warning" onclick="exportarDados()">
-                        📥 Exportar Dados
-                    </button>
-                </div>
+            <div class="table-container">
+                <table class="user-table" id="userTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Login (E-mail)</th>
+                            <th>Nível</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        </tbody>
+                </table>
             </div>
         </div>
     </main>
 
-    <!-- Scripts -->
-    <script src="../js/auth.js"></script>
-    <script src="../js/api.js"></script>
+    <script src="../js/app.js"></script>
     <script>
-        // Verificar se é admin
+        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
-            if (!Auth.requireAdmin()) {
+            // 1. CORREÇÃO DO ERRO: Usar guardAdminRoute() em vez de requireAdmin()
+            if (!Auth.guardAdminRoute()) {
                 return;
             }
 
-            // Carregar dados iniciais
-            loadDashboard();
-            loadUsuarios();
-
-            // Configurar logout
-            document.getElementById('logoutBtn').addEventListener('click', function() {
-                if (confirm('Deseja realmente sair?')) {
-                    Auth.logout();
-                }
+            // Configurar logout e nome
+            document.getElementById('logoutBtn').addEventListener('click', (e) => {
+                e.preventDefault();
+                if (confirm('Deseja realmente sair?')) Auth.logout();
             });
 
-            // Atualizar nome do usuário
             const user = Auth.getUser();
-            if (user) {
-                const displayName = user.nome || user.email || 'Administrador';
-                document.getElementById('userName').textContent = displayName;
-            }
+            if (user) document.getElementById('userName').textContent = user.nome || "Admin";
+
+            // Carregar dados
+            loadUsuarios();
+            loadEstatisticas();
         });
 
-        // Carregar dashboard
-        async function loadDashboard() {
+        // Carregar Estatísticas
+        async function loadEstatisticas() {
             try {
-                const data = await API.admin.getDashboard();
-                
-                document.getElementById('totalUsuarios').textContent = data.totalUsuarios || 0;
-                document.getElementById('usuariosAtivos').textContent = data.usuariosAtivos || 0;
-                document.getElementById('usuariosInativos').textContent = data.usuariosInativos || 0;
-                document.getElementById('admins').textContent = data.admins || 0;
-                
-                console.log('Dashboard carregado:', data);
+                const stats = await API.get('/admin/estatisticas');
+                document.getElementById('totalUsuarios').textContent = stats.totalUsers + stats.totalAdmins || 0;
+                document.getElementById('totalAdmins').textContent = stats.totalAdmins || 0;
+                document.getElementById('usuariosAtivos').textContent = stats.loginsAtivos || 0;
             } catch (error) {
-                console.error('Erro ao carregar dashboard:', error);
-                alert('Erro ao carregar dados do dashboard');
+                console.error("Erro stats:", error);
             }
         }
 
-        // Carregar usuários
+        // 2. CORREÇÃO DA LISTAGEM: Usar /admin/logins para ver todos
         async function loadUsuarios() {
             const loadingDiv = document.getElementById('loadingUsers');
-            const tableDiv = document.getElementById('userTable');
             const tbody = document.getElementById('userTableBody');
 
             try {
                 loadingDiv.style.display = 'block';
-                tableDiv.style.display = 'none';
-
-                const data = await API.admin.getUsuarios();
-                
                 tbody.innerHTML = '';
+
+                // Busca da rota que retorna logins com níveis de acesso
+                const data = await API.get('/admin/logins');
                 
-                if (data.usuarios && data.usuarios.length > 0) {
-                    data.usuarios.forEach(user => {
+                if (data && data.length > 0) {
+                    data.forEach(user => {
+                        // Define badges
+                        const isAdmin = user.nivelAcesso === 'ADMIN';
+                        const isAtivo = user.status === 'A' || user.status === 'Ativo'; // Ajuste conforme retorno do backend
+                        
+                        const roleBadge = isAdmin 
+                            ? `<span class="status-badge badge-admin">ADMIN</span>` 
+                            : `<span class="status-badge badge-user">USER</span>`;
+                            
+                        const statusBadge = isAtivo
+                            ? `<span class="status-badge badge-active">Ativo</span>`
+                            : `<span class="status-badge badge-inactive">Inativo</span>`;
+
+                        // Botões de ação dinâmica
+                        let btnRole = '';
+                        if (isAdmin) {
+                            btnRole = `<button class="btn btn-sm btn-outline" onclick="alterarNivel(${user.voluntarioId}, 'USER')" title="Rebaixar para Usuário">⬇️ User</button>`;
+                        } else {
+                            btnRole = `<button class="btn btn-sm btn-warning" onclick="alterarNivel(${user.voluntarioId}, 'ADMIN')" title="Promover a Admin">👑 Admin</button>`;
+                        }
+
+                        const btnStatus = isAtivo
+                            ? `<button class="btn btn-sm btn-secondary" onclick="alterarStatus(${user.voluntarioId}, 'I')" title="Desativar">🔒</button>`
+                            : `<button class="btn btn-sm btn-success" onclick="alterarStatus(${user.voluntarioId}, 'A')" title="Ativar">🔓</button>`;
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${user.voluntarioId}</td>
-                            <td>${user.email}</td>
-                            <td>
-                                <span class="status-badge ${user.nivelAcesso === 'ADMIN' ? 'status-active' : ''}"">
-                                    ${user.nivelAcesso}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="status-badge ${user.status === 'A' ? 'status-active' : 'status-inactive'}">
-                                    ${user.status === 'A' ? 'Ativo' : 'Inativo'}
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn btn-sm btn-warning" onclick="toggleStatus(${user.voluntarioId}, '${user.status}')">
-                                    ${user.status === 'A' ? 'Desativar' : 'Ativar'}
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteUser(${user.voluntarioId})">
-                                    Excluir
-                                </button>
+                            <td>${user.login}</td>
+                            <td>${roleBadge}</td>
+                            <td>${statusBadge}</td>
+                            <td class="actions-cell">
+                                ${btnRole}
+                                ${btnStatus}
+                                <button class="btn btn-sm btn-danger" onclick="excluirUsuario(${user.voluntarioId})" title="Excluir">🗑️</button>
                             </td>
                         `;
                         tbody.appendChild(row);
                     });
-                    
-                    tableDiv.style.display = 'table';
                 } else {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Nenhum usuário encontrado</td></tr>';
-                    tableDiv.style.display = 'table';
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum usuário encontrado.</td></tr>';
                 }
                 
             } catch (error) {
-                console.error('Erro ao carregar usuários:', error);
-                alert('Erro ao carregar lista de usuários');
+                console.error('Erro:', error);
+                UI.showAlert('Erro ao carregar usuários: ' + error.message, 'danger');
             } finally {
                 loadingDiv.style.display = 'none';
             }
         }
 
-        // Alternar status do usuário
-        async function toggleStatus(userId, currentStatus) {
-            const newStatus = currentStatus === 'A' ? 'I' : 'A';
-            const action = newStatus === 'A' ? 'ativar' : 'desativar';
+        // 3. FUNÇÃO PARA PROMOVER/REBAIXAR ADMIN
+        async function alterarNivel(id, novoNivel) {
+            const acao = novoNivel === 'ADMIN' ? "promover este usuário a Administrador" : "rebaixar este usuário para Comum";
             
-            if (!confirm(`Deseja realmente ${action} este usuário?`)) {
-                return;
-            }
+            UI.confirm(`Tem certeza que deseja ${acao}?`, async () => {
+                try {
+                    // Chama a rota PUT correta
+                    await API.put(`/admin/logins/${id}/nivel`, { nivelAcesso: novoNivel });
+                    UI.showAlert(`Nível de acesso atualizado para ${novoNivel}!`, 'success');
+                    loadUsuarios();
+                    loadEstatisticas();
+                } catch (error) {
+                    UI.showAlert('Erro ao alterar nível: ' + error.message, 'danger');
+                }
+            });
+        }
 
+        // Alterar Status (Ativo/Inativo)
+        async function alterarStatus(id, novoStatus) {
             try {
-                await API.admin.alterarStatus(userId, newStatus);
-                alert(`Usuário ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`);
+                await API.put(`/admin/logins/${id}/status`, { status: novoStatus });
+                UI.showAlert('Status atualizado com sucesso!', 'success');
                 loadUsuarios();
-                loadDashboard();
             } catch (error) {
-                console.error('Erro ao alterar status:', error);
-                alert('Erro ao alterar status do usuário');
+                UI.showAlert('Erro ao alterar status: ' + error.message, 'danger');
             }
         }
 
-        // Excluir usuário
-        async function deleteUser(userId) {
-            if (!confirm('Deseja realmente excluir este usuário? Esta ação não pode ser desfeita.')) {
-                return;
-            }
-
-            try {
-                await API.admin.deletarUsuario(userId);
-                alert('Usuário excluído com sucesso!');
-                loadUsuarios();
-                loadDashboard();
-            } catch (error) {
-                console.error('Erro ao excluir usuário:', error);
-                alert('Erro ao excluir usuário: ' + error.message);
-            }
-        }
-
-        // Criar admin
-        function criarAdmin() {
-            const email = prompt('Digite o email do novo administrador:');
-            const senha = prompt('Digite a senha do novo administrador:');
-            
-            if (email && senha) {
-                // Implementar criação de admin via API
-                alert('Funcionalidade em desenvolvimento');
-            }
-        }
-
-        // Exportar dados
-        function exportarDados() {
-            alert('Funcionalidade de exportação em desenvolvimento');
+        // Excluir Usuário
+        async function excluirUsuario(id) {
+            UI.confirm('Deseja realmente excluir este usuário? Esta ação é irreversível.', async () => {
+                try {
+                    await API.delete(`/admin/voluntarios/${id}`);
+                    UI.showAlert('Usuário excluído com sucesso!', 'success');
+                    loadUsuarios();
+                    loadEstatisticas();
+                } catch (error) {
+                    UI.showAlert('Erro ao excluir: ' + error.message, 'danger');
+                }
+            });
         }
     </script>
 </body>

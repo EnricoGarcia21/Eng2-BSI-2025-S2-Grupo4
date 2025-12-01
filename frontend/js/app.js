@@ -65,7 +65,6 @@ const Auth = {
             document.body.style.display = 'none'; 
             
             // Mostra o Pop-up Vermelho e Redireciona
-            // Pequeno delay para garantir que o CSS carregou se for redirecionamento rápido
             setTimeout(() => {
                 alert("⛔ ACESSO NEGADO!\n\nVocê não tem permissão de administrador para acessar esta página.");
                 window.location.href = 'dashboard.html';
@@ -261,7 +260,7 @@ const Formatter = {
     }
 };
 
-// ===== Funções de UI (ATUALIZADA COM TOASTS) =====
+// ===== Funções de UI (TOASTS) =====
 const UI = {
     // Cria o container de notificações se não existir
     getContainer() {
@@ -311,7 +310,7 @@ const UI = {
         }, 4000);
     },
 
-    // Mostra loading (Mantido igual)
+    // Mostra loading
     showLoading() {
         if (document.getElementById('loadingOverlay')) return;
         const overlay = document.createElement('div');
@@ -321,7 +320,7 @@ const UI = {
         document.body.appendChild(overlay);
     },
 
-    // Esconde loading (Mantido igual)
+    // Esconde loading
     hideLoading() {
         const overlay = document.getElementById('loadingOverlay');
         if (overlay) {
@@ -329,19 +328,19 @@ const UI = {
         }
     },
 
-    // Abre modal (Mantido igual)
+    // Abre modal
     openModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) modal.classList.add('active');
     },
 
-    // Fecha modal (Mantido igual)
+    // Fecha modal
     closeModal(modalId) {
         const modal = document.getElementById(modalId);
         if (modal) modal.classList.remove('active');
     },
 
-    // Confirmação (Mantido igual)
+    // Confirmação
     confirm(message, callback) {
         if (window.confirm(message)) {
             callback();
@@ -349,7 +348,7 @@ const UI = {
     }
 };
 
-// ===== Funções de API =====
+// ===== Funções de API (CORRIGIDA PARA LER ERROS DO BACKEND) =====
 const API = {
     getAuthHeaders() {
         const headers = {
@@ -362,6 +361,20 @@ const API = {
         return headers;
     },
 
+    // Helper para tratar respostas
+    async handleResponse(response) {
+        if (response.ok) {
+            return response.json();
+        }
+        // Tenta ler o corpo do erro
+        const errorBody = await response.json().catch(() => ({}));
+        // Pega a mensagem de 'erro' (padrão do seu controller) ou 'message'
+        const errorMessage = errorBody.erro || errorBody.message || `Erro HTTP ${response.status}`;
+        
+        // Lança erro com a mensagem específica do backend
+        throw new Error(errorMessage);
+    },
+
     async get(endpoint) {
         try {
             UI.showLoading();
@@ -370,12 +383,11 @@ const API = {
                 headers: this.getAuthHeaders()
             });
             UI.hideLoading();
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
             UI.hideLoading();
             console.error('Erro na requisição GET:', error);
-            UI.showAlert('Erro ao buscar dados. Tente novamente.', 'danger');
+            UI.showAlert(error.message || 'Erro ao buscar dados.', 'danger');
             throw error;
         }
     },
@@ -389,12 +401,12 @@ const API = {
                 body: JSON.stringify(data)
             });
             UI.hideLoading();
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
             UI.hideLoading();
             console.error('Erro na requisição POST:', error);
-            UI.showAlert('Erro ao salvar dados. Tente novamente.', 'danger');
+            // Exibe a mensagem exata retornada pelo backend (ex: validação de data)
+            UI.showAlert(error.message || 'Erro ao salvar dados.', 'danger');
             throw error;
         }
     },
@@ -408,12 +420,11 @@ const API = {
                 body: JSON.stringify(data)
             });
             UI.hideLoading();
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return await response.json();
+            return await this.handleResponse(response);
         } catch (error) {
             UI.hideLoading();
             console.error('Erro na requisição PUT:', error);
-            UI.showAlert('Erro ao atualizar dados. Tente novamente.', 'danger');
+            UI.showAlert(error.message || 'Erro ao atualizar dados.', 'danger');
             throw error;
         }
     },
@@ -426,12 +437,11 @@ const API = {
                 headers: this.getAuthHeaders()
             });
             UI.hideLoading();
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            return true;
+            return await this.handleResponse(response);
         } catch (error) {
             UI.hideLoading();
             console.error('Erro na requisição DELETE:', error);
-            UI.showAlert('Erro ao excluir dados. Tente novamente.', 'danger');
+            UI.showAlert(error.message || 'Erro ao excluir dados.', 'danger');
             throw error;
         }
     }

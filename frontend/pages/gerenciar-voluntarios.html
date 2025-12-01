@@ -394,54 +394,80 @@
             aplicarFiltros();
         }
 
-        // 2. PREPARAR EDIÇÃO
-        async function editarVoluntario(id) {
-            try {
-                const response = await fetch(`${API_ADMIN}/voluntarios/${id}`, { headers: getHeaders() });
-                if (!response.ok) throw new Error('Erro ao buscar voluntário');
-                
-                const vol = await response.json();
-                voluntarioEmEdicao = vol;
-
-                Validator.clearAllErrors(document.getElementById('formVoluntario'));
-                document.getElementById('voluntarioId').value = id;
-                document.getElementById('modalTitle').textContent = 'Editar Voluntário';
-                
-                // Preencher Campos
-                document.getElementById('nome').value = vol.vol_nome || '';
-                document.getElementById('cpf').value = vol.vol_cpf || ''; 
-                document.getElementById('email').value = vol.vol_email || '';
-                document.getElementById('telefone').value = vol.vol_telefone || '';
-                document.getElementById('sexo').value = vol.vol_sexo || 'O'; // Novo campo
-                
-                if (vol.vol_datanasc) {
-                    document.getElementById('dataNascimento').value = vol.vol_datanasc.split('T')[0];
-                } else {
-                    document.getElementById('dataNascimento').value = '';
-                }
-
-                // Endereço completo
-                document.getElementById('cep').value = vol.vol_cep || '';
-                document.getElementById('endereco').value = vol.vol_rua || ''; // mapeia para von_rua
-                document.getElementById('numero').value = vol.vol_numero || '';
-                document.getElementById('bairro').value = vol.vol_bairro || '';
-                document.getElementById('cidade').value = vol.vol_cidade || '';
-                document.getElementById('uf').value = vol.vol_uf || '';
-
-                const isAtivo = (vol.status === 'A' || vol.status === 'Ativo');
-                const selectStatus = document.getElementById('statusVoluntario');
-                selectStatus.value = isAtivo ? 'ativo' : 'inativo';
-                
-                const temLogin = (vol.status !== undefined && vol.status !== "N/A");
-                selectStatus.disabled = !temLogin;
-
-                UI.openModal('modalVoluntario');
-            } catch (error) {
-                console.error(error);
-                UI.showAlert('Erro ao carregar edição.', 'danger');
+       // --- Função Auxiliar para data do Input ---
+    function formatarDataISO(data) {
+        if (!data) return '';
+        // Se vier como data completa ISO (2025-10-01T00:00:00...)
+        if (data.includes('T')) {
+            return data.split('T')[0];
+        }
+        // Se vier como dd/MM/yyyy
+        if (data.includes('/')) {
+            const partes = data.split('/');
+            if (partes.length === 3) {
+                return `${partes[2]}-${partes[1]}-${partes[0]}`;
             }
         }
+        // Se já for yyyy-MM-dd
+        return data;
+    }
 
+    // 2. PREPARAR EDIÇÃO (CORRIGIDA)
+    async function editarVoluntario(id) {
+        try {
+            const response = await fetch(`${API_ADMIN}/voluntarios/${id}`, { headers: getHeaders() });
+            if (!response.ok) throw new Error('Erro ao buscar voluntário');
+            
+            const vol = await response.json();
+            voluntarioEmEdicao = vol;
+
+            Validator.clearAllErrors(document.getElementById('formVoluntario'));
+            document.getElementById('voluntarioId').value = id;
+            document.getElementById('modalTitle').textContent = 'Editar Voluntário';
+            
+            // --- Preencher Dados Pessoais ---
+            document.getElementById('nome').value = vol.vol_nome || '';
+            document.getElementById('cpf').value = vol.vol_cpf || ''; 
+            document.getElementById('email').value = vol.vol_email || '';
+            document.getElementById('telefone').value = vol.vol_telefone || '';
+            
+            // Correção do Select de Sexo
+            const sexoSelect = document.getElementById('sexo');
+            // Tenta mapear valores comuns (M, Masculino, F, Feminino) para as options (M, F, O)
+            let sexoValor = vol.vol_sexo || 'O';
+            if(sexoValor.startsWith('M') || sexoValor.startsWith('m')) sexoValor = 'M';
+            else if(sexoValor.startsWith('F') || sexoValor.startsWith('f')) sexoValor = 'F';
+            else sexoValor = 'O';
+            sexoSelect.value = sexoValor;
+
+            // Correção da Data
+            document.getElementById('dataNascimento').value = formatarDataISO(vol.vol_datanasc);
+
+            // --- Preencher Endereço Completo ---
+            // O backend AdminController envia chaves como 'vol_rua', 'vol_cep', etc.
+            document.getElementById('cep').value = vol.vol_cep || '';
+            document.getElementById('endereco').value = vol.vol_rua || ''; // Atenção: Backend envia vol_rua, Front usa id="endereco"
+            document.getElementById('numero').value = vol.vol_numero || '';
+            document.getElementById('bairro').value = vol.vol_bairro || '';
+            document.getElementById('cidade').value = vol.vol_cidade || '';
+            document.getElementById('uf').value = vol.vol_uf || '';
+
+            // --- Status e Login ---
+            // Verifica se o status é 'A', 'Ativo' ou se existe
+            const isAtivo = (vol.status === 'A' || vol.status === 'Ativo');
+            const selectStatus = document.getElementById('statusVoluntario');
+            selectStatus.value = isAtivo ? 'ativo' : 'inativo';
+            
+            // Habilita o status apenas se tiver login associado
+            const temLogin = (vol.status !== undefined && vol.status !== "N/A" && vol.status !== null);
+            selectStatus.disabled = !temLogin;
+
+            UI.openModal('modalVoluntario');
+        } catch (error) {
+            console.error('Erro detalhado:', error);
+            UI.showAlert('Erro ao carregar edição: ' + error.message, 'danger');
+        }
+    }
         // 3. EXCLUIR VOLUNTÁRIO
         async function excluirVoluntario(id) {
             UI.confirm('⚠️ Tem certeza? Isso excluirá o voluntário e seu acesso permanentemente.', async () => {

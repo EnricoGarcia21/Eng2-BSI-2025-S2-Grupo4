@@ -1,8 +1,6 @@
 package DOARC.mvc.controller;
 
 import DOARC.mvc.model.CampResponsavel;
-import DOARC.mvc.util.Conexao;
-import DOARC.mvc.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,9 +12,7 @@ public class CampRespController {
     @Autowired
     private CampResponsavel campRespModel;
 
-    private Conexao getConexao() {
-        return SingletonDB.conectar();
-    }
+    // Removemos getConexao()
 
     private Map<String, Object> toJson(CampResponsavel cr) {
         Map<String, Object> json = new HashMap<>();
@@ -28,7 +24,6 @@ public class CampRespController {
         return json;
     }
 
-    // Validação dos dados
     private String validarCampResponsavel(CampResponsavel cr) {
         if (cr.getCam_id() <= 0) return "ID da campanha é obrigatório";
         if (cr.getVoluntario_vol_id() <= 0) return "ID do voluntário é obrigatório";
@@ -37,22 +32,19 @@ public class CampRespController {
         return null;
     }
 
-    // ADD
     public Map<String, Object> addCampResponsavel(CampResponsavel nova) {
         String erroValidacao = validarCampResponsavel(nova);
         if (erroValidacao != null) return Map.of("erro", erroValidacao);
 
         try {
-            Conexao conexao = getConexao();
-            // Verifica duplicidade
             List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(
-                    nova.getCam_id(), nova.getVoluntario_vol_id(), conexao);
+                    nova.getCam_id(), nova.getVoluntario_vol_id());
 
             if (!existentes.isEmpty()) {
                 return Map.of("erro", "Este voluntário já está vinculado a esta campanha");
             }
 
-            CampResponsavel gravada = campRespModel.gravar(nova, conexao);
+            CampResponsavel gravada = campRespModel.gravar(nova); // Sem conexão
             if (gravada == null) return Map.of("erro", "Erro ao vincular voluntário");
 
             return toJson(gravada);
@@ -62,12 +54,10 @@ public class CampRespController {
         }
     }
 
-    // UPDATE
     public Map<String, Object> updtCampResponsavel(CampResponsavel campResp) {
         try {
-            Conexao conexao = getConexao();
             List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(
-                    campResp.getCam_id(), campResp.getVoluntario_vol_id(), conexao);
+                    campResp.getCam_id(), campResp.getVoluntario_vol_id());
 
             if (existentes.isEmpty()) return Map.of("erro", "Vinculação não encontrada");
 
@@ -76,7 +66,7 @@ public class CampRespController {
             existente.setDATA_FIM(campResp.getDATA_FIM());
             existente.setObs_texto(campResp.getObs_texto());
 
-            CampResponsavel alterada = campRespModel.alterar(existente, conexao);
+            CampResponsavel alterada = campRespModel.alterar(existente);
             if (alterada == null) return Map.of("erro", "Erro ao atualizar");
 
             return toJson(alterada);
@@ -85,10 +75,9 @@ public class CampRespController {
         }
     }
 
-    // GET ALL
     public List<Map<String, Object>> getCampResponsavel() {
         try {
-            List<CampResponsavel> lista = campRespModel.consultar("", getConexao());
+            List<CampResponsavel> lista = campRespModel.consultar("");
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;
@@ -97,10 +86,9 @@ public class CampRespController {
         }
     }
 
-    // GET FILTRO
     public List<Map<String, Object>> getCampResponsavel(String filtro) {
         try {
-            List<CampResponsavel> lista = campRespModel.consultar(filtro, getConexao());
+            List<CampResponsavel> lista = campRespModel.consultar(filtro);
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;
@@ -109,10 +97,9 @@ public class CampRespController {
         }
     }
 
-    // GET SPECIFIC
     public Map<String, Object> getCampResponsavel(int camId, int voluntarioId) {
         try {
-            List<CampResponsavel> lista = campRespModel.consultarPorChaveComposta(camId, voluntarioId, getConexao());
+            List<CampResponsavel> lista = campRespModel.consultarPorChaveComposta(camId, voluntarioId);
             if (lista.isEmpty()) return Map.of("erro", "Vinculação não encontrada");
             return toJson(lista.get(0));
         } catch (Exception e) {
@@ -120,24 +107,21 @@ public class CampRespController {
         }
     }
 
-    // DELETE
     public Map<String, Object> deletarCampResponsavel(int camId, int voluntarioId) {
         try {
-            Conexao conexao = getConexao();
-            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(camId, voluntarioId, conexao);
+            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(camId, voluntarioId);
             if (existentes.isEmpty()) return Map.of("erro", "Vinculação não encontrada");
 
-            boolean sucesso = campRespModel.apagar(existentes.get(0), conexao);
+            boolean sucesso = campRespModel.apagar(existentes.get(0));
             return sucesso ? Map.of("mensagem", "Removido com sucesso") : Map.of("erro", "Erro ao remover");
         } catch (Exception e) {
             return Map.of("erro", "Erro: " + e.getMessage());
         }
     }
 
-    // GET BY VOLUNTARIO
     public List<Map<String, Object>> getCampanhasPorVoluntario(int voluntarioId) {
         try {
-            List<CampResponsavel> lista = campRespModel.getCampanhasPorVoluntario(voluntarioId, getConexao());
+            List<CampResponsavel> lista = campRespModel.getCampanhasPorVoluntario(voluntarioId);
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;
@@ -146,13 +130,9 @@ public class CampRespController {
         }
     }
 
-    // ✅ CORREÇÃO: GET BY CAMPANHA (Nome da coluna corrigido para 'camp_id')
     public List<Map<String, Object>> getVoluntariosPorCampanha(int campanhaId) {
         try {
-            // O filtro deve usar o nome da coluna no BANCO DE DADOS ('camp_id'), não a variável Java ('cam_id')
-            // O DAO concatena essa string direto no SQL: "WHERE " + filtro
-            List<CampResponsavel> lista = campRespModel.consultar("camp_id = " + campanhaId, getConexao());
-
+            List<CampResponsavel> lista = campRespModel.consultar("camp_id = " + campanhaId);
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;

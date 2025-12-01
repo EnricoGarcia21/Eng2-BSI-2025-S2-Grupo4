@@ -1,9 +1,9 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.VoluntarioDAO;
-import DOARC.mvc.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 @Component
 public class Voluntario {
@@ -27,33 +27,33 @@ public class Voluntario {
 
     public Voluntario() {}
 
-    // Métodos de negócio delegando para o DAO
-    public Voluntario buscarPorEmail(String email, Conexao conexao) {
-        return dao.buscarPorEmail(email, conexao);
+    // Métodos de negócio delegando para o DAO (sem passar Conexao)
+    public Voluntario buscarPorEmail(String email) {
+        return dao.buscarPorEmail(email);
     }
 
-    public Voluntario buscarPorCpf(String cpf, Conexao conexao) {
-        return dao.buscarPorCpf(cpf, conexao);
+    public Voluntario buscarPorCpf(String cpf) {
+        return dao.buscarPorCpf(cpf);
     }
 
-    public Voluntario gravar(Voluntario v, Conexao conexao) {
-        return dao.gravar(v, conexao);
+    public Voluntario gravar(Voluntario v) {
+        return dao.gravar(v);
     }
 
-    public Voluntario alterar(Voluntario v, Conexao conexao) {
-        return dao.alterar(v, conexao);
+    public Voluntario alterar(Voluntario v) {
+        return dao.alterar(v);
     }
 
-    public boolean apagar(Voluntario v, Conexao conexao) {
-        return dao.apagar(v, conexao);
+    public boolean apagar(Voluntario v) {
+        return dao.apagar(v);
     }
 
-    public Voluntario consultar(int id, Conexao conexao) {
-        return dao.get(id, conexao);
+    public Voluntario consultar(int id) {
+        return dao.get(id);
     }
 
-    public java.util.List<Voluntario> consultar(String filtro, Conexao conexao) {
-        return dao.get(filtro, conexao);
+    public List<Voluntario> consultar(String filtro) {
+        return dao.get(filtro);
     }
 
     // Getters e Setters
