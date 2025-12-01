@@ -14,7 +14,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
     public VoluntarioDAO() {}
 
     @Override
-    public Voluntario gravar(Voluntario v, Conexao conexao) {
+    public Voluntario gravar(Voluntario v) {
         // Query atualizada com todos os campos
         String sql = """
             INSERT INTO voluntario
@@ -24,15 +24,17 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
             RETURNING vol_id
         """;
 
-        try {
-            Connection conn = conexao.getConnect();
+        Conexao conexao = new Conexao();
+
+        // Usamos try-with-resources no Connection também para garantir o fechamento
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) return null;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, v.getVol_nome());
                 stmt.setString(2, v.getVol_bairro());
                 stmt.setString(3, v.getVol_numero());
-                stmt.setString(4, v.getVol_rua()); // Mapeia vol_rua para von_rua
+                stmt.setString(4, v.getVol_rua());
                 stmt.setString(5, v.getVol_telefone());
                 stmt.setString(6, v.getVol_cidade());
                 stmt.setString(7, v.getVol_cep());
@@ -59,7 +61,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
     }
 
     @Override
-    public Voluntario alterar(Voluntario v, Conexao conexao) {
+    public Voluntario alterar(Voluntario v) {
         String sql = """
             UPDATE voluntario SET
             vol_nome=?, vol_bairro=?, vol_numero=?, vol_rua=?, vol_telefone=?, 
@@ -68,8 +70,9 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
             WHERE vol_id=?
         """;
 
-        try {
-            Connection conn = conexao.getConnect();
+        Conexao conexao = new Conexao();
+
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) return null;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -97,10 +100,11 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
     }
 
     @Override
-    public boolean apagar(Voluntario v, Conexao conexao) {
+    public boolean apagar(Voluntario v) {
         String sql = "DELETE FROM voluntario WHERE vol_id=?";
-        try {
-            Connection conn = conexao.getConnect();
+        Conexao conexao = new Conexao();
+
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) return false;
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, v.getVol_id());
@@ -113,10 +117,11 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
     }
 
     @Override
-    public Voluntario get(int id, Conexao conexao) {
+    public Voluntario get(int id) {
         String sql = "SELECT * FROM voluntario WHERE vol_id=?";
-        try {
-            Connection conn = conexao.getConnect();
+        Conexao conexao = new Conexao();
+
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) return null;
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, id);
@@ -131,15 +136,16 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
     }
 
     @Override
-    public List<Voluntario> get(String filtro, Conexao conexao) {
+    public List<Voluntario> get(String filtro) {
         List<Voluntario> lista = new ArrayList<>();
         String sql = "SELECT * FROM voluntario";
         if (filtro != null && !filtro.isBlank()) {
             sql += " WHERE vol_nome ILIKE ? OR vol_cpf ILIKE ? OR vol_email ILIKE ?";
         }
 
-        try {
-            Connection conn = conexao.getConnect();
+        Conexao conexao = new Conexao();
+
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) return lista;
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 if (filtro != null && !filtro.isBlank()) {
@@ -158,19 +164,20 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         return lista;
     }
 
-    public Voluntario buscarPorEmail(String email, Conexao conexao) {
-        return buscarPorCampo("vol_email", email, conexao);
+    public Voluntario buscarPorEmail(String email) {
+        return buscarPorCampo("vol_email", email);
     }
 
-    // ✅ NOVO MÉTODO: Validar CPF duplicado
-    public Voluntario buscarPorCpf(String cpf, Conexao conexao) {
-        return buscarPorCampo("vol_cpf", cpf, conexao);
+    public Voluntario buscarPorCpf(String cpf) {
+        return buscarPorCampo("vol_cpf", cpf);
     }
 
-    private Voluntario buscarPorCampo(String campo, String valor, Conexao conexao) {
+    // Método auxiliar privado agora gerencia sua própria conexão
+    private Voluntario buscarPorCampo(String campo, String valor) {
         String sql = "SELECT * FROM voluntario WHERE " + campo + " = ?";
-        try {
-            Connection conn = conexao.getConnect();
+        Conexao conexao = new Conexao();
+
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) return null;
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, valor);
@@ -190,7 +197,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         v.setVol_nome(rs.getString("vol_nome"));
         v.setVol_bairro(rs.getString("vol_bairro"));
         v.setVol_numero(rs.getString("vol_numero"));
-        v.setVol_rua(rs.getString("vol_rua")); // Atenção ao nome da coluna no DB
+        v.setVol_rua(rs.getString("vol_rua"));
         v.setVol_telefone(rs.getString("vol_telefone"));
         v.setVol_cidade(rs.getString("vol_cidade"));
         v.setVol_cep(rs.getString("vol_cep"));

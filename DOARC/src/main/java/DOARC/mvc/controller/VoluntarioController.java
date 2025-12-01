@@ -1,13 +1,12 @@
 package DOARC.mvc.controller;
 
 import DOARC.mvc.model.Voluntario;
-import DOARC.mvc.util.Conexao;
-import DOARC.mvc.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
 
 @Controller
 public class VoluntarioController {
@@ -15,14 +14,13 @@ public class VoluntarioController {
     @Autowired
     private Voluntario voluntarioModel;
 
-    private Conexao getConexao() {
-        return SingletonDB.conectar();
-    }
+
 
     public Map<String, Object> getVoluntario(int id) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Voluntario v = voluntarioModel.consultar(id, getConexao());
+            // Chamada limpa, sem passar conexão
+            Voluntario v = voluntarioModel.consultar(id);
             if (v == null) {
                 response.put("erro", "Voluntário não encontrado");
                 return response;
@@ -35,25 +33,23 @@ public class VoluntarioController {
     }
 
     public Voluntario buscarVoluntarioPorId(int id) {
-        return voluntarioModel.consultar(id, getConexao());
+        return voluntarioModel.consultar(id);
     }
 
     public Voluntario atualizarPerfil(Voluntario voluntario) {
-        return voluntarioModel.alterar(voluntario, getConexao());
+        return voluntarioModel.alterar(voluntario);
     }
 
     public Voluntario cadastrarVoluntario(Voluntario voluntario) {
         try {
-            Conexao conexao = getConexao();
-
-            // ✅ VALIDAÇÃO: Verificar CPF duplicado
-            Voluntario existente = voluntarioModel.buscarPorCpf(voluntario.getVol_cpf(), conexao);
+            // Validação de CPF duplicado
+            Voluntario existente = voluntarioModel.buscarPorCpf(voluntario.getVol_cpf());
             if (existente != null) {
                 System.err.println("❌ Erro: CPF já cadastrado: " + voluntario.getVol_cpf());
-                return null; // Retorna null para indicar falha (View trata como erro genérico)
+                return null;
             }
 
-            return voluntarioModel.gravar(voluntario, conexao);
+            return voluntarioModel.gravar(voluntario);
         } catch (Exception e) {
             System.err.println("❌ Erro controller cadastrar: " + e.getMessage());
             return null;
@@ -62,15 +58,15 @@ public class VoluntarioController {
 
     public boolean removerVoluntario(int id) {
         try {
-            Voluntario v = voluntarioModel.consultar(id, getConexao());
-            return v != null && voluntarioModel.apagar(v, getConexao());
+            Voluntario v = voluntarioModel.consultar(id);
+            return v != null && voluntarioModel.apagar(v);
         } catch (Exception e) {
             return false;
         }
     }
 
-    public java.util.List<Voluntario> listarTodos() {
-        return voluntarioModel.consultar("", getConexao());
+    public List<Voluntario> listarTodos() {
+        return voluntarioModel.consultar("");
     }
 
     // Helper para converter objeto completo para Map

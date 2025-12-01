@@ -15,7 +15,6 @@ public class CampRespDAO {
 
     public CampRespDAO() {}
 
-    // Método auxiliar para converter String para java.sql.Date
     private java.sql.Date parseDate(String dateString) {
         if (dateString == null || dateString.trim().isEmpty()) {
             return null;
@@ -35,33 +34,26 @@ public class CampRespDAO {
         }
     }
 
-    public List<CampResponsavel> get(String filtro, Conexao conexao) {
+    public List<CampResponsavel> get(String filtro) {
         List<CampResponsavel> lista = new ArrayList<>();
-        String sql = "SELECT * FROM campanha_responsavel"; // Nome correto da tabela
+        String sql = "SELECT * FROM campanha_responsavel";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null || conn.isClosed()) return lista;
 
-            PreparedStatement stmt;
-
+            String queryFinal = sql;
             if (filtro != null && !filtro.isBlank()) {
-                sql += " WHERE " + filtro;
-                stmt = conn.prepareStatement(sql);
-            } else {
-                stmt = conn.prepareStatement(sql);
+                queryFinal += " WHERE " + filtro;
             }
 
-            ResultSet rs = stmt.executeQuery();
+            try (PreparedStatement stmt = conn.prepareStatement(queryFinal);
+                 ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                lista.add(mapCampResponsavel(rs));
+                while (rs.next()) {
+                    lista.add(mapCampResponsavel(rs));
+                }
             }
-
-            rs.close();
-            stmt.close();
-            // NÃO fechar a conexão aqui
-
         } catch (SQLException e) {
             System.err.println("Erro ao listar: " + e.getMessage());
             e.printStackTrace();
@@ -70,17 +62,14 @@ public class CampRespDAO {
         return lista;
     }
 
-    // ✅ CORREÇÃO AQUI: Não fechar a conexão no try-with-resources
-    public List<CampResponsavel> getByCompositeKey(int camId, int voluntarioId, Conexao conexao) {
+    public List<CampResponsavel> getByCompositeKey(int camId, int voluntarioId) {
         List<CampResponsavel> lista = new ArrayList<>();
-        // Usando nomes das colunas do banco: camp_id e vol_id
         String sql = "SELECT * FROM campanha_responsavel WHERE camp_id = ? AND vol_id = ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null || conn.isClosed()) return lista;
 
-            // Fechar apenas o PreparedStatement e ResultSet
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setInt(1, camId);
                 stmt.setInt(2, voluntarioId);
@@ -95,53 +84,47 @@ public class CampRespDAO {
             System.err.println("Erro ao buscar por chave composta: " + e.getMessage());
             e.printStackTrace();
         }
-
         return lista;
     }
 
-    public CampResponsavel gravar(CampResponsavel cr, Conexao conexao) {
+    public CampResponsavel gravar(CampResponsavel cr) {
         String sql = """
             INSERT INTO campanha_responsavel 
             (camp_id, vol_id, data_inicio, data_fim, obs_texto)
             VALUES (?, ?, ?, ?, ?)
         """;
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null || conn.isClosed()) {
                 System.err.println("Erro: Conexão fechada ou nula no gravar.");
                 return null;
             }
 
-            PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            try (PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                java.sql.Date dataInicio = parseDate(cr.getDATA_INICIO());
+                java.sql.Date dataFim = parseDate(cr.getDATA_FIM());
 
-            java.sql.Date dataInicio = parseDate(cr.getDATA_INICIO());
-            java.sql.Date dataFim = parseDate(cr.getDATA_FIM());
+                if (dataInicio == null) dataInicio = new java.sql.Date(System.currentTimeMillis());
+                if (dataFim == null) dataFim = new java.sql.Date(System.currentTimeMillis());
 
-            if (dataInicio == null) dataInicio = new java.sql.Date(System.currentTimeMillis());
-            if (dataFim == null) dataFim = new java.sql.Date(System.currentTimeMillis());
+                stmt.setInt(1, cr.getCam_id());
+                stmt.setInt(2, cr.getVoluntario_vol_id());
+                stmt.setDate(3, dataInicio);
+                stmt.setDate(4, dataFim);
+                stmt.setString(5, cr.getObs_texto());
 
-            stmt.setInt(1, cr.getCam_id());
-            stmt.setInt(2, cr.getVoluntario_vol_id());
-            stmt.setDate(3, dataInicio);
-            stmt.setDate(4, dataFim);
-            stmt.setString(5, cr.getObs_texto());
-
-            int rowsAffected = stmt.executeUpdate();
-            stmt.close();
-            // NÃO fechar a conexão aqui
-
-            return rowsAffected > 0 ? cr : null;
-
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0 ? cr : null;
+            }
         } catch (SQLException e) {
             System.err.println("Erro ao gravar: " + e.getMessage());
             e.printStackTrace();
         }
-
         return null;
     }
 
-    public CampResponsavel alterar(CampResponsavel cr, Conexao conexao) {
+    public CampResponsavel alterar(CampResponsavel cr) {
         String sql = """
             UPDATE campanha_responsavel SET
                 data_inicio = ?,
@@ -149,78 +132,66 @@ public class CampRespDAO {
                 obs_texto = ?
             WHERE camp_id = ? AND vol_id = ?
         """;
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
-            PreparedStatement stmt = conn.prepareStatement(sql);
+        try (Connection conn = conexao.getConnect()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                java.sql.Date dataInicio = parseDate(cr.getDATA_INICIO());
+                java.sql.Date dataFim = parseDate(cr.getDATA_FIM());
 
-            java.sql.Date dataInicio = parseDate(cr.getDATA_INICIO());
-            java.sql.Date dataFim = parseDate(cr.getDATA_FIM());
+                stmt.setDate(1, dataInicio);
+                stmt.setDate(2, dataFim);
+                stmt.setString(3, cr.getObs_texto());
+                stmt.setInt(4, cr.getCam_id());
+                stmt.setInt(5, cr.getVoluntario_vol_id());
 
-            stmt.setDate(1, dataInicio);
-            stmt.setDate(2, dataFim);
-            stmt.setString(3, cr.getObs_texto());
-            stmt.setInt(4, cr.getCam_id());
-            stmt.setInt(5, cr.getVoluntario_vol_id());
-
-            int rowsAffected = stmt.executeUpdate();
-            stmt.close();
-
-            return rowsAffected > 0 ? cr : null;
-
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0 ? cr : null;
+            }
         } catch (SQLException e) {
             System.err.println("Erro ao alterar: " + e.getMessage());
             e.printStackTrace();
         }
-
         return null;
     }
 
-    public boolean apagar(CampResponsavel cr, Conexao conexao) {
+    public boolean apagar(CampResponsavel cr) {
         String sql = "DELETE FROM campanha_responsavel WHERE camp_id = ? AND vol_id = ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, cr.getCam_id());
-            stmt.setInt(2, cr.getVoluntario_vol_id());
+        try (Connection conn = conexao.getConnect()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, cr.getCam_id());
+                stmt.setInt(2, cr.getVoluntario_vol_id());
 
-            int rowsAffected = stmt.executeUpdate();
-            stmt.close();
-
-            return rowsAffected > 0;
-
+                int rowsAffected = stmt.executeUpdate();
+                return rowsAffected > 0;
+            }
         } catch (SQLException e) {
             System.err.println("Erro ao apagar: " + e.getMessage());
             e.printStackTrace();
         }
-
         return false;
     }
 
-    public List<CampResponsavel> getCampanhasPorVoluntario(int voluntarioId, Conexao conexao) {
+    public List<CampResponsavel> getCampanhasPorVoluntario(int voluntarioId) {
         List<CampResponsavel> lista = new ArrayList<>();
         String sql = "SELECT * FROM campanha_responsavel WHERE vol_id = ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt.setInt(1, voluntarioId);
-
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                lista.add(mapCampResponsavel(rs));
+        try (Connection conn = conexao.getConnect()) {
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                stmt.setInt(1, voluntarioId);
+                try (ResultSet rs = stmt.executeQuery()) {
+                    while (rs.next()) {
+                        lista.add(mapCampResponsavel(rs));
+                    }
+                }
             }
-
-            rs.close();
-            stmt.close();
-
         } catch (SQLException e) {
             System.err.println("Erro ao buscar por voluntário: " + e.getMessage());
             e.printStackTrace();
         }
-
         return lista;
     }
 
@@ -241,7 +212,6 @@ public class CampRespDAO {
         }
 
         cr.setObs_texto(rs.getString("obs_texto"));
-
         return cr;
     }
 }

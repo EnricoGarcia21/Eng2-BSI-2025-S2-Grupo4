@@ -8,27 +8,17 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * DAO para Login - Baseado em BANCO-COMPLETO.txt
- *
- * Tabela Login:
- * - VOL_ID INTEGER PRIMARY KEY
- * - login VARCHAR(50) UNIQUE NOT NULL
- * - senha VARCHAR(255) NOT NULL
- * - nive_acesso VARCHAR(20) CHECK ('Administrador', 'Logistica', 'Operacional')
- * - status VARCHAR(10) CHECK ('Ativo', 'Inativo')
- */
 @Repository
 public class LoginDAO implements IDAO<Login> {
 
     public LoginDAO() {}
 
     @Override
-    public Login gravar(Login entidade, Conexao conexao) {
+    public Login gravar(Login entidade) {
         String sql = "INSERT INTO login (vol_id, login, senha, nive_acesso, status) VALUES (?, ?, ?, ?, ?)";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) {
                 System.err.println("❌ LoginDAO.gravar: Conexão é null");
                 return null;
@@ -56,11 +46,11 @@ public class LoginDAO implements IDAO<Login> {
     }
 
     @Override
-    public Login alterar(Login entidade, Conexao conexao) {
+    public Login alterar(Login entidade) {
         String sql = "UPDATE login SET login=?, senha=?, nive_acesso=?, status=? WHERE vol_id=?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) {
                 System.err.println("❌ LoginDAO.alterar: Conexão é null");
                 return null;
@@ -83,11 +73,11 @@ public class LoginDAO implements IDAO<Login> {
     }
 
     @Override
-    public boolean apagar(Login entidade, Conexao conexao) {
+    public boolean apagar(Login entidade) {
         String sql = "DELETE FROM login WHERE vol_id = ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) {
                 System.err.println("❌ LoginDAO.apagar: Conexão é null");
                 return false;
@@ -105,11 +95,11 @@ public class LoginDAO implements IDAO<Login> {
     }
 
     @Override
-    public Login get(int id, Conexao conexao) {
+    public Login get(int id) {
         String sql = "SELECT * FROM login WHERE vol_id = ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) {
                 System.err.println("❌ LoginDAO.get: Conexão é null");
                 return null;
@@ -131,12 +121,12 @@ public class LoginDAO implements IDAO<Login> {
     }
 
     @Override
-    public List<Login> get(String filtro, Conexao conexao) {
+    public List<Login> get(String filtro) {
         List<Login> lista = new ArrayList<>();
         String sql = "SELECT * FROM login WHERE login ILIKE ? OR nive_acesso ILIKE ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
+        try (Connection conn = conexao.getConnect()) {
             if (conn == null) {
                 System.err.println("❌ LoginDAO.get filtro: Conexão é null");
                 return lista;
@@ -160,18 +150,12 @@ public class LoginDAO implements IDAO<Login> {
         return lista;
     }
 
-    /**
-     * Busca login por email/username exato
-     */
-    public Login buscarPorLogin(String email, Conexao conexao) {
+    public Login buscarPorLogin(String email) {
         String sql = "SELECT * FROM login WHERE LOWER(login) = LOWER(?)";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
-            if (conn == null) {
-                System.err.println("❌ LoginDAO.buscarPorLogin: Conexão é null");
-                return null;
-            }
+        try (Connection conn = conexao.getConnect()) {
+            if (conn == null) return null;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, email);
@@ -188,28 +172,19 @@ public class LoginDAO implements IDAO<Login> {
         return null;
     }
 
-    /**
-     * Busca login por VOL_ID
-     */
-    public Login buscarPorVoluntarioId(int voluntarioId, Conexao conexao) {
-        return get(voluntarioId, conexao);
+    public Login buscarPorVoluntarioId(int voluntarioId) {
+        return get(voluntarioId);
     }
 
-    /**
-     * Atualiza apenas o status
-     */
-    public boolean atualizarStatus(int voluntarioId, String novoStatus, Conexao conexao) {
+    public boolean atualizarStatus(int voluntarioId, String novoStatus) {
         String sql = "UPDATE login SET status = ? WHERE vol_id = ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
-            if (conn == null) {
-                System.err.println("❌ LoginDAO.atualizarStatus: Conexão é null");
-                return false;
-            }
+        try (Connection conn = conexao.getConnect()) {
+            if (conn == null) return false;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, novoStatus); // 'Ativo' ou 'Inativo'
+                stmt.setString(1, novoStatus);
                 stmt.setInt(2, voluntarioId);
                 return stmt.executeUpdate() > 0;
             }
@@ -220,18 +195,12 @@ public class LoginDAO implements IDAO<Login> {
         return false;
     }
 
-    /**
-     * Atualiza apenas a senha
-     */
-    public boolean atualizarSenha(int voluntarioId, String novaSenhaHash, Conexao conexao) {
+    public boolean atualizarSenha(int voluntarioId, String novaSenhaHash) {
         String sql = "UPDATE login SET senha = ? WHERE vol_id = ?";
+        Conexao conexao = new Conexao();
 
-        try {
-            Connection conn = conexao.getConnect();
-            if (conn == null) {
-                System.err.println("❌ LoginDAO.atualizarSenha: Conexão é null");
-                return false;
-            }
+        try (Connection conn = conexao.getConnect()) {
+            if (conn == null) return false;
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, novaSenhaHash);
@@ -246,13 +215,8 @@ public class LoginDAO implements IDAO<Login> {
     }
 
     // ==================== HELPER METHODS ====================
-
-    /**
-     * Mapeia ResultSet para Login
-     */
     private Login mapLogin(ResultSet rs) throws SQLException {
         Login l = new Login();
-
         int volId = rs.getInt("vol_id");
         l.setVoluntarioId(volId);
         l.setLoginId(volId);
@@ -260,68 +224,31 @@ public class LoginDAO implements IDAO<Login> {
         l.setSenha(rs.getString("senha"));
         l.setNivelAcesso(convertRoleFromDb(rs.getString("nive_acesso")));
         l.setStatus(convertStatusFromDb(rs.getString("status")));
-
         return l;
     }
 
-    /**
-     * Converte role do código para o banco
-     * ADMIN → Administrador
-     * MANAGER → Logistica
-     * USER → Operacional
-     */
     private String convertRoleToDb(String role) {
         if (role == null) return "Operacional";
-
         switch (role.toUpperCase()) {
-            case "ADMIN":
-            case "ADMINISTRADOR":
-                return "Administrador";
-            case "MANAGER":
-            case "LOGISTICA":
-                return "Logistica";
-            case "USER":
-            case "OPERACIONAL":
-            default:
-                return "Operacional";
+            case "ADMIN": case "ADMINISTRADOR": return "Administrador";
+            case "MANAGER": case "LOGISTICA": return "Logistica";
+            default: return "Operacional";
         }
     }
 
-    /**
-     * Converte role do banco para o código
-     * Administrador → ADMIN
-     * Logistica → MANAGER
-     * Operacional → USER
-     */
     private String convertRoleFromDb(String roleDB) {
         if (roleDB == null) return "USER";
-
         switch (roleDB) {
-            case "Administrador":
-                return "ADMIN";
-            case "Logistica":
-                return "MANAGER";
-            case "Operacional":
-                return "USER";
-            default:
-                return "USER";
+            case "Administrador": return "ADMIN";
+            case "Logistica": return "MANAGER";
+            default: return "USER";
         }
     }
 
-    /**
-     * Converte status do código para o banco
-     * 'A' → Ativo
-     * 'I' → Inativo
-     */
     private String convertStatusToDb(char status) {
         return (status == 'A' || status == 'a') ? "Ativo" : "Inativo";
     }
 
-    /**
-     * Converte status do banco para o código
-     * Ativo → 'A'
-     * Inativo → 'I'
-     */
     private char convertStatusFromDb(String statusDB) {
         return (statusDB != null && statusDB.equalsIgnoreCase("Ativo")) ? 'A' : 'I';
     }

@@ -1,8 +1,6 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.CampanhaDAO;
-import DOARC.mvc.util.Conexao;
-import DOARC.mvc.util.SingletonDB;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +17,6 @@ public class Campanha {
     private Double cam_meta_arrecadacao;
     private Double cam_valor_arrecadado;
 
-    // ✅ CORREÇÃO: Injeção de Dependência
     @Autowired
     private CampanhaDAO dao;
 
@@ -37,36 +34,30 @@ public class Campanha {
         this.cam_valor_arrecadado = cam_valor_arrecadado;
     }
 
-    // =============================
-    // ✅ MÉTODOS DE DELEGAÇÃO (Todos exigem Conexao)
-    // =============================
-    private Conexao getConexao() {
-        return SingletonDB.conectar();
-    }
-    public List<Campanha> consultar(String filtro, Conexao conexao) {
-        return dao.get(filtro, conexao);
+
+    public List<Campanha> consultar(String filtro) {
+        return dao.get(filtro);
     }
 
-    public Campanha consultar(int id, Conexao conexao) {
-        return dao.get(id, conexao);
+    public Campanha consultar(int id) {
+        return dao.get(id);
     }
 
-    public Campanha gravar(Campanha c, Conexao conexao) {
-        return dao.gravar(c, conexao);
+    public Campanha gravar(Campanha c) {
+        return dao.gravar(c);
     }
 
-    public Campanha alterar(Campanha c, Conexao conexao) {
-        return dao.alterar(c, conexao);
+    public Campanha alterar(Campanha c) {
+        return dao.alterar(c);
     }
 
-    public boolean apagar(Campanha c, Conexao conexao) {
-        return dao.apagar(c, conexao);
+    public boolean apagar(Campanha c) {
+        return dao.apagar(c);
     }
 
-    public List<Campanha> getCampanhasPorVoluntario(int voluntarioId, Conexao conexao) {
-        return dao.getCampanhasPorVoluntario(voluntarioId, conexao);
+    public List<Campanha> getCampanhasPorVoluntario(int voluntarioId) {
+        return dao.getCampanhasPorVoluntario(voluntarioId);
     }
-
 
     // =============================
     // ✅ GETTERS / SETTERS

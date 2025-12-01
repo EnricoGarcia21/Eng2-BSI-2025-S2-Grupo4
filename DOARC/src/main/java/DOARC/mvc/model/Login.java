@@ -1,9 +1,9 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.LoginDAO;
-import DOARC.mvc.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import java.util.List;
 
 @Component
 public class Login {
@@ -30,44 +30,43 @@ public class Login {
         this.status = status;
     }
 
-    // Métodos de operações CRUD
-    public Login consultar(int id, Conexao conexao) {
-        return dao.get(id, conexao);
+    // Métodos de operações CRUD (sem Conexao)
+    public Login consultar(int id) {
+        return dao.get(id);
     }
 
-    public java.util.List<Login> consultar(String filtro, Conexao conexao) {
-        return dao.get(filtro, conexao);
+    public List<Login> consultar(String filtro) {
+        return dao.get(filtro);
     }
 
-    public Login gravar(Login login, Conexao conexao) {
-        return dao.gravar(login, conexao);
+    public Login gravar(Login login) {
+        return dao.gravar(login);
     }
 
-    public Login alterar(Login login, Conexao conexao) {
-        return dao.alterar(login, conexao);
+    public Login alterar(Login login) {
+        return dao.alterar(login);
     }
 
-    public boolean apagar(Login login, Conexao conexao) {
-        return dao.apagar(login, conexao);
+    public boolean apagar(Login login) {
+        return dao.apagar(login);
     }
 
     // Métodos de busca específicos
-    public Login buscarPorLogin(String login, Conexao conexao) {
-        return dao.buscarPorLogin(login, conexao);
+    public Login buscarPorLogin(String login) {
+        return dao.buscarPorLogin(login);
     }
 
-    public Login buscarPorVoluntarioId(int voluntarioId, Conexao conexao) {
-        return dao.buscarPorVoluntarioId(voluntarioId, conexao);
+    public Login buscarPorVoluntarioId(int voluntarioId) {
+        return dao.buscarPorVoluntarioId(voluntarioId);
     }
 
-    public boolean atualizarStatus(int loginId, char novoStatus, Conexao conexao) {
-        // Converter char para String para o DAO
+    public boolean atualizarStatus(int loginId, char novoStatus) {
         String statusStr = (novoStatus == 'A' || novoStatus == 'a') ? "Ativo" : "Inativo";
-        return dao.atualizarStatus(loginId, statusStr, conexao);
+        return dao.atualizarStatus(loginId, statusStr);
     }
 
-    public boolean atualizarSenha(int loginId, String novaSenhaHash, Conexao conexao) {
-        return dao.atualizarSenha(loginId, novaSenhaHash, conexao);
+    public boolean atualizarSenha(int loginId, String novaSenhaHash) {
+        return dao.atualizarSenha(loginId, novaSenhaHash);
     }
 
     // Métodos auxiliares
