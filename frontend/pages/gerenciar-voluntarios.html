@@ -540,7 +540,7 @@
                 vol_nome: nome,
                 vol_cpf: cpf.replace(/\D/g,''), // Limpa formatação
                 vol_email: email,
-                vol_telefone: telefone.replace(/\D/g,''),
+                vol_telefone: telefone.replace(/\D/g,'').substring(0, 12),
                 vol_datanasc: dataNasc,
                 vol_sexo: sexo,
                 // Endereço completo

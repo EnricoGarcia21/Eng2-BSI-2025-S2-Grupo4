@@ -1,6 +1,7 @@
 package DOARC.mvc.view;
 
 import DOARC.mvc.controller.VoluntarioController;
+import DOARC.mvc.controller.AcessoController;
 import DOARC.mvc.model.Login;
 import DOARC.mvc.model.Voluntario;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/apis/voluntario")
@@ -20,7 +22,7 @@ public class VoluntarioView {
     private VoluntarioController voluntarioController;
 
     @Autowired
-    private Login loginModel;
+    private AcessoController acessoController;
 
     private boolean podeAcessar(HttpServletRequest request, int voluntarioId) {
         Boolean authenticated = (Boolean) request.getAttribute("authenticated");
@@ -32,8 +34,7 @@ public class VoluntarioView {
         String email = (String) request.getAttribute("email");
         if (email != null) {
             try {
-                // Correção: Chamada direta sem passar conexão
-                Login usuarioLogado = loginModel.buscarPorLogin(email);
+                Login usuarioLogado = acessoController.buscarPorEmail(email);
                 if (usuarioLogado != null) return usuarioLogado.getVoluntarioId() == voluntarioId;
             } catch (Exception e) { return false; }
         }
@@ -52,21 +53,14 @@ public class VoluntarioView {
             if (!isAdmin(request)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ArrayList<>());
             }
-            // O Controller já gerencia tudo
-            List<Voluntario> voluntarios = voluntarioController.listarTodos();
-            List<Map<String, Object>> result = new ArrayList<>();
 
-            for (Voluntario v : voluntarios) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("vol_id", v.getVol_id());
-                map.put("vol_nome", v.getVol_nome());
-                map.put("vol_telefone", v.getVol_telefone());
-                map.put("vol_email", v.getVol_email());
-                map.put("vol_cidade", v.getVol_cidade());
-                map.put("vol_bairro", v.getVol_bairro());
-                result.add(map);
-            }
-            return ResponseEntity.ok(result);
+            // CORREÇÃO: Converte List<Voluntario> para List<Map>
+            List<Voluntario> listaEntidades = voluntarioController.listarTodos();
+            List<Map<String, Object>> listaMap = listaEntidades.stream()
+                    .map(v -> voluntarioController.voluntarioToMap(v))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(listaMap);
         } catch (Exception e) {
             System.err.println("❌ Erro ao listar voluntários: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
@@ -81,19 +75,21 @@ public class VoluntarioView {
                 response.put("erro", "Acesso negado");
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
             }
-            Voluntario criado = voluntarioController.cadastrarVoluntario(voluntario);
 
-            if (criado != null && criado.getVol_id() > 0) {
+            // O controller retorna o objeto gravado
+            Voluntario gravado = voluntarioController.cadastrarVoluntario(voluntario);
+
+            if (gravado != null && gravado.getVol_id() > 0) {
                 response.put("success", true);
                 response.put("message", "Voluntário cadastrado com sucesso!");
-                response.put("vol_id", criado.getVol_id());
+                response.put("id", gravado.getVol_id());
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
             } else {
-                response.put("erro", "Erro ao criar voluntário");
+                response.put("erro", "Falha ao gravar voluntário (CPF duplicado ou erro no banco)");
                 return ResponseEntity.badRequest().body(response);
             }
         } catch (Exception e) {
-            response.put("erro", "Erro interno do servidor");
+            response.put("erro", "Erro interno do servidor: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -179,17 +175,14 @@ public class VoluntarioView {
             if (authenticated == null || !authenticated) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-            List<Voluntario> voluntarios = voluntarioController.listarTodos();
-            List<Map<String, Object>> result = new ArrayList<>();
-            for (Voluntario v : voluntarios) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("vol_id", v.getVol_id());
-                map.put("vol_nome", v.getVol_nome());
-                map.put("vol_email", v.getVol_email());
-                map.put("vol_telefone", v.getVol_telefone());
-                result.add(map);
-            }
-            return ResponseEntity.ok(result);
+
+            // CORREÇÃO: Converte List<Voluntario> para List<Map>
+            List<Voluntario> listaEntidades = voluntarioController.listarTodos();
+            List<Map<String, Object>> voluntarios = listaEntidades.stream()
+                    .map(v -> voluntarioController.voluntarioToMap(v))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(voluntarios);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ArrayList<>());
         }
@@ -210,7 +203,7 @@ public class VoluntarioView {
             }
             dashboard.put("totalCampanhas", 0);
             dashboard.put("campanhasAtivas", 0);
-            dashboard.put("ultimoLogin", new Date());
+            dashboard.put("ultimoLogin", new java.util.Date());
 
             return ResponseEntity.ok(dashboard);
         } catch (Exception e) {

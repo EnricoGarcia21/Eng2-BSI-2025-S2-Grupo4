@@ -24,6 +24,19 @@ public class AcessoView {
     @Autowired
     private EmailNotification emailNotification;
 
+    @GetMapping("/verificar-cpf/{cpf}")
+    public ResponseEntity<Map<String, Object>> verificarCpf(@PathVariable String cpf) {
+        try {
+            Map<String, Object> resultado = acessoController.verificarVoluntarioParaCadastro(cpf);
+            if (resultado.containsKey("erro")) {
+                return ResponseEntity.badRequest().body(resultado);
+            }
+            return ResponseEntity.ok(resultado);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("erro", "Erro ao verificar CPF"));
+        }
+    }
+
     @PostMapping("/logar")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> dados) {
         Map<String, Object> response = new HashMap<>();
@@ -36,6 +49,7 @@ public class AcessoView {
         }
 
         Login usuario = acessoController.buscarPorEmail(email);
+
         if (usuario == null) {
             response.put("erro", "Usuário não encontrado.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
@@ -70,47 +84,48 @@ public class AcessoView {
     public ResponseEntity<Map<String, Object>> registrar(@RequestBody Map<String, String> dados) {
         Map<String, Object> response = new HashMap<>();
 
-        // ... (Extração de dados mantida igual) ...
-        String nome = dados.get("nome");
-        String cpf = dados.get("cpf");
-        String telefone = dados.get("telefone");
-        String dataNascimentoStr = dados.get("dataNascimento");
-        String rua = dados.getOrDefault("rua", "");
-        String numero = dados.getOrDefault("numero", "");
-        String bairro = dados.getOrDefault("bairro", "");
-        String cidade = dados.getOrDefault("cidade", "");
-        String cep = dados.getOrDefault("cep", "");
-        String uf = dados.getOrDefault("uf", "");
-        String complemento = dados.getOrDefault("complemento", "");
-        String email = dados.get("email");
-        String senha = dados.get("senha");
-        String nivelAcesso = dados.getOrDefault("nivelAcesso", "USER");
-        String sexo = dados.getOrDefault("sexo", "O");
-
-        LocalDate dataNascimento = null;
         try {
-            if (dataNascimentoStr != null) dataNascimento = LocalDate.parse(dataNascimentoStr);
+            String nome = dados.get("nome");
+            String cpf = dados.get("cpf");
+            String telefone = dados.get("telefone");
+            String dataNascimentoStr = dados.get("dataNascimento");
+            String email = dados.get("email");
+            String senha = dados.get("senha");
+            String sexo = dados.getOrDefault("sexo", "O");
+            String rua = dados.getOrDefault("rua", "");
+            String numero = dados.getOrDefault("numero", "");
+            String bairro = dados.getOrDefault("bairro", "");
+            String cidade = dados.getOrDefault("cidade", "");
+            String cep = dados.getOrDefault("cep", "");
+            String uf = dados.getOrDefault("uf", "");
+            String complemento = dados.getOrDefault("complemento", "");
+            String nivelAcesso = dados.getOrDefault("nivelAcesso", "USER");
+
+            LocalDate dataNascimento = null;
+            if (dataNascimentoStr != null && !dataNascimentoStr.isEmpty()) {
+                dataNascimento = LocalDate.parse(dataNascimentoStr);
+            }
+
+            Login novoLogin = acessoController.registrarVoluntarioCompleto(
+                    nome, cpf, telefone, dataNascimento,
+                    rua, numero, bairro, cidade, cep, uf, complemento,
+                    sexo, email, senha, nivelAcesso
+            );
+
+            if (novoLogin != null) {
+                response.put("success", true);
+                response.put("message", "Conta criada com sucesso!");
+                try {
+                    emailNotification.enviarEmailBemVindo(email, nome);
+                } catch (Exception ignored) {}
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            } else {
+                response.put("erro", "Erro ao criar conta. Verifique se o CPF/Email já estão em uso.");
+                return ResponseEntity.badRequest().body(response);
+            }
         } catch (Exception e) {
-            response.put("erro", "Data inválida");
-            return ResponseEntity.badRequest().body(response);
-        }
-
-        Login novoLogin = acessoController.registrarVoluntarioCompleto(
-                nome, cpf, telefone, dataNascimento,
-                rua, numero, bairro, cidade, cep, uf, complemento,
-                sexo, email, senha, nivelAcesso
-        );
-
-        if (novoLogin != null) {
-            response.put("success", true);
-            response.put("message", "Conta criada!");
-            try {
-                emailNotification.enviarEmailBemVindo(email, nome);
-            } catch (Exception ignored) {}
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } else {
-            response.put("erro", "Erro ao criar conta.");
-            return ResponseEntity.badRequest().body(response);
+            response.put("erro", "Erro interno: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 

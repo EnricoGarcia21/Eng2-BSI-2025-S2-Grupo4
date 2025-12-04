@@ -3,28 +3,21 @@ package DOARC.mvc.util;
 import java.sql.*;
 
 public class Conexao {
-
     private Connection connect;
     private String erro;
 
-    // Configurações do banco (Mantenha igual ao seu application.properties)
-    private final String URL_BASE = "jdbc:postgresql://localhost:5432/";
-    private final String BANCO = "DOARC";
-    private final String USUARIO = "postgres";
-    private final String SENHA = "postgres123";
-
-    // 1. Construtor Vazio: Conecta sozinho (Usado pelas DAOs)
+    // Construtor vazio (padrão legado)
     public Conexao() {
-        this.erro = "";
-        this.connect = null;
-        this.conectar(URL_BASE, BANCO, USUARIO, SENHA);
+        erro = "";
+        connect = null;
     }
 
-    // 2. Construtor Novo: Aceita conexão externa (Correção para o SingletonDB)
+    // --- ADICIONADO: Necessário para o SingletonDB injetar a conexão do Spring ---
     public Conexao(Connection c) {
         this.connect = c;
         this.erro = "";
     }
+    // ---------------------------------------------------------------------------
 
     public Connection getConnect() {
         return connect;
@@ -33,12 +26,10 @@ public class Conexao {
     public boolean conectar(String local, String banco, String usuario, String senha) {
         boolean conectado = false;
         try {
-            Class.forName("org.postgresql.Driver");
+            // Class.forName("org.postgresql.Driver"); // Opcional em Java moderno
             String url = local + banco;
             connect = DriverManager.getConnection(url, usuario, senha);
             conectado = true;
-        } catch (ClassNotFoundException cnfex) {
-            erro = "Driver não encontrado: " + cnfex.toString();
         } catch (SQLException sqlex) {
             erro = "Impossivel conectar com a base de dados: " + sqlex.toString();
         } catch (Exception ex) {
@@ -55,7 +46,7 @@ public class Conexao {
         return (connect != null);
     }
 
-    public boolean manipular(String sql) {
+    public boolean manipular(String sql) { // inserir, alterar, excluir
         boolean executou = false;
         try {
             Statement statement = connect.createStatement();

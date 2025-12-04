@@ -3,7 +3,6 @@ package DOARC.mvc.view;
 import DOARC.mvc.controller.AdminController;
 import DOARC.mvc.model.Login;
 import DOARC.mvc.model.Voluntario;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +20,6 @@ public class AdminView {
 
     @Autowired
     private AdminController adminController;
-
-    @Autowired
-    private Login loginModel;
-
-    @Autowired
-    private Voluntario voluntarioModel;
-
-    // Conexão REMOVIDA
 
     @GetMapping("/voluntarios")
     public ResponseEntity<List<Map<String, Object>>> listarVoluntarios() {
@@ -62,6 +53,7 @@ public class AdminView {
             voluntario.setVol_email((String) dados.get("vol_email"));
             voluntario.setVol_cidade((String) dados.get("vol_cidade"));
             voluntario.setVol_bairro((String) dados.get("vol_bairro"));
+            // Adicione outros campos conforme necessário
 
             Map<String, Object> resultado = adminController.updtVoluntario(voluntario);
 
@@ -100,8 +92,7 @@ public class AdminView {
     @GetMapping("/logins")
     public ResponseEntity<List<Map<String, Object>>> listarLogins() {
         try {
-            // Correção: Chamada sem conexão
-            List<Login> logins = loginModel.consultar("");
+            List<Login> logins = adminController.listarLogins();
             List<Map<String, Object>> response = new ArrayList<>();
 
             for (Login login : logins) {
@@ -128,8 +119,7 @@ public class AdminView {
                 response.put("erro", "Status inválido");
                 return ResponseEntity.badRequest().body(response);
             }
-            // Correção: Chamada sem conexão
-            boolean sucesso = loginModel.atualizarStatus(voluntarioId, novoStatus.charAt(0));
+            boolean sucesso = adminController.atualizarStatusLogin(voluntarioId, novoStatus.charAt(0));
 
             if (sucesso) {
                 response.put("success", true);
@@ -154,14 +144,8 @@ public class AdminView {
                 response.put("erro", "Nível inválido");
                 return ResponseEntity.badRequest().body(response);
             }
-            // Correção: Chamada sem conexão
-            Login login = loginModel.consultar(voluntarioId);
-            if (login == null) {
-                response.put("erro", "Login não encontrado");
-                return ResponseEntity.notFound().build();
-            }
-            login.setNivelAcesso(novoNivel);
-            Login atualizado = loginModel.alterar(login);
+
+            Login atualizado = adminController.atualizarNivelAcesso(voluntarioId, novoNivel);
 
             if (atualizado != null) {
                 response.put("success", true);
@@ -181,11 +165,11 @@ public class AdminView {
     public ResponseEntity<Map<String, Object>> obterEstatisticas() {
         try {
             Map<String, Object> stats = new HashMap<>();
-            // Correção: Chamadas sem conexão
-            List<Voluntario> voluntarios = voluntarioModel.consultar("");
+
+            List<Voluntario> voluntarios = adminController.listarTodosVoluntarios();
             stats.put("totalVoluntarios", voluntarios.size());
 
-            List<Login> logins = loginModel.consultar("");
+            List<Login> logins = adminController.listarLogins();
             long loginsAtivos = logins.stream().filter(l -> l.getStatus() == 'A').count();
             long admins = logins.stream().filter(l -> "ADMIN".equals(l.getNivelAcesso())).count();
 

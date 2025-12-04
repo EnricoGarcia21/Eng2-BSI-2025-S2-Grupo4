@@ -5,10 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro de Voluntário</title>
 
-    <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- MÁSCARAS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
 
@@ -43,6 +41,8 @@
                 <div id="alertArea"></div>
 
                 <form id="registerForm">
+                    
+                    <input type="hidden" id="volId" value="0"> 
 
                     <div class="form-section">
                         <h5>Dados Pessoais</h5>
@@ -131,33 +131,15 @@
                                     <label class="form-label">UF *</label>
                                     <select id="uf" class="form-select" required>
                                         <option value="">Selecione</option>
-                                        <option value="AC">AC</option>
-                                        <option value="AL">AL</option>
-                                        <option value="AP">AP</option>
-                                        <option value="AM">AM</option>
-                                        <option value="BA">BA</option>
-                                        <option value="CE">CE</option>
-                                        <option value="DF">DF</option>
-                                        <option value="ES">ES</option>
-                                        <option value="GO">GO</option>
-                                        <option value="MA">MA</option>
-                                        <option value="MT">MT</option>
-                                        <option value="MS">MS</option>
-                                        <option value="MG">MG</option>
-                                        <option value="PA">PA</option>
-                                        <option value="PB">PB</option>
-                                        <option value="PR">PR</option>
-                                        <option value="PE">PE</option>
-                                        <option value="PI">PI</option>
-                                        <option value="RJ">RJ</option>
-                                        <option value="RN">RN</option>
-                                        <option value="RS">RS</option>
-                                        <option value="RO">RO</option>
-                                        <option value="RR">RR</option>
-                                        <option value="SC">SC</option>
-                                        <option value="SP">SP</option>
-                                        <option value="SE">SE</option>
-                                        <option value="TO">TO</option>
+                                        <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                        <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                        <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                        <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                        <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                        <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                        <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                        <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                        <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                                     </select>
                                 </div>
                             </div>
@@ -192,11 +174,11 @@
                             </div>
                         </div>
                     </div>
-<button type="submit" class="btn btn-primary">Cadastrar</button>
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
 
-    <div class="text-center mt-3">
-        <a href="index.html" class="btn btn-link">Já tem conta? Fazer login</a>
-    </div>
+                    <div class="text-center mt-3">
+                        <a href="index.html" class="btn btn-link">Já tem conta? Fazer login</a>
+                    </div>
 
                 </form>
 
@@ -205,7 +187,6 @@
     </div>
 </div>
 
-<!-- Alert helper -->
 <script>
 const UI = {
     showAlert(msg, type = "danger") {
@@ -223,173 +204,106 @@ const UI = {
 };
 </script>
 
-<!-- MÁSCARAS -->
 <script>
 $(document).ready(() => {
     $('#cpf').mask('000.000.000-00');
-    $('#telefone').mask('(00) 00000-0000');
+    // Corrigido para acomodar o limite de 12 dígitos do seu banco (opcionalmente)
+    const options = {
+        onKeyPress: function (cpf, e, field, options) {
+            const masks = ['(00) 0000-0000', '(00) 90000-0000'];
+            const mask = (cpf.length > 14) ? masks[1] : masks[0];
+            $('#telefone').mask(mask, options);
+        }
+    };
+    $('#telefone').mask('(00) 0000-0000', options);
     $('#cep').mask('00000-000');
 });
 </script>
+
 <script>
+const API_ACESSO_BASE = "http://localhost:8080/apis/acesso";
+const API_VERIFICAR_CPF = `${API_ACESSO_BASE}/verificar-cpf`;
+const API_REGISTRO_URL = `${API_ACESSO_BASE}/registrar`;
 
-const API_REGISTRO_URL = "http://localhost:8080/apis/acesso/registrar";
-const API_VOLUNTARIO = "http://localhost:8080/apis/voluntario"; // Removido por ser redundante, mas mantida a declaração
+const form = document.getElementById('registerForm');
+const cpfInput = document.getElementById('cpf');
+const volIdInput = document.getElementById('volId');
 
-document.getElementById('registerForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
 
-    // Coletar todos os dados do formulário
-    const nome = document.getElementById('nome').value.trim();
-    const cpf = document.getElementById('cpf').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const telefone = document.getElementById('telefone').value.trim();
-    const dataNascimento = document.getElementById('dataNascimento').value;
-    const sexo = document.getElementById('sexo').value;
-    const rua = document.getElementById('rua').value.trim();
-    const numero = document.getElementById('numero').value.trim();
-    const bairro = document.getElementById('bairro').value.trim();
-    const cidade = document.getElementById('cidade').value.trim();
-    const uf = document.getElementById('uf').value;
-    const complemento = document.getElementById('complemento').value.trim();
-    const senha = document.getElementById('password').value.trim();
-    const confirmSenha = document.getElementById('confirmPassword').value.trim();
+// --- Funções de Lógica ---
 
-    // ------------------------------
-    // 1. Validações Frontend
-    // ------------------------------
-
-    const camposObrigatorios = [
-        {valor: nome, nome: "Nome Completo"},
-        {valor: cpf, nome: "CPF"},
-        {valor: email, nome: "Email"},
-        {valor: telefone, nome: "Telefone"},
-        {valor: dataNascimento, nome: "Data de Nascimento"},
-        {valor: sexo, nome: "Sexo"},
-        {valor: rua, nome: "Rua"},
-        {valor: numero, nome: "Número"},
-        {valor: bairro, nome: "Bairro"},
-        {valor: cidade, nome: "Cidade"},
-        {valor: uf, nome: "UF"},
-        {valor: senha, nome: "Senha"},
-        {valor: confirmSenha, nome: "Confirmar Senha"}
-    ];
-
-    const campoVazio = camposObrigatorios.find(campo => !campo.valor);
-    if (campoVazio) {
-        UI.showAlert(`⚠️ O campo "${campoVazio.nome}" é obrigatório.`);
-        return;
-    }
-
-    if (senha !== confirmSenha) {
-        UI.showAlert("⚠️ As senhas não coincidem.");
-        return;
-    }
-
-    if (senha.length < 6) {
-        UI.showAlert("⚠️ A senha deve ter pelo menos 6 caracteres.");
-        return;
-    }
-
-    // Validação de idade mínima
-    const nasc = new Date(dataNascimento);
-    const hoje = new Date();
-    let idade = hoje.getFullYear() - nasc.getFullYear();
-    const m = hoje.getMonth() - nasc.getMonth();
-
-    if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) {
-        idade--;
-    }
-
-    if (idade < 18) {
-        UI.showAlert("⛔ Apenas voluntários com 18 anos ou mais podem se cadastrar.");
-        return;
-    }
-
-    // ------------------------------
-    // 2. Construir Payload Único
-    // ------------------------------
-
-    // O Controller espera um campo único 'endereco' que mapeia para 'vol_rua' e é usado
-    // para compor parte do endereço (com o complemento)
-    const enderecoCompleto = [rua, numero, bairro, cidade, uf, complemento].filter(Boolean).join(', ');
+function preencherCampos(dados) {
+    document.getElementById('nome').value = dados.nome || '';
+    document.getElementById('email').value = dados.email || '';
     
-    const dadosVoluntario = {
-        nome: nome,
-        // Enviar CPF e Telefone LIMPOS (O Controller já está corrigido para limpar, mas é boa prática)
-        cpf: cpf.replace(/\D/g, ''),
-        telefone: telefone.replace(/\D/g, ''),
-        dataNascimento: dataNascimento,
-        endereco: enderecoCompleto, // Mapeia para 'endereco' esperado pelo Controller
-        email: email,
-        senha: senha,
-        sexo: sexo,
-        nivelAcesso: 'USER' // Padrão
-    };
+    // Preenche e força máscara
+    $('#telefone').mask('(00) 00000-0000').val(dados.telefone).trigger('input');
+    $('#cep').mask('00000-000').val(dados.cep).trigger('input');
+    
+    document.getElementById('dataNascimento').value = dados.dataNascimento || ''; 
+    document.getElementById('sexo').value = (dados.sexo && dados.sexo.length > 0) ? dados.sexo.substring(0, 1).toUpperCase() : '';
+    document.getElementById('rua').value = dados.rua || '';
+    document.getElementById('numero').value = dados.numero || '';
+    document.getElementById('bairro').value = dados.bairro || '';
+    document.getElementById('cidade').value = dados.cidade || '';
+    document.getElementById('uf').value = dados.uf || '';
+    document.getElementById('complemento').value = dados.complemento || '';
+}
 
-    // ------------------------------
-    // 3. Chamar a API de Registro (Passo Único)
-    // ------------------------------
+
+async function verificarCpf() {
+    const cpfLimpo = cpfInput.value.replace(/\D/g, '');
+    volIdInput.value = '0'; 
+
+    if (cpfLimpo.length !== 11) return;
+
+    UI.showAlert("Buscando CPF existente...", "info");
 
     try {
-        UI.showAlert("📝 Cadastrando voluntário...", "info");
+        const response = await fetch(`${API_VERIFICAR_CPF}/${cpfLimpo}`);
+        const data = await response.json();
 
-        // CORREÇÃO CRÍTICA: Usar o endpoint de registro completo
-        const response = await fetch(API_REGISTRO_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify(dadosVoluntario)
-        });
-
-        // Tentar parsear o JSON da resposta
-        let result;
-        try {
-            result = await response.json();
-        } catch (parseError) {
-            console.error('❌ Erro ao parsear resposta JSON:', parseError);
-            UI.showAlert("⚠️ Erro no servidor. Resposta inválida recebida.", "danger");
-            return;
-        }
-
-        // Verificar status HTTP
-        if (response.ok && result.success) {
-            // REGISTRO SUCESSO
-            const message = result.message || "Cadastro realizado com sucesso! Redirecionando para login...";
-            UI.showAlert("✅ " + message, "success");
-            setTimeout(() => {
-                window.location.href = "index.html";
-            }, 2000);
-        } else {
-            // REGISTRO FALHOU - Mostrar erro específico
-            const errorMessage = result.erro || "Erro desconhecido no servidor durante o cadastro.";
-
-            // Identificar tipo de erro baseado no status HTTP
-            let warningIcon = '❌';
-            if (response.status === 400) {
-                warningIcon = '⚠️'; // Requisição inválida (validação falhou)
-            } else if (response.status === 409) {
-                warningIcon = '🚫'; // Conflito (email já existe)
-            } else if (response.status >= 500) {
-                warningIcon = '💥'; // Erro no servidor
+        if (response.ok && data.encontrado) {
+            
+            if (data.vol_id) {
+                // Voluntário encontrado, mas sem Login (Permite Registro)
+                volIdInput.value = data.vol_id; 
+                cpfInput.disabled = true; // Desabilita para não ser alterado
+                cpfInput.style.backgroundColor = '#e9ecef';
+                
+                preencherCampos(data);
+                
+                UI.showAlert("✅ Voluntário encontrado! Preencha apenas o Email e a Senha para criar seu acesso.", "success");
+                
+            } else {
+                // CPF existe E já tem login (Erro)
+                UI.showAlert(`🚫 ${data.erro || 'Este CPF já está cadastrado e possui Login de acesso.'}`, "danger");
+                volIdInput.value = '0';
+                cpfInput.disabled = false;
             }
-
-            console.warn(`Registro falhou - Status ${response.status}:`, errorMessage);
-            UI.showAlert(`${warningIcon} ${errorMessage}`, "danger");
+            
+        } else if (!data.encontrado) {
+            // CPF não existe (Segue com o cadastro normalmente)
+            UI.showAlert("📝 CPF validado! Preencha o restante do formulário para o primeiro cadastro.", "success");
+            cpfInput.disabled = false;
+        } else if (data.erro) {
+             UI.showAlert(`🚫 ${data.erro}`, "danger");
         }
+        
     } catch (error) {
-        // ERRO DE CONEXÃO
-        console.error("❌ Erro de conexão:", error);
-
-        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-            UI.showAlert("🔌 Não foi possível conectar ao servidor. Verifique se o backend está rodando em http://localhost:8080", "danger");
-        } else {
-            UI.showAlert("⚠️ Erro inesperado: " + error.message, "danger");
+        console.error("Erro ao verificar CPF:", error);
+        UI.showAlert("⚠️ Erro de conexão ao verificar CPF. Tente novamente.", "danger");
+    } finally {
+        // Remove o alerta de "Buscando CPF"
+        if (document.getElementById('alertArea').querySelector('.alert-info')) {
+             document.getElementById('alertArea').innerHTML = '';
         }
     }
-});
+}
+
+// Vincula a função de verificação ao campo CPF
+cpfInput.addEventListener('blur', verificarCpf);
+
 
 // Preenchimento automático do CEP
 document.getElementById('cep').addEventListener('blur', async function() {
@@ -409,7 +323,6 @@ document.getElementById('cep').addEventListener('blur', async function() {
             document.getElementById('cidade').value = data.localidade || '';
             document.getElementById('uf').value = data.uf || '';
             
-            // Focar no número após preencher o CEP
             document.getElementById('numero').focus();
             
             UI.showAlert("Endereço preenchido automaticamente!", "success");
@@ -424,21 +337,103 @@ document.getElementById('cep').addEventListener('blur', async function() {
     }
 });
 
-// Validação em tempo real da senha
-document.getElementById('confirmPassword').addEventListener('input', function() {
-    const senha = document.getElementById('password').value;
-    const confirmSenha = this.value;
+
+// Lógica de Submissão do Formulário
+form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // 1. Reabilitar CPF para garantir que o valor seja enviado no payload (se desabilitado)
+    const isCpfDisabled = cpfInput.disabled;
+    if (isCpfDisabled) cpfInput.disabled = false;
+
+    // 2. Coletar e Validar
+    const nome = document.getElementById('nome').value.trim();
+    const cpf = document.getElementById('cpf').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const telefone = document.getElementById('telefone').value.trim();
+    const dataNascimento = document.getElementById('dataNascimento').value;
+    const sexo = document.getElementById('sexo').value;
+    const cep = document.getElementById('cep').value.trim();
+    const rua = document.getElementById('rua').value.trim();
+    const numero = document.getElementById('numero').value.trim();
+    const bairro = document.getElementById('bairro').value.trim();
+    const cidade = document.getElementById('cidade').value.trim();
+    const uf = document.getElementById('uf').value;
+    const complemento = document.getElementById('complemento').value.trim();
+    const senha = document.getElementById('password').value.trim();
+    const confirmSenha = document.getElementById('confirmPassword').value.trim();
     
-    if (confirmSenha && senha !== confirmSenha) {
-        this.classList.add('is-invalid');
-        this.classList.remove('is-valid');
-    } else if (confirmSenha) {
-        this.classList.add('is-valid');
-        this.classList.remove('is-invalid');
+    const camposObrigatorios = [
+        {valor: nome, nome: "Nome Completo"}, {valor: cpf, nome: "CPF"}, {valor: email, nome: "Email"},
+        {valor: telefone, nome: "Telefone"}, {valor: dataNascimento, nome: "Data de Nascimento"},
+        {valor: sexo, nome: "Sexo"}, {valor: cep, nome: "CEP"}, {valor: rua, nome: "Rua"}, 
+        {valor: numero, nome: "Número"}, {valor: bairro, nome: "Bairro"}, {valor: cidade, nome: "Cidade"}, 
+        {valor: uf, nome: "UF"}, {valor: senha, nome: "Senha"}, {valor: confirmSenha, nome: "Confirmar Senha"}
+    ];
+
+    const campoVazio = camposObrigatorios.find(campo => !campo.valor);
+    if (campoVazio || senha !== confirmSenha || senha.length < 6) {
+        if (isCpfDisabled) cpfInput.disabled = true; // Re-desabilitar CPF após validação
+        UI.showAlert(`⚠️ Corrija os erros: ${campoVazio ? `O campo "${campoVazio.nome}" é obrigatório.` : (senha !== confirmSenha ? 'As senhas não coincidem.' : 'A senha é muito curta.')}`);
+        return;
+    }
+    
+    // 3. Validação de idade (simplificada)
+    const nasc = new Date(dataNascimento);
+    const hoje = new Date();
+    const idade = hoje.getFullYear() - nasc.getFullYear() - (new Date(hoje.getFullYear(), nasc.getMonth(), nasc.getDate()) > hoje ? 1 : 0);
+    if (idade < 18) {
+        if (isCpfDisabled) cpfInput.disabled = true;
+        UI.showAlert("⛔ Apenas voluntários com 18 anos ou mais podem se cadastrar.");
+        return;
+    }
+
+    // 4. Construir Payload
+    const dadosVoluntario = {
+        nome: nome,
+        cpf: cpf.replace(/\D/g, ''),
+        telefone: telefone.replace(/\D/g, ''),
+        dataNascimento: dataNascimento,
+        email: email,
+        senha: senha,
+        sexo: sexo,
+        rua: rua,
+        numero: numero,
+        bairro: bairro,
+        cidade: cidade,
+        cep: cep.replace(/\D/g, ''),
+        uf: uf,
+        complemento: complemento,
+        nivelAcesso: 'USER'
+    };
+
+    // 5. Chamar a API de Registro
+    try {
+        UI.showAlert("📝 Cadastrando/Atualizando voluntário...", "info");
+
+        const response = await fetch(API_REGISTRO_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(dadosVoluntario)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            UI.showAlert("✅ " + (result.message || "Cadastro realizado com sucesso! Redirecionando para login..."), "success");
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 2000);
+        } else {
+            UI.showAlert(`🚫 ${result.erro || "Erro desconhecido no servidor durante o cadastro."}`, "danger");
+        }
+    } catch (error) {
+        UI.showAlert("⚠️ Erro inesperado: Não foi possível conectar ao servidor. " + error.message, "danger");
+    } finally {
+        if (isCpfDisabled) cpfInput.disabled = true; // Re-desabilitar se estava desabilitado
     }
 });
 </script>
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>

@@ -1,7 +1,8 @@
 package DOARC.mvc.controller;
 
 import DOARC.mvc.model.Campanha;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.Conexao;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -10,10 +11,9 @@ import java.util.*;
 @Service
 public class CampanhaController {
 
-    @Autowired
-    private Campanha campanhaModel;
-
-    // Removemos getConexao()
+    private Conexao getConexao() {
+        return SingletonDB.conectar();
+    }
 
     private Map<String, Object> toJson(Campanha c) {
         Map<String, Object> json = new HashMap<>();
@@ -34,26 +34,20 @@ public class CampanhaController {
         if (c.getVoluntario_vol_id() <= 0) return "ID do voluntário inválido";
         if (c.getCam_meta_arrecadacao() == null || c.getCam_meta_arrecadacao() < 0) return "Meta de arrecadação inválida";
 
-        // --- NOVA VALIDAÇÃO PEDIDA PELA PROFESSORA ---
         try {
-            // Converte a String do banco para LocalDate para comparar
             LocalDate dtInicio = LocalDate.parse(c.getCam_data_ini());
             LocalDate dtFim = LocalDate.parse(c.getCam_data_fim());
             LocalDate hoje = LocalDate.now();
 
-            // Se for um novo cadastro (ID = 0) e a data for anterior a hoje
             if (c.getCam_id() == 0 && dtInicio.isBefore(hoje)) {
                 return "A data de início deve ser igual ou posterior à data atual.";
             }
-
             if (dtFim.isBefore(dtInicio)) {
                 return "A data final não pode ser menor que a data de início.";
             }
-
         } catch (Exception e) {
             return "Formato de data inválido.";
         }
-        // ---------------------------------------------
 
         if (c.getCam_valor_arrecadado() == null) c.setCam_valor_arrecadado(0.0);
         if (c.getCam_valor_arrecadado() < 0) return "Valor arrecadado não pode ser negativo";
@@ -66,7 +60,8 @@ public class CampanhaController {
         if (erroValidacao != null) return Map.of("erro", erroValidacao);
 
         try {
-            Campanha gravada = campanhaModel.gravar(nova); // Sem passar conexão
+            Conexao conexao = getConexao();
+            Campanha gravada = nova.gravar(conexao);
 
             if (gravada == null) {
                 return Map.of("erro", "Erro ao cadastrar a Campanha.");
@@ -85,7 +80,8 @@ public class CampanhaController {
         if (campanha.getCam_id() <= 0) return Map.of("erro", "ID da campanha é obrigatório");
 
         try {
-            Campanha existente = campanhaModel.consultar(campanha.getCam_id());
+            Conexao conexao = getConexao();
+            Campanha existente = Campanha.get(campanha.getCam_id(), conexao);
             if (existente == null) return Map.of("erro", "Campanha não encontrada");
 
             existente.setCam_data_ini(campanha.getCam_data_ini());
@@ -95,7 +91,7 @@ public class CampanhaController {
             existente.setCam_meta_arrecadacao(campanha.getCam_meta_arrecadacao());
             existente.setCam_valor_arrecadado(campanha.getCam_valor_arrecadado());
 
-            Campanha alterada = campanhaModel.alterar(existente); // Sem passar conexão
+            Campanha alterada = existente.alterar(conexao);
 
             if (alterada == null) return Map.of("erro", "Erro ao atualizar a Campanha.");
             return toJson(alterada);
@@ -107,28 +103,32 @@ public class CampanhaController {
     }
 
     public List<Map<String, Object>> getCampanha() {
-        List<Campanha> lista = campanhaModel.consultar("");
+        Conexao conexao = getConexao();
+        List<Campanha> lista = Campanha.get("", conexao);
         List<Map<String, Object>> result = new ArrayList<>();
         for (Campanha c : lista) result.add(toJson(c));
         return result;
     }
 
     public Map<String, Object> getCampanha(int id) {
-        Campanha c = campanhaModel.consultar(id);
+        Conexao conexao = getConexao();
+        Campanha c = Campanha.get(id, conexao);
         return (c == null) ? Map.of("erro", "Campanha não encontrada") : toJson(c);
     }
 
     public Map<String, Object> deletarCampanha(int id) {
-        Campanha c = campanhaModel.consultar(id);
+        Conexao conexao = getConexao();
+        Campanha c = Campanha.get(id, conexao);
         if (c == null) return Map.of("erro", "Campanha não encontrada");
 
-        return campanhaModel.apagar(c)
+        return c.apagar(conexao)
                 ? Map.of("mensagem", "Campanha removida com sucesso")
                 : Map.of("erro", "Erro ao remover campanha");
     }
 
     public List<Map<String, Object>> getCampanhasPorVoluntario(int voluntarioId) {
-        List<Campanha> lista = campanhaModel.getCampanhasPorVoluntario(voluntarioId);
+        Conexao conexao = getConexao();
+        List<Campanha> lista = Campanha.getPorVoluntario(voluntarioId, conexao);
         List<Map<String, Object>> result = new ArrayList<>();
         for (Campanha c : lista) result.add(toJson(c));
         return result;

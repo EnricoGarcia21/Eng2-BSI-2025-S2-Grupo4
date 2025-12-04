@@ -1,7 +1,8 @@
 package DOARC.mvc.controller;
 
 import DOARC.mvc.model.CampResponsavel;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.Conexao;
+import DOARC.mvc.util.SingletonDB;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -9,10 +10,9 @@ import java.util.*;
 @Service
 public class CampRespController {
 
-    @Autowired
-    private CampResponsavel campRespModel;
-
-    // Removemos getConexao()
+    private Conexao getConexao() {
+        return SingletonDB.conectar();
+    }
 
     private Map<String, Object> toJson(CampResponsavel cr) {
         Map<String, Object> json = new HashMap<>();
@@ -37,14 +37,15 @@ public class CampRespController {
         if (erroValidacao != null) return Map.of("erro", erroValidacao);
 
         try {
-            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(
-                    nova.getCam_id(), nova.getVoluntario_vol_id());
+            Conexao conexao = getConexao();
+            List<CampResponsavel> existentes = CampResponsavel.getPorChave(
+                    nova.getCam_id(), nova.getVoluntario_vol_id(), conexao);
 
             if (!existentes.isEmpty()) {
                 return Map.of("erro", "Este voluntário já está vinculado a esta campanha");
             }
 
-            CampResponsavel gravada = campRespModel.gravar(nova); // Sem conexão
+            CampResponsavel gravada = nova.gravar(conexao);
             if (gravada == null) return Map.of("erro", "Erro ao vincular voluntário");
 
             return toJson(gravada);
@@ -56,8 +57,9 @@ public class CampRespController {
 
     public Map<String, Object> updtCampResponsavel(CampResponsavel campResp) {
         try {
-            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(
-                    campResp.getCam_id(), campResp.getVoluntario_vol_id());
+            Conexao conexao = getConexao();
+            List<CampResponsavel> existentes = CampResponsavel.getPorChave(
+                    campResp.getCam_id(), campResp.getVoluntario_vol_id(), conexao);
 
             if (existentes.isEmpty()) return Map.of("erro", "Vinculação não encontrada");
 
@@ -66,7 +68,7 @@ public class CampRespController {
             existente.setDATA_FIM(campResp.getDATA_FIM());
             existente.setObs_texto(campResp.getObs_texto());
 
-            CampResponsavel alterada = campRespModel.alterar(existente);
+            CampResponsavel alterada = existente.alterar(conexao);
             if (alterada == null) return Map.of("erro", "Erro ao atualizar");
 
             return toJson(alterada);
@@ -77,7 +79,8 @@ public class CampRespController {
 
     public List<Map<String, Object>> getCampResponsavel() {
         try {
-            List<CampResponsavel> lista = campRespModel.consultar("");
+            Conexao conexao = getConexao();
+            List<CampResponsavel> lista = CampResponsavel.get("", conexao);
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;
@@ -88,7 +91,8 @@ public class CampRespController {
 
     public List<Map<String, Object>> getCampResponsavel(String filtro) {
         try {
-            List<CampResponsavel> lista = campRespModel.consultar(filtro);
+            Conexao conexao = getConexao();
+            List<CampResponsavel> lista = CampResponsavel.get(filtro, conexao);
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;
@@ -99,7 +103,8 @@ public class CampRespController {
 
     public Map<String, Object> getCampResponsavel(int camId, int voluntarioId) {
         try {
-            List<CampResponsavel> lista = campRespModel.consultarPorChaveComposta(camId, voluntarioId);
+            Conexao conexao = getConexao();
+            List<CampResponsavel> lista = CampResponsavel.getPorChave(camId, voluntarioId, conexao);
             if (lista.isEmpty()) return Map.of("erro", "Vinculação não encontrada");
             return toJson(lista.get(0));
         } catch (Exception e) {
@@ -109,10 +114,11 @@ public class CampRespController {
 
     public Map<String, Object> deletarCampResponsavel(int camId, int voluntarioId) {
         try {
-            List<CampResponsavel> existentes = campRespModel.consultarPorChaveComposta(camId, voluntarioId);
+            Conexao conexao = getConexao();
+            List<CampResponsavel> existentes = CampResponsavel.getPorChave(camId, voluntarioId, conexao);
             if (existentes.isEmpty()) return Map.of("erro", "Vinculação não encontrada");
 
-            boolean sucesso = campRespModel.apagar(existentes.get(0));
+            boolean sucesso = existentes.get(0).apagar(conexao);
             return sucesso ? Map.of("mensagem", "Removido com sucesso") : Map.of("erro", "Erro ao remover");
         } catch (Exception e) {
             return Map.of("erro", "Erro: " + e.getMessage());
@@ -121,7 +127,8 @@ public class CampRespController {
 
     public List<Map<String, Object>> getCampanhasPorVoluntario(int voluntarioId) {
         try {
-            List<CampResponsavel> lista = campRespModel.getCampanhasPorVoluntario(voluntarioId);
+            Conexao conexao = getConexao();
+            List<CampResponsavel> lista = CampResponsavel.getPorVoluntario(voluntarioId, conexao);
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;
@@ -132,7 +139,8 @@ public class CampRespController {
 
     public List<Map<String, Object>> getVoluntariosPorCampanha(int campanhaId) {
         try {
-            List<CampResponsavel> lista = campRespModel.consultar("camp_id = " + campanhaId);
+            Conexao conexao = getConexao();
+            List<CampResponsavel> lista = CampResponsavel.get("camp_id = " + campanhaId, conexao);
             List<Map<String, Object>> result = new ArrayList<>();
             for (CampResponsavel cr : lista) result.add(toJson(cr));
             return result;

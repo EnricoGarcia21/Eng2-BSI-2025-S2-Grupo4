@@ -11,15 +11,13 @@ import java.util.List;
 @Component
 public class EmailNotification {
 
-    @Autowired(required = false) // Torna opcional para evitar erro se não configurado
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     @Value("${spring.mail.username:doarc.sistema@gmail.com}")
     private String fromEmail;
 
-    /**
-     * Envia notificação de nova campanha para uma lista de emails
-     */
+
     public boolean enviarNotificacaoCampanha(List<String> emails, String tituloCampanha, String descricao) {
         if (mailSender == null) {
             System.err.println("⚠️ JavaMailSender não está configurado. Email não enviado.");
@@ -97,9 +95,6 @@ public class EmailNotification {
         }
     }
 
-    /**
-     * Envia email de recuperação de senha
-     */
     public boolean enviarEmailRecuperacaoSenha(String email, String token, String nome) {
         if (mailSender == null) {
             System.err.println("⚠️ JavaMailSender não está configurado. Email não enviado.");
@@ -122,14 +117,12 @@ public class EmailNotification {
         }
     }
 
-    /**
-     * Verifica se o serviço de email está configurado
-     */
+
     public boolean isConfigured() {
         return mailSender != null;
     }
 
-    // ===== MÉTODOS PRIVADOS PARA CRIAR MENSAGENS =====
+
 
     private String criarMensagemCampanha(String titulo, String descricao) {
         return String.format(

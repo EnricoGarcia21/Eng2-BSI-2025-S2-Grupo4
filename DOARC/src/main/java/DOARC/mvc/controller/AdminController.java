@@ -1,8 +1,12 @@
 package DOARC.mvc.controller;
 
+import DOARC.mvc.model.Campanha;
+import DOARC.mvc.model.CampResponsavel;
 import DOARC.mvc.model.Login;
 import DOARC.mvc.model.Voluntario;
-import org.springframework.beans.factory.annotation.Autowired;
+import DOARC.mvc.util.Conexao;
+import DOARC.mvc.util.SingletonDB;
+import DOARC.mvc.util.ValidationUtil;
 import org.springframework.stereotype.Controller;
 
 import java.util.ArrayList;
@@ -13,12 +17,9 @@ import java.util.Map;
 @Controller
 public class AdminController {
 
-    @Autowired
-    private Voluntario voluntarioModel;
-
-    @Autowired
-    private Login loginModel;
-
+    private Conexao getConexao() {
+        return SingletonDB.conectar();
+    }
 
     private Map<String, Object> voluntarioToMap(Voluntario v) {
         Map<String, Object> map = new HashMap<>();
@@ -38,24 +39,22 @@ public class AdminController {
         return map;
     }
 
-
-    private long contarAdminsAtivos() {
-        List<Login> todos = loginModel.consultar("");
+    private long contarAdminsAtivos(Conexao conexao) {
+        List<Login> todos = Login.get("", conexao);
         return todos.stream()
                 .filter(l -> "ADMIN".equalsIgnoreCase(l.getNivelAcesso()) && (l.getStatus() == 'A' || l.getStatus() == 'a'))
                 .count();
     }
 
-
     public List<Map<String, Object>> listarUsuarios() {
         List<Map<String, Object>> result = new ArrayList<>();
         try {
-            List<Voluntario> lista = voluntarioModel.consultar("");
+            Conexao conexao = getConexao();
+            List<Voluntario> lista = Voluntario.get("", conexao);
 
             for (Voluntario v : lista) {
-                Login login = loginModel.buscarPorVoluntarioId(v.getVol_id());
+                Login login = Login.get(v.getVol_id(), conexao);
 
-                // Se for ADMIN, pula (não mostra na lista comum de voluntários)
                 if (login != null && "ADMIN".equalsIgnoreCase(login.getNivelAcesso())) {
                     continue;
                 }
@@ -76,10 +75,10 @@ public class AdminController {
         return result;
     }
 
-    // Busca um voluntário específico
     public Map<String, Object> getVoluntario(int id) {
         try {
-            Voluntario voluntario = voluntarioModel.consultar(id);
+            Conexao conexao = getConexao();
+            Voluntario voluntario = Voluntario.get(id, conexao);
             if (voluntario == null) return Map.of("erro", "Voluntário não encontrado");
             return voluntarioToMap(voluntario);
         } catch (Exception e) {
@@ -87,16 +86,23 @@ public class AdminController {
         }
     }
 
-    // Atualiza dados do voluntário
     public Map<String, Object> updtVoluntario(Voluntario voluntario) {
         try {
-            Voluntario existente = voluntarioModel.consultar(voluntario.getVol_id());
+            Conexao conexao = getConexao();
+            Voluntario existente = Voluntario.get(voluntario.getVol_id(), conexao);
             if (existente == null) return Map.of("erro", "Voluntário não encontrado");
 
             existente.setVol_nome(voluntario.getVol_nome());
-            existente.setVol_cpf(voluntario.getVol_cpf());
+
+
+            if (voluntario.getVol_cpf() != null) {
+                existente.setVol_cpf(ValidationUtil.cleanCPF(voluntario.getVol_cpf()));
+            }
+            if (voluntario.getVol_telefone() != null) {
+                existente.setVol_telefone(ValidationUtil.cleanPhone(voluntario.getVol_telefone()));
+            }
+
             existente.setVol_email(voluntario.getVol_email());
-            existente.setVol_telefone(voluntario.getVol_telefone());
             existente.setVol_datanasc(voluntario.getVol_datanasc());
             existente.setVol_sexo(voluntario.getVol_sexo());
             existente.setVol_cep(voluntario.getVol_cep());
@@ -106,7 +112,7 @@ public class AdminController {
             existente.setVol_cidade(voluntario.getVol_cidade());
             existente.setVol_uf(voluntario.getVol_uf());
 
-            Voluntario atualizado = voluntarioModel.alterar(existente);
+            Voluntario atualizado = existente.alterar(conexao);
 
             if (atualizado != null) return voluntarioToMap(atualizado);
             return Map.of("erro", "Falha ao atualizar dados no banco");
@@ -116,84 +122,94 @@ public class AdminController {
         }
     }
 
-    // Deleta voluntário (com proteção para não apagar o último admin)
     public Map<String, Object> deletarVoluntario(int id) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Voluntario v = voluntarioModel.consultar(id);
+            Conexao conexao = getConexao();
+            Voluntario v = Voluntario.get(id, conexao);
             if (v == null) {
                 response.put("erro", "Voluntário não encontrado");
                 return response;
             }
 
-            Login login = loginModel.buscarPorVoluntarioId(id);
-            if (login != null) {
 
+            Login login = Login.get(id, conexao);
+            if (login != null) {
                 if ("ADMIN".equalsIgnoreCase(login.getNivelAcesso())) {
-                    if (contarAdminsAtivos() <= 1) {
-                        response.put("erro", "Não é possível remover o único administrador do sistema.");
+                    if (contarAdminsAtivos(conexao) <= 1 && (login.getStatus() == 'A' || login.getStatus() == 'a')) {
+                        response.put("erro", "Não é possível remover o único administrador ativo.");
                         return response;
                     }
                 }
-                loginModel.apagar(login);
+                login.apagar(conexao);
             }
 
-            boolean sucesso = voluntarioModel.apagar(v);
-            if (sucesso) response.put("mensagem", "Voluntário removido com sucesso");
-            else response.put("erro", "Não foi possível remover o voluntário");
+
+            List<CampResponsavel> participacoes = CampResponsavel.getPorVoluntario(id, conexao);
+            for (CampResponsavel cr : participacoes) {
+                cr.apagar(conexao);
+            }
+
+
+            List<Campanha> campanhasCriadas = Campanha.getPorVoluntario(id, conexao);
+            for (Campanha c : campanhasCriadas) {
+                if (c.getVoluntario_vol_id() == id) {
+                    List<CampResponsavel> parts = CampResponsavel.get("camp_id = " + c.getCam_id(), conexao);
+                    for (CampResponsavel p : parts) p.apagar(conexao);
+                    c.apagar(conexao);
+                }
+            }
+
+            // 4. Remover Voluntário
+            if (v.apagar(conexao)) {
+                response.put("mensagem", "Voluntário removido com sucesso");
+            } else {
+                response.put("erro", "Erro ao remover voluntário (Vínculos persistentes)");
+            }
 
         } catch (Exception e) {
+            e.printStackTrace();
             response.put("erro", "Erro ao deletar: " + e.getMessage());
         }
         return response;
     }
 
-
     public List<Login> listarLogins() {
-        return loginModel.consultar("");
+        return Login.get("", getConexao());
     }
 
     public Login buscarLoginPorVoluntarioId(int voluntarioId) {
-        return loginModel.buscarPorVoluntarioId(voluntarioId);
+        return Login.get(voluntarioId, getConexao());
     }
 
-    // Atualiza status (Ativar/Desativar) com proteção
     public boolean atualizarStatusLogin(int voluntarioId, char novoStatus) {
-        Login login = loginModel.buscarPorVoluntarioId(voluntarioId);
-
-
+        Conexao conexao = getConexao();
+        Login login = Login.get(voluntarioId, conexao);
         if (login != null && "ADMIN".equalsIgnoreCase(login.getNivelAcesso())) {
-
-            if ((novoStatus == 'I' || novoStatus == 'i') && contarAdminsAtivos() <= 1) {
-                System.err.println("Tentativa de desativar o último admin bloqueada.");
+            if ((novoStatus == 'I' || novoStatus == 'i') && contarAdminsAtivos(conexao) <= 1) {
                 return false;
             }
         }
-
-        return loginModel.atualizarStatus(voluntarioId, novoStatus);
+        return Login.atualizarStatus(voluntarioId, String.valueOf(novoStatus), conexao);
     }
-
 
     public Login atualizarNivelAcesso(int voluntarioId, String novoNivel) {
-        Login login = loginModel.buscarPorVoluntarioId(voluntarioId);
+        Conexao conexao = getConexao();
+        Login login = Login.get(voluntarioId, conexao);
         if (login == null) return null;
-
-
         if ("ADMIN".equalsIgnoreCase(login.getNivelAcesso()) && !"ADMIN".equalsIgnoreCase(novoNivel)) {
-            if (contarAdminsAtivos() <= 1) {
-                throw new RuntimeException("Não é possível rebaixar o único administrador.");
-            }
+            if (contarAdminsAtivos(conexao) <= 1) throw new RuntimeException("Não é possível rebaixar o único administrador.");
         }
-
         login.setNivelAcesso(novoNivel);
-        return loginModel.alterar(login);
+        return login.alterar(conexao);
     }
 
+
     public List<Voluntario> listarTodosVoluntarios() {
-        return voluntarioModel.consultar("");
+        return Voluntario.get("", getConexao());
     }
 
     public Voluntario buscarVoluntarioPorId(int id) {
-        return voluntarioModel.consultar(id);
+        return Voluntario.get(id, getConexao());
     }
 }

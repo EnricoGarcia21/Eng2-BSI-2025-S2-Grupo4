@@ -29,6 +29,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/apis/acesso/logar",
             "/apis/acesso/registrar",
             "/apis/acesso/registrar-admin",
+            // CORREÇÃO: Libera a verificação de CPF para o cadastro
+            "/apis/acesso/verificar-cpf",
             "/error",
             "/favicon.ico"
     );
@@ -61,7 +63,6 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         String authHeader = request.getHeader("Authorization");
-        System.out.println("🔍 Authorization Header: " + (authHeader != null ? "Bearer ***" : "null"));
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
@@ -75,8 +76,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 request.setAttribute("email", email);
                 request.setAttribute("role", role);
                 request.setAttribute("authenticated", true);
-
-                System.out.println("✅ Token válido - Email: " + email + ", Role: " + role);
 
             } catch (JwtException e) {
                 System.err.println("❌ Token inválido: " + e.getMessage());
@@ -104,14 +103,11 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        boolean isPublic = isPublicPath(path);
-
-        System.out.println("🔍 shouldNotFilter - Path: " + path + " | IsPublic: " + isPublic);
-
-        return isPublic;
+        return isPublicPath(path);
     }
 
     private boolean isPublicPath(String path) {
+        // CORREÇÃO: 'startsWith' garante que /apis/acesso/verificar-cpf/123456... seja aceito
         return PUBLIC_PATHS.stream().anyMatch(publicPath ->
                 path.startsWith(publicPath) || path.equals(publicPath)
         );

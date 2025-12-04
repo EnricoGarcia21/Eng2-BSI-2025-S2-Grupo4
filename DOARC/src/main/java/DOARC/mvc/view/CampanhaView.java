@@ -1,6 +1,7 @@
 package DOARC.mvc.view;
 
 import DOARC.mvc.controller.CampanhaController;
+import DOARC.mvc.controller.VoluntarioController;
 import DOARC.mvc.model.Campanha;
 import DOARC.mvc.model.EmailNotification;
 import DOARC.mvc.model.Voluntario;
@@ -25,12 +26,10 @@ public class CampanhaView {
     private CampanhaController campanhaController;
 
     @Autowired
-    private Voluntario voluntarioModel;
+    private VoluntarioController voluntarioController;
 
     @Autowired
     private EmailNotification emailNotification;
-
-    // Conexao getConexao() REMOVIDA
 
     private boolean isAdmin(HttpServletRequest request) {
         Boolean authenticated = (Boolean) request.getAttribute("authenticated");
@@ -109,25 +108,25 @@ public class CampanhaView {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Notificação por e-mail (Corrigida: Sem Conexao)
-            new Thread(() -> {
-                try {
-                    // consultar("") agora funciona sem conexão pois a Model gerencia
-                    List<Voluntario> voluntarios = voluntarioModel.consultar("");
-                    List<String> emails = voluntarios.stream()
-                            .map(Voluntario::getVol_email)
-                            .filter(email -> email != null && !email.trim().isEmpty())
-                            .collect(Collectors.toList());
-
-                    if (!emails.isEmpty()) {
-                        String titulo = "Nova Campanha: " + novaCampanha.getCam_desc();
-                        String descricao = String.format("Meta: R$ %.2f", novaCampanha.getCam_meta_arrecadacao());
-                        emailNotification.enviarNotificacaoCampanha(emails, titulo, descricao);
-                    }
-                } catch (Exception e) {
-                    System.err.println("Erro ao enviar notificação: " + e.getMessage());
-                }
-            }).start();
+//            new Thread(() -> {
+//                try {
+//
+//                    List<Voluntario> voluntarios = voluntarioController.listarTodos();
+//
+//                    List<String> emails = voluntarios.stream()
+//                            .map(Voluntario::getVol_email)
+//                            .filter(email -> email != null && !email.trim().isEmpty())
+//                            .collect(Collectors.toList());
+//
+//                    if (!emails.isEmpty()) {
+//                        String titulo = "Nova Campanha: " + novaCampanha.getCam_desc();
+//                        String descricao = String.format("Meta: R$ %.2f", novaCampanha.getCam_meta_arrecadacao());
+//                        emailNotification.enviarNotificacaoCampanha(emails, titulo, descricao);
+//                    }
+//                } catch (Exception e) {
+//                    System.err.println("Erro ao enviar notificação: " + e.getMessage());
+//                }
+//            }).start();
 
             response.put("success", true);
             response.put("message", "Campanha lançada com sucesso!");
