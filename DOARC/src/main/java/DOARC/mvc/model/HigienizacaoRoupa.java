@@ -1,10 +1,9 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.HigienizacaoRoupaDAO;
-import DOARC.mvc.util.Conexao; // Importação necessária
+import DOARC.mvc.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 
 @Component
@@ -17,11 +16,10 @@ public class HigienizacaoRoupa {
     private String higLocal;
     private String higHora;
     private double higValorPago;
+    private String higUltimoAlerta; // NOVO CAMPO
 
     @Autowired
     private HigienizacaoRoupaDAO dao;
-
-    // --- CONSTRUTORES --- (Inalterados)
 
     public HigienizacaoRoupa() {
     }
@@ -34,30 +32,30 @@ public class HigienizacaoRoupa {
         this.higLocal = higLocal;
         this.higHora = higHora;
         this.higValorPago = higValorPago;
+        this.higUltimoAlerta = "NENHUM"; // Valor padrão
     }
 
-    // --- MÉTODOS DE DELEGAÇÃO PARA O DAO (ALTERADOS) ---
-    public List<HigienizacaoRoupa> consultar(String filtro, Conexao conexao) { // Recebe e repassa
+    public List<HigienizacaoRoupa> consultar(String filtro, Conexao conexao) {
         return dao.get(filtro, conexao);
     }
 
-    public HigienizacaoRoupa consultar(int id, Conexao conexao) { // Recebe e repassa
+    public HigienizacaoRoupa consultar(int id, Conexao conexao) {
         return dao.get(id, conexao);
     }
 
-    public HigienizacaoRoupa gravar(HigienizacaoRoupa higienizacao, Conexao conexao) { // Recebe e repassa
+    public HigienizacaoRoupa gravar(HigienizacaoRoupa higienizacao, Conexao conexao) {
         return dao.gravar(higienizacao, conexao);
     }
 
-    public HigienizacaoRoupa alterar(HigienizacaoRoupa higienizacao, Conexao conexao) { // Recebe e repassa
+    public HigienizacaoRoupa alterar(HigienizacaoRoupa higienizacao, Conexao conexao) {
         return dao.alterar(higienizacao, conexao);
     }
 
-    public boolean apagar(HigienizacaoRoupa higienizacao, Conexao conexao) { // Recebe e repassa
+    public boolean apagar(HigienizacaoRoupa higienizacao, Conexao conexao) {
         return dao.apagar(higienizacao, conexao);
     }
 
-    // --- GETTERS E SETTERS --- (Inalterados)
+    // GETTERS E SETTERS ATUALIZADOS
     public int getHigId() { return higId; }
     public void setHigId(int higId) { this.higId = higId; }
     public String getHigDataAgendada() { return higDataAgendada; }
@@ -72,4 +70,6 @@ public class HigienizacaoRoupa {
     public void setHigHora(String higHora) { this.higHora = higHora; }
     public double getHigValorPago() { return higValorPago; }
     public void setHigValorPago(double higValorPago) { this.higValorPago = higValorPago; }
+    public String getHigUltimoAlerta() { return higUltimoAlerta; }
+    public void setHigUltimoAlerta(String higUltimoAlerta) { this.higUltimoAlerta = higUltimoAlerta; }
 }
