@@ -456,3 +456,5 @@ INSERT INTO Verificar_Necessidade (VER_DATA, VER_OBS, VER_RESULTADO, VOL_ID, DON
 ('15/09/2025', 'Verificação inicial da família 1.', 'Necessidade alta de alimentos.', 1, 1),
 ('16/09/2025', 'Verificação da família 2 após doação.', 'Necessidade média de vestuário.', 2, 2),
 ('17/09/2025', 'Verificação da família 3.', 'Necessidade alta de cobertores.', 3, 3);
+
+ALTER TABLE higienizacao_roupas ADD COLUMN hig_ultimo_alerta VARCHAR(20) DEFAULT 'NENHUM';
