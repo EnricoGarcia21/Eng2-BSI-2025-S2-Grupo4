@@ -282,7 +282,7 @@
         const categoriaId = document.getElementById('filtroCategoria').value;
         const nome = document.getElementById('searchInput').value; 
         // O endpoint do GET é: /api/produtos?categoriaId={id}&nome={nome}
-        const query = `/produtos?categoriaId=${categoriaId}&nome=${nome}`;
+const query = `/api/produtos?categoriaId=${categoriaId}&nome=${nome}`;
 
         try {
             const produtos = await API.get(query);
@@ -355,7 +355,7 @@
         UI.confirm('Tem certeza que deseja excluir este produto?', async function() {
             try {
                 // Endpoint: DELETE /api/produtos/{id}
-                await API.delete(`/produtos/${id}`); 
+                await API.delete(`/api/produtos/${id}`); 
                 UI.showAlert('Produto excluído com sucesso!', 'success');
                 filtrarPorCategoria(); // Recarrega a lista
             }
@@ -365,24 +365,17 @@
         });
     }
 
-    // FUNÇÃO ATUALIZADA: Busca os dados do produto pelo ID e abre o modal para edição
     async function editarProduto(id) {
         try {
-            // Endpoint: GET /api/produtos/{id}
-            const produto = await API.get(`/produtos/${id}`); 
-
-            // Preenche o formulário
+            const produto = await API.get(`/api/produtos/${id}`); 
             document.getElementById('produtoId').value = produto.id; 
             document.getElementById('modalTitle').textContent = 'Editar Produto';
             document.getElementById('nome').value = produto.nome;
-            // Use produto.categoriaId para selecionar a opção correta
             document.getElementById('categoria').value = produto.categoriaId; 
-            // Usa 'quant' (ou 'quantidade') para preencher o campo 'quantidade' no modal
             document.getElementById('quantidade').value = produto.quant ?? produto.quantidade ?? 0; 
             document.getElementById('descricao').value = produto.descricao || '';
             document.getElementById('informacoesAdicionais').value = produto.informacoesAdicionais || '';
 
-            // Limpar erros de validação (Se Validator existir)
             if (typeof Validator !== 'undefined' && Validator.clearAllErrors) {
                 Validator.clearAllErrors(document.getElementById('formProduto'));
             }
@@ -394,7 +387,6 @@
         }
     }
 
-    // Função de Salvar (Criação ou Edição)
     async function salvarProduto() {
         const form = document.getElementById('formProduto');
         const produtoId = document.getElementById('produtoId').value;
@@ -404,13 +396,12 @@
         const descricao = document.getElementById('descricao');
         const informacoesAdicionais = document.getElementById('informacoesAdicionais');
 
-        // Validação (Assume que Validator existe em app.js)
         if (typeof Validator !== 'undefined') {
             Validator.clearAllErrors(form); 
         }
         
         let isValid = true;
-
+        
         if (typeof Validator !== 'undefined' && Validator.isEmpty(nome.value)) {
             Validator.showError(nome, 'Nome é obrigatório');
             isValid = false;
@@ -422,8 +413,7 @@
         if (typeof Validator !== 'undefined' && (Validator.isEmpty(quantidade.value) || parseInt(quantidade.value) < 0)) {
             Validator.showError(quantidade, 'Quantidade é obrigatória e não pode ser negativa');
             isValid = false;
-        } else if (quantidade.value === "") { // Validação simples caso Validator não exista
-             // Não está validando corretamente, mas assumimos que o Validator existe.
+        } else if (quantidade.value === "") { 
         }
         
         if (!isValid) return;
@@ -442,11 +432,11 @@
             
             if (produtoId) {
                 // PUT /api/produtos/{id}
-                await API.put(`/produtos/${produtoId}`, data);
+                await API.put(`/api/produtos/${produtoId}`, data);
                 UI.showAlert('Produto atualizado com sucesso!', 'success');
             } else {
                 // POST /api/produtos
-                await API.post('/produtos', data);
+                await API.post('/api/produtos', data);
                 UI.showAlert('Produto cadastrado com sucesso!', 'success');
             }
 
@@ -457,4 +447,4 @@
              console.error('Falha ao salvar produto:', error.message);
         }
     }
-</script>
+</script>x

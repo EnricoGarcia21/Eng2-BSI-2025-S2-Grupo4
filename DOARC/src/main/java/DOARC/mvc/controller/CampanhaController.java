@@ -23,7 +23,7 @@ public class CampanhaController {
         json.put("cam_id", c.getCam_id());
         json.put("cam_data_ini", c.getCam_data_ini());
         json.put("cam_data_fim", c.getCam_data_fim());
-        json.put("voluntario_vol_id", c.getVoluntario_vol_id());
+        json.put("_vol_id", c.getVoluntario_vol_id());
         json.put("cam_desc", c.getCam_desc());
         json.put("cam_meta_arrecadacao", c.getCam_meta_arrecadacao());
         json.put("cam_valor_arrecadado", c.getCam_valor_arrecadado());

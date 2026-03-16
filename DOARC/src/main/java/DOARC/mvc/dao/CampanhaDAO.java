@@ -22,7 +22,7 @@ public class CampanhaDAO implements IDAO<Campanha> {
     public Campanha gravar(Campanha c, Conexao conexao) {
         String sql = """
             INSERT INTO campanha 
-            (cam_data_ini, cam_data_fim, voluntario_vol_id, cam_desc, 
+            (cam_data_ini, cam_data_fim, vol_id, cam_desc, 
              cam_meta_arrecadacao, cam_valor_arrecadado)
             VALUES (?, ?, ?, ?, ?, ?)
         """;
@@ -196,7 +196,7 @@ public class CampanhaDAO implements IDAO<Campanha> {
         c.setCam_id(rs.getInt("cam_id"));
         c.setCam_data_ini(rs.getString("cam_data_ini"));
         c.setCam_data_fim(rs.getString("cam_data_fim"));
-        c.setVoluntario_vol_id(rs.getInt("voluntario_vol_id"));
+        c.setVoluntario_vol_id(rs.getInt("vol_id"));
         c.setCam_desc(rs.getString("cam_desc"));
         c.setCam_meta_arrecadacao(rs.getDouble("cam_meta_arrecadacao"));
         c.setCam_valor_arrecadado(rs.getDouble("cam_valor_arrecadado"));
@@ -206,7 +206,7 @@ public class CampanhaDAO implements IDAO<Campanha> {
 
     public List<Campanha> getCampanhasPorVoluntario(int voluntarioId, Conexao conexao) {
         List<Campanha> lista = new ArrayList<>();
-        String sql = "SELECT * FROM campanha WHERE voluntario_vol_id = ?";
+        String sql = "SELECT * FROM campanha WHERE vol_id = ?";
 
         try {
             Connection conn = conexao.getConnect();

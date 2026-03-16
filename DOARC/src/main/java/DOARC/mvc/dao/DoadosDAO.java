@@ -13,7 +13,7 @@ import java.sql.SQLException;
 @Repository
 public class DoadosDAO {
 
-    public Doados gravar(Doados entidade, Conexao conexao) throws SQLException {
+    public Doados gravar(Doados entidade, Conexao conexao) {
         Connection conn = conexao.getConnect();
 
         String sqlMestre = "INSERT INTO doados (doa_data_aquisicao, doa_tipo_doacao, vol_id, don_id, obs_doado, valor_doacao) " +
@@ -21,7 +21,10 @@ public class DoadosDAO {
 
         String sqlDetalhe = "INSERT INTO doadosproduto (doa_id, prod_id, dp_qtde) VALUES (?, ?, ?)";
 
-        // --- Inserir o mestre ---
+        // Como o Controller vai gerenciar o setAutoCommit(false) para controlar o estoque junto,
+        // aqui nós apenas executamos os PreparedStatement.
+        // O try-catch aqui serve para retornar null em caso de falha SQL, seguindo o padrão ProdutoDAO.
+
         try (PreparedStatement pstMestre = conn.prepareStatement(sqlMestre)) {
             pstMestre.setString(1, entidade.getDoaDataAquisicao());
             pstMestre.setString(2, entidade.getDoaTipoDoacao());
@@ -34,21 +37,25 @@ public class DoadosDAO {
             if (rs.next()) {
                 entidade.setDoaId(rs.getInt("doa_id"));
             } else {
-                throw new SQLException("Falha ao criar registro de doação: nenhum ID retornado.");
+                return null; // Falha ao gerar ID
             }
-        }
 
-        // --- Inserir os detalhes ---
-        try (PreparedStatement pstDetalhe = conn.prepareStatement(sqlDetalhe)) {
-            for (DoadosProduto dp : entidade.getProdutos()) {
-                pstDetalhe.setInt(1, entidade.getDoaId());
-                pstDetalhe.setInt(2, dp.getProdId());
-                pstDetalhe.setBigDecimal(3, dp.getDpQtde());
-                pstDetalhe.addBatch();
+            // Gravar os itens (Produtos da doação)
+            try (PreparedStatement pstDetalhe = conn.prepareStatement(sqlDetalhe)) {
+                for (DoadosProduto dp : entidade.getProdutos()) {
+                    pstDetalhe.setInt(1, entidade.getDoaId());
+                    pstDetalhe.setInt(2, dp.getProdId());
+                    pstDetalhe.setBigDecimal(3, dp.getDpQtde());
+                    pstDetalhe.addBatch();
+                }
+                pstDetalhe.executeBatch();
             }
-            pstDetalhe.executeBatch();
-        }
 
-        return entidade;
+            return entidade; // Sucesso
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null; // Retorna null em caso de erro, igual ao ProdutoDAO
+        }
     }
 }

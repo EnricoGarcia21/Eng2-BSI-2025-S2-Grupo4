@@ -140,12 +140,10 @@ public class DonatarioController {
     // --- DELETE ---
     public Map<String, Object> deletarDonatario(int id) {
         Conexao conexao = getConexao(); // 1. INSTANCIA a Conexão
-        // Chama o método consultar da Model, PASSANDO a Conexão
         Donatario d = donatarioModel.consultar(id, conexao);
 
         if (d == null) return Map.of("erro", "Donatário não encontrado");
 
-        // Chama o método apagar da Model, PASSANDO a Conexão
         boolean deletado = donatarioModel.apagar(d, conexao);
         return deletado ? Map.of("mensagem", "Donatário removido com sucesso") : Map.of("erro", "Erro ao remover o Donatário");
     }

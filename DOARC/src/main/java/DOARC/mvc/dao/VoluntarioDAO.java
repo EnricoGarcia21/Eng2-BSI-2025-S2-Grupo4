@@ -112,9 +112,6 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         return null;
     }
 
-    // =====================================================
-    // ✅ LISTAR / BUSCAR FILTRADO
-    // =====================================================
     @Override
     public List<Voluntario> get(String filtro, Conexao conexao) {
         List<Voluntario> lista = new ArrayList<>();
@@ -141,9 +138,7 @@ public class VoluntarioDAO implements IDAO<Voluntario> {
         return lista;
     }
 
-    // =====================================================
-    // ✅ MAPEAMENTO
-    // =====================================================
+
     private Voluntario mapVoluntario(ResultSet rs) throws SQLException {
         Voluntario v = new Voluntario();
 

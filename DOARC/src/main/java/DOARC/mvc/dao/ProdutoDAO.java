@@ -2,11 +2,13 @@ package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Produto;
 import DOARC.mvc.util.Conexao;
+import org.springframework.stereotype.Repository;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class ProdutoDAO {
 
     public Produto gravar(Produto produto, Conexao conexao) {
@@ -113,5 +115,57 @@ public class ProdutoDAO {
             e.printStackTrace();
         }
         return lista;
+    }
+
+
+    public boolean adicionarEstoque(int produtoId, int quantidadeAAdicionar, Conexao conexao) {
+        String sql = "UPDATE produto SET prod_quant = prod_quant + ? " +
+                "WHERE prod_id = ?";
+
+        try (PreparedStatement pst = conexao.getConnect().prepareStatement(sql)) {
+            pst.setInt(1, quantidadeAAdicionar);
+            pst.setInt(2, produtoId);
+
+            return pst.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean subtrairEstoque(int produtoId, int quantidadeASubtrair, Conexao conexao) {
+
+        String sql = "UPDATE produto SET prod_quant = prod_quant - ? " +
+                "WHERE prod_id = ? AND prod_quant >= ?";
+
+        try (PreparedStatement pst = conexao.getConnect().prepareStatement(sql)) {
+            pst.setInt(1, quantidadeASubtrair);
+            pst.setInt(2, produtoId);
+            pst.setInt(3, quantidadeASubtrair);
+
+            int linhasAfetadas = pst.executeUpdate();
+
+            return linhasAfetadas > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean setarEstoque(int produtoId, int quantidadeExata, Conexao conexao) {
+        String sql = "UPDATE produto SET prod_quant = ? WHERE prod_id = ?";
+
+        try (PreparedStatement pst = conexao.getConnect().prepareStatement(sql)) {
+            pst.setInt(1, quantidadeExata);
+            pst.setInt(2, produtoId);
+
+            return pst.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

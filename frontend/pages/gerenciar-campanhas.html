@@ -462,7 +462,7 @@ async function carregarVoluntarios() {
         document.getElementById('dataInicio').value = formatarDataParaInput(campanha.cam_data_ini);
         document.getElementById('dataFim').value = formatarDataParaInput(campanha.cam_data_fim);
         document.getElementById('meta').value = campanha.cam_meta_arrecadacao || '';
-        document.getElementById('responsavel').value = campanha.voluntario_vol_id || '';
+        document.getElementById('responsavel').value = campanha.vol_id || '';
         document.getElementById('observacoes').value = campanha.cam_observacoes || '';
         
         UI.openModal('modalCampanha');
@@ -623,7 +623,7 @@ async function carregarVoluntarios() {
                 cam_desc: descricao.value,
                 cam_data_ini: dataInicio.value,
                 cam_data_fim: dataFim.value,
-                voluntario_vol_id: parseInt(responsavel.value),
+                vol_id: parseInt(responsavel.value),
                 cam_meta_arrecadacao: parseFloat(document.getElementById('meta').value) || 0,
                 cam_observacoes: document.getElementById('observacoes').value,
                 cam_valor_arrecadado:valoArrecadadoAtual

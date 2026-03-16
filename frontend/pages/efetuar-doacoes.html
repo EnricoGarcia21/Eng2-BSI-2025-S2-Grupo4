@@ -7,436 +7,394 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-content">
-            <a href="dashboard.html" class="logo">DOARC</a>
-            <div class="user-menu">
-                <span class="user-name" id="userName">Voluntário</span>
-                <button class="btn-logout" id="logoutBtn">Sair</button>
-            </div>
+<header class="header">
+    <div class="header-content">
+        <a href="dashboard.html" class="logo">DOARC</a>
+        <div class="user-menu">
+            <span class="user-name" id="userName">Voluntário</span>
+            <button class="btn-logout" id="logoutBtn">Sair</button>
         </div>
-    </header>
+    </div>
+</header>
 
-    <!-- Navigation -->
-    <nav class="nav">
-        <ul class="nav-list">
-            <li class="nav-item">
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">Gerenciar</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
-                    <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
-                    <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
-                    <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
-                    <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
-                    <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
-                </ul>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link active">Doações</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
-                    <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
-                    <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
-                    <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
-                </ul>
-            </li>
-            <li class="nav-item">
-                <a href="#" class="nav-link">Estoque</a>
-                <ul class="submenu">
-                    <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
-                    <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
-                    <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
-                    <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
-                </ul>
-            </li>
-            <li class="nav-item">
-                <a href="relatorios.html" class="nav-link">Relatórios</a>
-            </li>
-        </ul>
-    </nav>
+<nav class="nav">
+    <ul class="nav-list">
+        <li class="nav-item">
+            <a href="dashboard.html" class="nav-link">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">Gerenciar</a>
+            <ul class="submenu">
+                <li class="submenu-item"><a href="gerenciar-doadores.html" class="submenu-link">Doadores</a></li>
+                <li class="submenu-item"><a href="gerenciar-donatarios.html" class="submenu-link">Donatários</a></li>
+                <li class="submenu-item"><a href="gerenciar-produtos.html" class="submenu-link">Produtos</a></li>
+                <li class="submenu-item"><a href="gerenciar-categorias.html" class="submenu-link">Categorias</a></li>
+                <li class="submenu-item"><a href="gerenciar-voluntarios.html" class="submenu-link">Voluntários</a></li>
+                <li class="submenu-item"><a href="gerenciar-campanhas.html" class="submenu-link">Campanhas</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link active">Doações</a>
+            <ul class="submenu">
+                <li class="submenu-item"><a href="receber-doacoes.html" class="submenu-link">Receber Doações</a></li>
+                <li class="submenu-item"><a href="efetuar-doacoes.html" class="submenu-link">Efetuar Doações</a></li>
+                <li class="submenu-item"><a href="agendar-doacao.html" class="submenu-link">Agendar Doação</a></li>
+                <li class="submenu-item"><a href="agendar-retirada.html" class="submenu-link">Agendar Retirada</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">Estoque</a>
+            <ul class="submenu">
+                <li class="submenu-item"><a href="visualizar-estoque.html" class="submenu-link">Visualizar Estoque</a></li>
+                <li class="submenu-item"><a href="registrar-acerto.html" class="submenu-link">Acerto de Estoque</a></li>
+                <li class="submenu-item"><a href="lancar-compra.html" class="submenu-link">Lançar Compra/Arrecadação</a></li>
+                <li class="submenu-item"><a href="agendar-higienizacao.html" class="submenu-link">Agendar Higienização</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a href="relatorios.html" class="nav-link">Relatórios</a>
+        </li>
+    </ul>
+</nav>
 
-    <!-- Main Content -->
-    <main class="container">
-        <div class="breadcrumb">
-            <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
-            <div class="breadcrumb-item">Doações</div>
-            <div class="breadcrumb-item active">Efetuar Doações</div>
+<main class="container">
+    <div class="breadcrumb">
+        <div class="breadcrumb-item"><a href="dashboard.html">Dashboard</a></div>
+        <div class="breadcrumb-item">Doações</div>
+        <div class="breadcrumb-item active">Efetuar Doações</div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h1 class="card-title">Efetuar Doações</h1>
+            <p class="card-subtitle">Registre a distribuição de produtos para donatários</p>
         </div>
+        <div class="card-body">
+            <form id="formEfetuarDoacao">
 
-        <div class="card">
-            <div class="card-header">
-                <h1 class="card-title">Efetuar Doações</h1>
-                <p class="card-subtitle">Registre a distribuição de produtos para donatários</p>
-            </div>
-            <div class="card-body">
-                <form id="formEfetuarDoacao">
-                    <!-- Informações do Donatário -->
-                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">Informações do Donatário</h3>
+                <div id="secaoProdutos">
+                    <h3 style="color: var(--primary-color); margin: 0 0 1rem;">1. Produtos a Doar</h3>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="produto" class="form-label required">Produto</label>
+                            <select id="produto" class="form-control form-select" onchange="verificarEstoque()">
+                                <option value="">Selecione um produto</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="infoEstoque" style="display: none; padding: 1rem; background: #e8f4f8; border-radius: 8px; margin-bottom: 1rem;">
+                        <strong>Estoque disponível:</strong> <span id="estoqueDisponivel">0</span> un
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quantidade" class="form-label required">Quantidade a doar</label>
+                            <input type="number" id="quantidade" class="form-control" min="1">
+                        </div>
+
+                        <div class="form-group" style="align-self: flex-end;">
+                            <button type="button" class="btn btn-secondary" onclick="adicionarProduto()">
+                                ➕ Adicionar Produto
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="listaProdutos" style="margin-top: 1rem; display: none;">
+                        <h4>Itens nesta Doação:</h4>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Quantidade (DP_QTDE)</th>
+                                    <th>Ações</th>
+                                </tr>
+                                </thead>
+                                <tbody id="tabelaProdutosAdicionados"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="secaoDadosDoacao">
+                    <hr style="margin: 2rem 0;">
+                    <h3 style="color: var(--primary-color); margin-bottom: 1rem;">2. Informações da Doação</h3>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="donatario" class="form-label required">Donatário</label>
                             <select id="donatario" class="form-control form-select" required>
                                 <option value="">Selecione um donatário</option>
-                                <option value="1">Ana Paula Silva - 111.222.333-44</option>
-                                <option value="2">Carlos Oliveira - 555.666.777-88</option>
-                                <option value="3">Família Santos - 999.888.777-66</option>
-                            </select>
-                            <div class="form-error">Selecione um donatário</div>
-                            <div class="form-text">
-                                <a href="gerenciar-donatarios.html" style="color: var(--primary-color);">
-                                    Cadastrar novo donatário
-                                </a>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dataDoacao" class="form-label required">Data da Doação</label>
-                            <input type="date" id="dataDoacao" class="form-control" required>
-                            <div class="form-error">Data é obrigatória</div>
-                        </div>
-                    </div>
-
-                    <!-- Produtos Doados -->
-                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Produtos a Doar</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="categoria" class="form-label required">Categoria</label>
-                            <select id="categoria" class="form-control form-select" onchange="carregarProdutosPorCategoria()">
-                                <option value="">Selecione uma categoria</option>
-                                <option value="1">Alimentos</option>
-                                <option value="2">Roupas</option>
-                                <option value="3">Higiene</option>
-                                <option value="4">Móveis</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label for="produto" class="form-label required">Produto</label>
-                            <select id="produto" class="form-control form-select" onchange="verificarEstoque()">
-                                <option value="">Selecione um produto</option>
+                            <label for="voluntario" class="form-label required">Voluntário Responsável</label>
+                            <select id="voluntario" class="form-control form-select" required>
+                                <option value="">Selecione um voluntário</option>
                             </select>
-                            <div id="avisoEstoque" class="form-text" style="display: none; color: var(--danger-color); font-weight: bold;">
-                                Estoque insuficiente!
-                            </div>
                         </div>
-                    </div>
-
-                    <div id="infoEstoque" style="display: none; padding: 1rem; background: #e8f4f8; border-radius: 8px; margin-bottom: 1rem;">
-                        <strong>Estoque disponível:</strong> <span id="estoqueDisponivel">0</span> <span id="unidadeEstoque">un</span>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="quantidade" class="form-label required">Quantidade</label>
-                            <input type="number" id="quantidade" class="form-control" min="1">
-                            <div class="form-error">Informe a quantidade</div>
+                            <label for="dataDoacao" class="form-label">Data da Doação</label>
+                            <input type="text" id="dataDoacao" class="form-control" readonly disabled>
+                            <div class="form-text">Data atual (não pode ser alterada)</div>
                         </div>
-
-                        <div class="form-group">
-                            <label for="unidadeMedida" class="form-label required">Unidade</label>
-                            <select id="unidadeMedida" class="form-control form-select" disabled>
-                                <option value="un">Unidade</option>
-                                <option value="kg">Kg</option>
-                                <option value="l">Litro</option>
-                                <option value="cx">Caixa</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="dataValidade" class="form-label">Data de Validade</label>
-                            <input type="date" id="dataValidade" class="form-control" disabled>
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn btn-secondary" onclick="adicionarProduto()">
-                        ➕ Adicionar Produto
-                    </button>
-
-                    <!-- Lista de Produtos Adicionados -->
-                    <div id="listaProdutos" style="margin-top: 2rem; display: none;">
-                        <h4>Produtos a Doar:</h4>
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Produto</th>
-                                        <th>Quantidade</th>
-                                        <th>Validade</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaProdutosAdicionados"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Campanha -->
-                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">Informações Adicionais</h3>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="campanha" class="form-label">Campanha Associada</label>
-                            <select id="campanha" class="form-control form-select">
-                                <option value="">Nenhuma campanha</option>
-                                <option value="1">Campanha de Natal 2025</option>
-                                <option value="2">Páscoa Solidária 2025</option>
-                                <option value="3">Inverno Solidário</option>
-                            </select>
-                            <div class="form-text">Opcional - associe a doação a uma campanha</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="condicao" class="form-label">Condição do Item</label>
-                            <select id="condicao" class="form-control form-select">
-                                <option value="novo">Novo</option>
-                                <option value="usado_bom">Usado - Bom Estado</option>
-                                <option value="usado_regular">Usado - Estado Regular</option>
-                            </select>
-                        </div>
+                        <div class="form-group"></div>
                     </div>
 
                     <div class="form-group">
-                        <label for="observacoesDoacao" class="form-label">Observações</label>
-                        <textarea id="observacoesDoacao" class="form-control" rows="3" placeholder="Informações adicionais sobre a doação..."></textarea>
+                        <label for="observacoesDoacao" class="form-label">Observações (obs_doado)</label>
+                        <textarea id="observacoesDoacao" class="form-control" rows="3" placeholder="Informações adicionais sobre esta doação..."></textarea>
                     </div>
+                </div>
 
-                    <div class="card-footer">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-outline" onclick="window.location.href='dashboard.html'">
-                                Cancelar
-                            </button>
-                            <button type="submit" class="btn btn-success">
-                                ✓ Registrar Doação
-                            </button>
-                        </div>
+                <div id="secaoCampanha">
+                    <hr style="margin: 2rem 0;">
+                    <h3 style="color: var(--primary-color); margin: 2rem 0 1rem;">3. Informações Adicionais</h3>
+
+                    <div class="form-group">
+                        <label for="campanha" class="form-label">Campanha Associada (Opcional)</label>
+                        <select id="campanha" class="form-control form-select">
+                            <option value="">Nenhuma campanha</option>
+                        </select>
                     </div>
-                </form>
-            </div>
+                </div>
+
+                <div class="card-footer">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-outline" onclick="window.location.href='dashboard.html'">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            ✓ Registrar Doação
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-    </main>
+    </div>
+</main>
 
-    <script src="../js/app.js"></script>
-    <script>
-        // Definir data de hoje como padrão
-        document.getElementById('dataDoacao').valueAsDate = new Date();
+<script src="../js/app.js"></script>
+<script>
+    let produtosAdicionados = [];
 
-        // Array para armazenar produtos adicionados
-        let produtosAdicionados = [];
+    document.addEventListener('DOMContentLoaded', () => {
+        const dataInput = document.getElementById('dataDoacao');
+        const hoje = new Date().toLocaleDateString('pt-BR');
+        dataInput.value = hoje;
 
-        // Simulação de estoque (em produção, virá da API)
-        const estoqueSimulado = {
-            '1_0': { quantidade: 50, unidade: 'kg' }, // Arroz
-            '1_1': { quantidade: 30, unidade: 'kg' }, // Feijão
-            '1_2': { quantidade: 20, unidade: 'kg' }, // Macarrão
-            '1_3': { quantidade: 15, unidade: 'l' },  // Óleo
-            '1_4': { quantidade: 25, unidade: 'kg' }, // Açúcar
-            '2_0': { quantidade: 40, unidade: 'un' }, // Camiseta
-            '2_1': { quantidade: 35, unidade: 'un' }, // Calça
-            '2_2': { quantidade: 20, unidade: 'un' }, // Agasalho
-            '2_3': { quantidade: 15, unidade: 'un' }, // Sapatos
-            '3_0': { quantidade: 60, unidade: 'un' }, // Sabonete
-            '3_1': { quantidade: 40, unidade: 'un' }, // Shampoo
-            '3_2': { quantidade: 50, unidade: 'un' }, // Pasta de Dente
-            '3_3': { quantidade: 45, unidade: 'un' }, // Desodorante
-            '4_0': { quantidade: 5, unidade: 'un' },  // Mesa
-            '4_1': { quantidade: 8, unidade: 'un' },  // Cadeira
-            '4_2': { quantidade: 3, unidade: 'un' },  // Cama
-            '4_3': { quantidade: 2, unidade: 'un' }   // Guarda-roupa
-        };
+        carregarProdutos();
+        carregarCampanhas();
+        carregarDonatarios();
+        carregarVoluntarios();
+    });
 
-        function carregarProdutosPorCategoria() {
-            const categoriaId = document.getElementById('categoria').value;
-            const selectProduto = document.getElementById('produto');
+    async function carregarDonatarios() {
+        const select = document.getElementById('donatario');
+        select.innerHTML = '<option value="">Carregando donatários...</option>';
 
-            // Limpar produtos e resetar informações de estoque
-            selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
-            document.getElementById('infoEstoque').style.display = 'none';
-            document.getElementById('avisoEstoque').style.display = 'none';
+        try {
+            const donatarios = await API.get('/api/donatario');
 
-            if (!categoriaId) return;
+            select.innerHTML = '<option value="">Selecione um donatário</option>';
 
-            // TODO: Carregar produtos da API baseado na categoria
-            // Simulação de produtos
-            const produtos = {
-                '1': ['Arroz', 'Feijão', 'Macarrão', 'Óleo', 'Açúcar'],
-                '2': ['Camiseta', 'Calça', 'Agasalho', 'Sapatos'],
-                '3': ['Sabonete', 'Shampoo', 'Pasta de Dente', 'Desodorante'],
-                '4': ['Mesa', 'Cadeira', 'Cama', 'Guarda-roupa']
-            };
-
-            if (produtos[categoriaId]) {
-                produtos[categoriaId].forEach((produto, index) => {
-                    const option = document.createElement('option');
-                    option.value = `${categoriaId}_${index}`;
-                    option.textContent = produto;
-                    selectProduto.appendChild(option);
-                });
-            }
-        }
-
-        function verificarEstoque() {
-            const produto = document.getElementById('produto');
-            const produtoId = produto.value;
-
-            if (!produtoId) {
-                document.getElementById('infoEstoque').style.display = 'none';
-                document.getElementById('avisoEstoque').style.display = 'none';
-                return;
-            }
-
-            // TODO: Buscar estoque real da API
-            const estoque = estoqueSimulado[produtoId];
-
-            if (estoque) {
-                document.getElementById('estoqueDisponivel').textContent = estoque.quantidade;
-                document.getElementById('unidadeEstoque').textContent = estoque.unidade;
-                document.getElementById('infoEstoque').style.display = 'block';
-
-                // Atualizar unidade no select
-                document.getElementById('unidadeMedida').value = estoque.unidade;
-
-                // Definir max na quantidade
-                document.getElementById('quantidade').max = estoque.quantidade;
-
-                // Verificar estoque baixo
-                if (estoque.quantidade < 10) {
-                    document.getElementById('avisoEstoque').style.display = 'block';
-                    document.getElementById('avisoEstoque').textContent = `Atenção: Estoque baixo (${estoque.quantidade} ${estoque.unidade})`;
-                    document.getElementById('avisoEstoque').style.color = 'var(--warning-color)';
-                } else if (estoque.quantidade === 0) {
-                    document.getElementById('avisoEstoque').style.display = 'block';
-                    document.getElementById('avisoEstoque').textContent = 'Produto sem estoque!';
-                    document.getElementById('avisoEstoque').style.color = 'var(--danger-color)';
-                } else {
-                    document.getElementById('avisoEstoque').style.display = 'none';
-                }
-            }
-        }
-
-        function adicionarProduto() {
-            const produto = document.getElementById('produto');
-            const quantidade = document.getElementById('quantidade');
-            const unidade = document.getElementById('unidadeMedida');
-            const dataValidade = document.getElementById('dataValidade');
-
-            if (!produto.value || !quantidade.value) {
-                UI.showAlert('Selecione um produto e informe a quantidade', 'warning');
-                return;
-            }
-
-            // Verificar estoque disponível
-            const estoque = estoqueSimulado[produto.value];
-            if (!estoque || parseInt(quantidade.value) > estoque.quantidade) {
-                UI.showAlert('Quantidade solicitada excede o estoque disponível!', 'danger');
-                return;
-            }
-
-            const produtoTexto = produto.options[produto.selectedIndex].text;
-            const unidadeTexto = unidade.options[unidade.selectedIndex].text;
-
-            produtosAdicionados.push({
-                produtoId: produto.value,
-                produto: produtoTexto,
-                quantidade: quantidade.value,
-                unidade: unidadeTexto,
-                dataValidade: dataValidade.value
+            donatarios.forEach(d => {
+                select.innerHTML += `<option value="${d.id}">${d.nome}</option>`;
             });
 
-            atualizarTabelaProdutos();
-
-            // Limpar campos
-            produto.value = '';
-            quantidade.value = '';
-            dataValidade.value = '';
-            document.getElementById('infoEstoque').style.display = 'none';
+        } catch (error) {
+            console.error("Erro ao carregar donatários:", error);
+            UI.showAlert("Falha ao carregar lista de donatários.", "danger");
+            select.innerHTML = '<option value="">Erro ao carregar</option>';
         }
+    }
 
-        function atualizarTabelaProdutos() {
-            const tbody = document.getElementById('tabelaProdutosAdicionados');
-            const lista = document.getElementById('listaProdutos');
+    async function carregarVoluntarios() {
+        const select = document.getElementById('voluntario');
+        select.innerHTML = '<option value="">Carregando voluntários...</option>';
 
-            if (produtosAdicionados.length === 0) {
-                lista.style.display = 'none';
-                return;
-            }
+        try {
+            const voluntarios = await API.get('/api/voluntario');
 
-            lista.style.display = 'block';
-            tbody.innerHTML = produtosAdicionados.map((item, index) => `
+            select.innerHTML = '<option value="">Selecione um voluntário</option>';
+
+            voluntarios.forEach(v => {
+                select.innerHTML += `<option value="${v.id}">${v.nome}</option>`;
+            });
+
+        } catch (error) {
+            console.error("Erro ao carregar voluntários:", error);
+            UI.showAlert("Falha ao carregar lista de voluntários.", "danger");
+            select.innerHTML = '<option value="">Erro ao carregar</option>';
+        }
+    }
+
+    async function carregarProdutos() {
+        const selectProduto = document.getElementById('produto');
+        selectProduto.innerHTML = '<option value="">Carregando produtos...</option>';
+        try {
+            const produtos = await API.get('/api/produtos');
+            selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
+            produtos.forEach(p => {
+                const estoque = p.quantidade ?? 0;
+                const categoria = p.categoriaNome || 'Sem Categoria';
+                const nome = p.nome || 'Produto sem nome';
+                selectProduto.innerHTML += `<option
+                            value="${p.id}"
+                            data-estoque="${estoque}"
+                            data-nome="${nome}">
+                        [${categoria}] ${nome} (Estoque: ${estoque})
+                    </option>`;
+            });
+        } catch (error) {
+            console.error("Erro ao carregar produtos:", error);
+            UI.showAlert("Falha ao carregar lista de produtos do servidor.", "danger");
+            selectProduto.innerHTML = '<option value="">Erro ao carregar</option>';
+        }
+    }
+
+    async function carregarCampanhas() {
+        const campanhasSimuladas = [
+            { id: 1, nome: "Campanha do Agasalho 2025" },
+            { id: 2, nome: "Arrecadação de Alimentos" },
+            { id: 3, nome:"Natal Solidário"}
+        ];
+        const select = document.getElementById('campanha');
+        campanhasSimuladas.forEach(c => {
+            select.innerHTML += `<option value="${c.id}">${c.nome}</option>`;
+        });
+    }
+
+    function verificarEstoque() {
+        const option = document.getElementById('produto').selectedOptions[0];
+        const infoEstoque = document.getElementById('infoEstoque');
+        if (!option || !option.value) {
+            infoEstoque.style.display = 'none';
+            return;
+        }
+        const estoque = option.getAttribute('data-estoque');
+        document.getElementById('estoqueDisponivel').textContent = estoque;
+        infoEstoque.style.display = 'block';
+        document.getElementById('quantidade').max = parseInt(estoque, 10);
+    }
+
+    function adicionarProduto() {
+        const produtoSelect = document.getElementById('produto');
+        const quantidadeInput = document.getElementById('quantidade');
+
+        const selectedOption = produtoSelect.options[produtoSelect.selectedIndex];
+        const prodId = selectedOption.value;
+        const prodNome = selectedOption.getAttribute('data-nome');
+        const quantidade = parseInt(quantidadeInput.value, 10);
+        const estoqueDisponivel = parseInt(selectedOption.getAttribute('data-estoque'), 10);
+
+        if (!prodId || !quantidade || quantidade <= 0) {
+            UI.showAlert('Selecione um produto e uma quantidade válida.', 'warning');
+            return;
+        }
+        if (quantidade > estoqueDisponivel) {
+            UI.showAlert('Quantidade solicitada excede o estoque disponível!', 'danger');
+            return;
+        }
+        const itemExistente = produtosAdicionados.find(p => p.prodId === parseInt(prodId, 10));
+        if(itemExistente) {
+            UI.showAlert('Produto já adicionado. Remova-o primeiro se quiser alterar a quantidade.', 'info');
+            return;
+        }
+        produtosAdicionados.push({
+            prodId: parseInt(prodId, 10),
+            produtoNome: prodNome,
+            quantidade: quantidade
+        });
+        atualizarTabelaProdutos();
+
+        produtoSelect.value = '';
+        quantidadeInput.value = '';
+        document.getElementById('infoEstoque').style.display = 'none';
+    }
+
+    function atualizarTabelaProdutos() {
+        const tbody = document.getElementById('tabelaProdutosAdicionados');
+        const lista = document.getElementById('listaProdutos');
+        if (produtosAdicionados.length === 0) {
+            lista.style.display = 'none';
+            return;
+        }
+        lista.style.display = 'block';
+        tbody.innerHTML = produtosAdicionados.map((item, index) => `
                 <tr>
-                    <td>${item.produto}</td>
-                    <td>${item.quantidade} ${item.unidade}</td>
-                    <td>${item.dataValidade ? Formatter.formatDate(item.dataValidade) : 'Não informado'}</td>
+                    <td>${item.produtoNome}</td>
+                    <td>${item.quantidade}</td>
                     <td>
-                        <button class="btn btn-sm btn-danger" onclick="removerProduto(${index})">
+                        <button type"button" class="btn btn-sm btn-danger" onclick="removerProduto(${index})">
                             🗑️ Remover
                         </button>
                     </td>
                 </tr>
             `).join('');
+    }
+
+    function removerProduto(index) {
+        produtosAdicionados.splice(index, 1);
+        atualizarTabelaProdutos();
+    }
+
+    document.getElementById('formEfetuarDoacao').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        Validator.clearAllErrors(this);
+        const donatario = document.getElementById('donatario');
+        const voluntario = document.getElementById('voluntario');
+        let isValid = true;
+
+        if (!donatario.value) {
+            Validator.showError(donatario, 'Selecione um donatário');
+            isValid = false;
+        }
+        if (!voluntario.value) {
+            Validator.showError(voluntario, 'Selecione um voluntário');
+            isValid = false;
         }
 
-        function removerProduto(index) {
-            produtosAdicionados.splice(index, 1);
-            atualizarTabelaProdutos();
+        if (produtosAdicionados.length === 0) {
+            UI.showAlert('Adicione pelo menos um produto para doar', 'warning');
+            isValid = false;
         }
 
-        // Submissão do formulário
-        document.getElementById('formEfetuarDoacao').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        if (!isValid) return;
 
-            const donatario = document.getElementById('donatario');
-            const dataDoacao = document.getElementById('dataDoacao');
+        const data = {
+            donatarioId: parseInt(donatario.value, 10),
+            voluntarioId: parseInt(voluntario.value, 10),
+            tipoDoacao: "Itens",
+            valorDoacao: 0,
+            observacoes: document.getElementById('observacoesDoacao').value,
+            campanhaId: document.getElementById('campanha').value ? parseInt(document.getElementById('campanha').value, 10) : null,
+            produtos: produtosAdicionados
+        };
 
-            // Validações básicas
-            Validator.clearAllErrors(this);
-            let isValid = true;
+        console.log('Payload a ser enviado para o backend:', data);
 
-            if (!donatario.value) {
-                Validator.showError(donatario, 'Selecione um donatário');
-                isValid = false;
-            }
+        try {
+            const response = await API.post('/api/doacoes/efetuar', data);
 
-            if (!dataDoacao.value) {
-                Validator.showError(dataDoacao, 'Informe a data');
-                isValid = false;
-            }
+            UI.showAlert('Doação efetuada com sucesso!', 'success');
 
-            if (produtosAdicionados.length === 0) {
-                UI.showAlert('Adicione pelo menos um produto para doar', 'warning');
-                isValid = false;
-            }
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
 
-            if (!isValid) return;
-
-            try {
-                const data = {
-                    donatarioId: donatario.value,
-                    data: dataDoacao.value,
-                    produtos: produtosAdicionados,
-                    campanhaId: document.getElementById('campanha').value,
-                    condicao: document.getElementById('condicao').value,
-                    observacoes: document.getElementById('observacoesDoacao').value
-                };
-
-                // TODO: Integrar com API
-                // await API.post('/doacoes/efetuar', data);
-
-                UI.showAlert('Doação efetuada com sucesso! Estoque atualizado.', 'success');
-
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 2000);
-
-            } catch (error) {
-                console.error('Erro ao efetuar doação:', error);
-            }
-        });
-    </script>
+        } catch (error) {
+            console.error('Erro ao efetuar doação:', error);
+            UI.showAlert(error.message || 'Erro ao processar a doação.', 'danger');
+        }
+    });
+</script>
 </body>
 </html>

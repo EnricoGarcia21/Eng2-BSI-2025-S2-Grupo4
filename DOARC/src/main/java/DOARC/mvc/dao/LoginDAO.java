@@ -17,7 +17,7 @@ public class LoginDAO implements IDAO<Login>{
     public Login gravar(Login entidade, Conexao conexao) {
 
         String sql = String.format(
-                "INSERT INTO login (voluntario_vol_id, login, senha, nive_acesso, status) " +
+                "INSERT INTO login (vol_id, login, senha, nive_acesso, status) " +
                         "VALUES (%d, '%s', '%s', '%s', '%c') RETURNING login_id",
                 entidade.getVoluntarioId(),
                 entidade.getLogin().replace("'", "''"),
@@ -42,7 +42,7 @@ public class LoginDAO implements IDAO<Login>{
     public Login alterar(Login entidade, Conexao conexao) {
 
         String sql = String.format(
-                "UPDATE login SET voluntario_vol_id=%d, login='%s', senha='%s', nive_acesso='%s', status='%c' " +
+                "UPDATE login SET vol_id=%d, login='%s', senha='%s', nive_acesso='%s', status='%c' " +
                         "WHERE login_id=%d",
                 entidade.getVoluntarioId(),
                 entidade.getLogin().replace("'", "''"),
@@ -103,7 +103,7 @@ public class LoginDAO implements IDAO<Login>{
         Login l = new Login();
 
         l.setLoginId(rs.getInt("login_id"));
-        l.setVoluntarioId(rs.getInt("voluntario_vol_id"));
+        l.setVoluntarioId(rs.getInt("vol_id"));
         l.setLogin(rs.getString("login"));
         l.setSenha(rs.getString("senha"));
         l.setNiveAcesso(rs.getString("nive_acesso"));

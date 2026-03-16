@@ -2,11 +2,11 @@
 // JavaScript Principal
 
 // ===== Configurações Globais =====
-const API_URL = 'http://localhost:8080/apis'; // URL do backend Spring Boot
+const API_URL = 'http://localhost:8080'; // URL do backend Spring Boot
 const STORAGE_KEY = 'doarc_user';
 
 // ===== Funções de Autenticação =====
-const Auth = {
+/*const Auth = {
     // Verifica se usuário está logado - USA SEU SISTEMA
     isAuthenticated() {
         const token = localStorage.getItem('token');
@@ -52,7 +52,7 @@ const Auth = {
         }
     }
 };
-
+*/
 // ===== Funções de Validação =====
 const Validator = {
     // Valida se campo está vazio
@@ -429,12 +429,12 @@ const Masks = {
 // ===== Inicialização =====
 document.addEventListener('DOMContentLoaded', function() {
     // Verifica autenticação em páginas protegidas (exceto login e registro)
-    if (!window.location.pathname.includes('index.html') &&
+   /* if (!window.location.pathname.includes('index.html') &&
         !window.location.pathname.includes('register.html') &&
         !window.location.pathname.endsWith('/')) {
         Auth.checkAuth();
         Auth.updateUserInfo();
-    }
+    }*/
 
     // Adiciona evento de logout
     const logoutBtn = document.getElementById('logoutBtn');
@@ -460,7 +460,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('[data-mask="cep"]').forEach(input => Masks.cep(input));
     document.querySelectorAll('[data-mask="currency"]').forEach(input => Masks.currency(input));
 
-    // Remove erros ao digitar
+   // Remove erros ao digitar
     document.querySelectorAll('.form-control').forEach(input => {
         input.addEventListener('input', function() {
             Validator.clearError(this);
@@ -469,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ===== Exporta funções globais =====
-window.Auth = Auth;
+/*window.Auth = Auth;*/
 window.Validator = Validator;
 window.Formatter = Formatter;
 window.UI = UI;

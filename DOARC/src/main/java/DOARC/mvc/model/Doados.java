@@ -1,5 +1,7 @@
 package DOARC.mvc.model;
 
+import DOARC.mvc.dao.DoadosDAO;
+import DOARC.mvc.util.Conexao;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -13,6 +15,28 @@ public class Doados {
     private String obsDoado;
     private BigDecimal valorDoacao;
     private List<DoadosProduto> produtos;
+
+    // Construtor vazio
+    public Doados() {}
+
+    // Construtor utilitário (opcional, mas ajuda no controller igual ao Produto)
+    public Doados(Integer donId, Integer volId, String obsDoado, String doaTipoDoacao,
+                  BigDecimal valorDoacao, String doaDataAquisicao) {
+        this.donId = donId;
+        this.volId = volId;
+        this.obsDoado = obsDoado;
+        this.doaTipoDoacao = doaTipoDoacao;
+        this.valorDoacao = valorDoacao;
+        this.doaDataAquisicao = doaDataAquisicao;
+    }
+
+    // --- A Lógica de Ligação com a DAO (Igual ao Produto) ---
+    private static final DoadosDAO dao = new DoadosDAO();
+
+    public Doados gravar(Conexao conexao) {
+        return dao.gravar(this, conexao);
+    }
+    // --------------------------------------------------------
 
     public Integer getDoaId() { return doaId; }
     public void setDoaId(Integer doaId) { this.doaId = doaId; }

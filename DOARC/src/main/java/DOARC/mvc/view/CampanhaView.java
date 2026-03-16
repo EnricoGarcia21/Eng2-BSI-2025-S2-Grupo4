@@ -9,17 +9,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-
+@CrossOrigin
 @RestController
-@RequestMapping("/apis/campanha")
+@RequestMapping("/api/campanha")
 public class CampanhaView {
 
     @Autowired
     private CampanhaController controller;
 
-    // ============================
-    // ✅ REGISTRAR CAMPANHA (POST) - Recebe objeto Campanha
-    // ============================
     @PostMapping("/registrar")
     public ResponseEntity<Object> add(@RequestBody Campanha campanha) {
 
@@ -44,8 +41,6 @@ public class CampanhaView {
                 ? ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()))
                 : ResponseEntity.ok(json);
     }
-
-    // ... (Métodos listar, get, deletar, porVoluntario permanecem iguais)
 
     @GetMapping
     public ResponseEntity<Object> listar() {

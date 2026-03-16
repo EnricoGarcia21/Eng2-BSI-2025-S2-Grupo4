@@ -23,8 +23,6 @@
             this.prodQuant = prodQuant;
             this.categoriaCatId = categoriaCatId;
         }
-
-        // ===== DAO integrado =====
         private static final ProdutoDAO dao = new ProdutoDAO();
 
         public Produto gravar(Conexao conexao) { return dao.gravar(this, conexao); }
@@ -33,7 +31,6 @@
         public static Produto get(int id, Conexao conexao) { return dao.get(id, conexao); }
         public static List<Produto> get(String filtro, Conexao conexao) { return dao.get(filtro, conexao); }
 
-        // ===== Getters e Setters =====
         public int getProdId() { return prodId; }
         public void setProdId(int prodId) { this.prodId = prodId; }
 

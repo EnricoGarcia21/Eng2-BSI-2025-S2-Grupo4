@@ -27,7 +27,6 @@ public class Voluntario {
 
     public Voluntario() {}
 
-    // ✅ Construtor completo para cadastro
     public Voluntario(String nome, String bairro, String numero, String rua,
                       String telefone, String cidade, String cep, String uf,
                       String email, String cpf, String dataNasc, String sexo)
@@ -46,7 +45,6 @@ public class Voluntario {
         this.vol_sexo = sexo;
     }
 
-    // ✅ Métodos da Model
     public Voluntario gravar(Voluntario v, Conexao conexao) {
         return dao.gravar(v, conexao);
     }
