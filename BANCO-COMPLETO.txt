@@ -458,3 +458,14 @@ INSERT INTO Verificar_Necessidade (VER_DATA, VER_OBS, VER_RESULTADO, VOL_ID, DON
 ('17/09/2025', 'Verificação da família 3.', 'Necessidade alta de cobertores.', 3, 3);
 
 ALTER TABLE higienizacao_roupas ADD COLUMN hig_ultimo_alerta VARCHAR(20) DEFAULT 'NENHUM';
+-- TABELA 22: Produto_Observador (A ponte entre o Sujeito e o Observador)
+CREATE TABLE Produto_Observador (
+    PROD_ID INTEGER,
+    DOA_ID INTEGER,
+    PRIMARY KEY (PROD_ID, DOA_ID),
+    FOREIGN KEY (PROD_ID) REFERENCES Produto(PROD_ID),
+    FOREIGN KEY (DOA_ID) REFERENCES Doadores(DOA_ID)
+);
+
+-- Inserindo um teste: O Doador 1 observa o Produto 2 (Arroz)
+INSERT INTO Produto_Observador (PROD_ID, DOA_ID) VALUES (2, 1);
