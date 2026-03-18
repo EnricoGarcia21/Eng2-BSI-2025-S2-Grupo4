@@ -1,0 +1,257 @@
+/* Paleta de Cores:
+   Branco: #FFFFFF
+   Cinza Claro (Fundo): #F8F9FA
+   Cinza Suave (Borda/Linha): #E9ECEF
+   Cinza Escuro (Texto): #495057
+   Destaque Azul/Ciano: #17A2B8
+   Botão Excluir: #DC3545
+*/
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #F8F9FA; /* Fundo da página (Cinza bem claro) */
+    color: #495057;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+/* --- HEADER DE NAVEGAÇÃO --- */
+.header {
+    background-color: #343A40; /* Barra escura e sólida no topo */
+    padding: 10px 0;
+}
+
+.header nav {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.nav-link {
+    color: #F8F9FA;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.nav-link:hover {
+    color: #17A2B8;
+}
+
+/* --- CONTAINERS GERAIS --- */
+
+/* 1. CONTAINER para CONSULTA (Largura total, foco na tabela) */
+.container {
+    max-width: 1200px;
+    margin: 40px auto;
+    background: #FFFFFF;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.08); /* Sombra suave */
+}
+
+/* 2. FORM-CONTAINER para CADASTRO (Menor, foca no formulário) */
+.form-container {
+    max-width: 650px;
+    margin: 40px auto;
+    padding: 30px;
+    background: #FFFFFF;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* --- TIPOGRAFIA --- */
+h1 {
+    font-size: 28px;
+    color: #343A40;
+    margin-bottom: 20px;
+    font-weight: 300;
+}
+
+h2 { /* Subtítulos do formulário */
+    color: #17A2B8;
+    border-bottom: 1px solid #E9ECEF;
+    padding-bottom: 5px;
+    margin-top: 30px;
+    font-size: 20px;
+}
+
+/* --- ELEMENTOS DE FORMULÁRIO/INPUTS --- */
+.form-label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #343A40;
+}
+
+.form-control, #filtro-input { /* Aplica estilo a todos os inputs e ao campo de filtro */
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #CED4DA;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-control:focus, #filtro-input:focus {
+    border-color: #17A2B8;
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.25);
+}
+
+/* --- FILTROS (Seção de Pesquisa) --- */
+.filtro-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #F1F3F5; /* Fundo levemente cinza */
+    border-radius: 4px;
+    border: 1px solid #E9ECEF;
+}
+
+#filtro-input {
+    flex-grow: 1;
+    margin: 0; /* Remove margem extra */
+}
+
+#filtro-status {
+    color: #999;
+    font-size: 14px;
+}
+
+/* --- BOTÕES GERAIS E DE AÇÃO --- */
+
+/* Botões de Ação Principal (Novo, Menu) */
+.edit-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.3s, transform 0.1s;
+    text-decoration: none;
+    display: inline-block;
+    color: #FFFFFF;
+    /* Cores aplicadas diretamente no HTML para botões de filtro/menu/novo */
+}
+
+.edit-btn:hover {
+    filter: brightness(110%);
+}
+
+/* Botão de Envio (Cadastro) */
+.btn-gradient {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    margin-top: 30px;
+    background-color: #17A2B8;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-gradient:hover {
+    background-color: #138496;
+}
+
+/* --- ESTILOS DE TABELA (CONSULTA) --- */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #FFFFFF;
+    border: 1px solid #E9ECEF;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+thead th {
+    background-color: #343A40; /* Cabeçalho escuro */
+    color: #FFFFFF;
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+td {
+    padding: 12px 15px;
+    border-top: 1px solid #E9ECEF;
+    font-size: 14px;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #F8F9FA; /* Listras suaves */
+}
+
+tbody tr:hover {
+    background-color: #E9ECEF; /* Destaque ao passar o mouse */
+}
+
+/* Botões de Ação na Tabela */
+.edit-btn[data-id] { /* Botão Alterar na Tabela */
+    background-color: #FFC107;
+    color: #343A40;
+    padding: 6px 10px;
+    margin-right: 5px;
+}
+
+.delete-btn { /* Botão Excluir na Tabela */
+    background-color: #DC3545;
+    color: #FFFFFF;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+/* --- ESTILOS CRUCIAIS PARA O FEEDBACK VISUAL --- */
+
+/* Indicador de campo obrigatório */
+.required-indicator {
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+/* Bordas de sucesso e erro */
+.form-control.success {
+    border-color: #28A745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+.form-control.error {
+    border-color: #DC3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+}
+/* Note: As cores são aplicadas dinamicamente no JS via style.borderColor, mas estas classes são mais robustas. */
+
+/* Mensagens */
+.error-message {
+    color: #DC3545;
+    background-color: #F8D7DA;
+    border: 1px solid #F5C6CB;
+    /* Estilos já presentes no seu CSS */
+}
+
+.success-message {
+    color: #28A745;
+    background-color: #D4EDDA;
+    border: 1px solid #C3E6CB;
+    /* Estilos já presentes no seu CSS */
+}
+

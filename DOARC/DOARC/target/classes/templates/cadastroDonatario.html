@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cadastro de Donatário</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header class="header">
+    <nav>
+        <a href="gerenciarDonatarios.html" class="nav-link">Voltar para Consulta de Donatários</a>
+    </nav>
+</header>
+
+<main>
+    <div class="form-container">
+        <h1>Cadastrar Novo Donatário</h1>
+        <form id="donatarioForm" novalidate>
+
+            <h2>Dados Pessoais</h2>
+
+            <label for="don_nome" class="form-label">Nome Completo:</label>
+            <input type="text" id="don_nome" name="don_nome" class="form-control" placeholder="Ex: Ana Maria Silva" required />
+
+            <label for="don_data_nasc" class="form-label">Data de Nascimento:</label>
+            <input type="date" id="don_data_nasc" name="don_data_nasc" class="form-control" required />
+
+            <label for="don_sexo" class="form-label">Sexo:</label>
+            <select id="don_sexo" name="don_sexo" class="form-control" required>
+                <option value="">Selecione...</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Outro">Outro</option>
+                <option value="Nao Informado">Prefiro não informar</option>
+            </select>
+
+            <h2>Contato e Endereço</h2>
+
+            <label for="don_telefone" class="form-label">Telefone:</label>
+            <input type="tel" id="don_telefone" name="don_telefone" class="form-control" placeholder="(XX) XXXXX-XXXX" required />
+
+            <label for="don_email" class="form-label">E-mail:</label>
+            <input type="email" id="don_email" name="don_email" class="form-control" placeholder="exemplo@email.com" required />
+
+            <label for="don_cep" class="form-label">CEP:</label>
+            <input type="text" id="don_cep" name="don_cep" class="form-control" placeholder="00000-000" required />
+
+            <label for="don_uf" class="form-label">UF (Estado):</label>
+            <input type="text" id="don_uf" name="don_uf" class="form-control" maxlength="2" placeholder="Ex: SP" required />
+
+            <label for="don_cidade" class="form-label">Cidade:</label>
+            <input type="text" id="don_cidade" name="don_cidade" class="form-control" placeholder="Ex: São Paulo" required />
+
+            <label for="don_bairro" class="form-label">Bairro:</label>
+            <input type="text" id="don_bairro" name="don_bairro" class="form-control" placeholder="Ex: Centro" required />
+
+            <label for="don_rua" class="form-label">Rua e Número:</label>
+            <input type="text" id="don_rua" name="don_rua" class="form-control" placeholder="Ex: Rua das Flores, 123" required />
+
+
+            <p id="submitErrorMessage" class="error-message message" style="display: none;"></p>
+            <p id="submitSuccessMessage" class="success-message message" style="display: none;"></p>
+
+            <button type="submit" class="btn-gradient">Cadastrar Donatário</button>
+        </form>
+    </div>
+</main>
+
+<script src="cadastroDonatario.js"></script>
+</body>
+</html>
