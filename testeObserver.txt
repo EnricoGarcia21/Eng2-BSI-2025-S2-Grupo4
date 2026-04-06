@@ -1,0 +1,8 @@
+{
+  "nome": "Camisa Masculina",
+  "descricao": "Algodão, Tamanho M",
+  "informacoesAdicionais": "Usada, boa condição",
+  "quantidade": 2,
+  "categoriaId": 1
+}
+http://localhost:8080/swagger-ui/index.html#/produto-view/updtProduto
