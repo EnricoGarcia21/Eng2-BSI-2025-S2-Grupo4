@@ -31,19 +31,32 @@ public class Produto implements SujeitoProduto {
 
     @Override
     public void anexar(ObservadorDonatario observador) {
-        // Implementação via banco de dados
+        if (observador instanceof Doador) {
+            Doador d = (Doador) observador;
+            Conexao conexao = SingletonDB.conectar();
+            // prodId é o atributo da sua classe Produto que mapeia PROD_ID
+            dao.vincularObservador(this.prodId, d.getId(), conexao);
+        }
     }
 
     @Override
-    public void desanexar(ObservadorDonatario observador) {}
+    public void desanexar(ObservadorDonatario observador) {
+        if (observador instanceof Doador) {
+            Doador d = (Doador) observador;
+            Conexao conexao = SingletonDB.conectar();
+            dao.desvincularObservador(this.prodId, d.getId(), conexao);
+        }
+    }
 
     @Override
     public void notificarObservadores() {
         Conexao conexao = SingletonDB.conectar();
+        // Busca a lista de doadores interessados neste produto específico
         List<Doador> doadores = dao.buscarObservadoresDoProduto(this.prodId, conexao);
 
         for (Doador d : doadores) {
-            d.update("O item '" + this.prodNome + "' atingiu o nível crítico no estoque. Precisamos de doações!");
+            d.update("ALERTA DE ESTOQUE: O produto '" + this.prodNome +
+                    "' atingiu o nível crítico (" + this.prodQuant + " unidades).");
         }
     }
 
@@ -57,6 +70,7 @@ public class Produto implements SujeitoProduto {
         }
         return alterado;
     }
+
 
     public Produto gravar(Conexao conexao) { return dao.gravar(this, conexao); }
     public Produto alterar(Conexao conexao) { return dao.alterar(this, conexao); }

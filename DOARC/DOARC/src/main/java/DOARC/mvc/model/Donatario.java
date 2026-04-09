@@ -1,7 +1,7 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.DonatarioDAO;
-import DOARC.mvc.util.Conexao; // Importação necessária para a Conexao
+import DOARC.mvc.util.Conexao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

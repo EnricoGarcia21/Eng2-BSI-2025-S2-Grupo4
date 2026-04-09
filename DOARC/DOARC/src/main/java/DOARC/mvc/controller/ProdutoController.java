@@ -1,5 +1,6 @@
 package DOARC.mvc.controller;
 
+import DOARC.mvc.model.Doador;
 import DOARC.mvc.model.Produto;
 import DOARC.mvc.util.Conexao;
 import DOARC.mvc.util.SingletonDB;
@@ -39,19 +40,14 @@ public class ProdutoController {
         }
     }
 
-    // MÉTODO ALTERADO PARA SUPORTAR O OBSERVER
     public Map<String, Object> updtProduto(int id, String nome, String descricao, String informacoesAdicionais,
                                            int quantidade, int categoriaId) {
         try {
             Conexao conexao = getConexao();
 
-            // Instanciamos o produto com os novos dados
             Produto produto = new Produto(nome, descricao, informacoesAdicionais, quantidade, categoriaId);
             produto.setProdId(id);
 
-            // GATILHO DO OBSERVER:
-            // Chamamos 'atualizarComNotificacao' em vez do 'alterar' comum.
-            // Se a 'quantidade' for 2, o Model vai disparar o print dos doadores automaticamente.
             Produto alterado = produto.atualizarComNotificacao(conexao);
 
             if (alterado == null) {
@@ -123,5 +119,40 @@ public class ProdutoController {
         }
 
         return Map.of("mensagem", "Produto removido com sucesso!");
+    }
+
+    public Map<String, Object> anexarObservador(int produtoId, int doadorId) {
+        try {
+            Conexao conexao = getConexao();
+
+            Produto produto = Produto.get(produtoId, conexao);
+            if (produto == null) return Map.of("erro", "Produto não encontrado.");
+
+            Doador doador = new Doador();
+            doador.setId(doadorId);
+
+            produto.anexar(doador);
+
+            return Map.of("mensagem", "Doador vinculado com sucesso para notificações!");
+        } catch (Exception e) {
+            return Map.of("erro", "Erro ao anexar: " + e.getMessage());
+        }
+    }
+
+    public Map<String, Object> desanexarObservador(int produtoId, int doadorId) {
+        try {
+            Conexao conexao = getConexao();
+            Produto produto = Produto.get(produtoId, conexao);
+            if (produto == null) return Map.of("erro", "Produto não encontrado.");
+
+            Doador doador = new Doador();
+            doador.setId(doadorId);
+
+            produto.desanexar(doador);
+
+            return Map.of("mensagem", "Vínculo de notificação removido com sucesso!");
+        } catch (Exception e) {
+            return Map.of("erro", "Erro ao desanexar: " + e.getMessage());
+        }
     }
 }

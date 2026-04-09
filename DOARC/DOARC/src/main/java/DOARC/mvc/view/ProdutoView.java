@@ -87,4 +87,30 @@ public class ProdutoView {
                 ? ResponseEntity.ok(json)
                 : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
     }
+
+    @PostMapping("/{id}/observadores/{doadorId}")
+    public ResponseEntity<Object> anexarObservador(@PathVariable int id, @PathVariable int doadorId) {
+        try {
+            Map<String, Object> json = produtoController.anexarObservador(id, doadorId);
+
+            return json.get("erro") == null
+                    ? ResponseEntity.ok(json)
+                    : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new Mensagem("Erro ao anexar observador: " + e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{id}/observadores/{doadorId}")
+    public ResponseEntity<Object> desanexarObservador(@PathVariable int id, @PathVariable int doadorId) {
+        try {
+            Map<String, Object> json = produtoController.desanexarObservador(id, doadorId);
+
+            return json.get("erro") == null
+                    ? ResponseEntity.ok(json)
+                    : ResponseEntity.badRequest().body(new Mensagem(json.get("erro").toString()));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new Mensagem("Erro ao desanexar observador: " + e.getMessage()));
+        }
+    }
 }

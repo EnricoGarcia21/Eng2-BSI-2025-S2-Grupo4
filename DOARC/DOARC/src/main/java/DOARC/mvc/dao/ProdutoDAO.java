@@ -41,22 +41,6 @@ public class ProdutoDAO {
         } catch (SQLException e) { e.printStackTrace(); return null; }
     }
 
-    public List<Doador> buscarObservadoresDoProduto(int produtoId, Conexao conexao) {
-        List<Doador> observadores = new ArrayList<>();
-        String sql = "SELECT d.DOA_NOME FROM Doadores d " +
-                "JOIN Produto_Observador po ON d.DOA_ID = po.DOA_ID " +
-                "WHERE po.PROD_ID = ?";
-        try (PreparedStatement pst = conexao.getConnect().prepareStatement(sql)) {
-            pst.setInt(1, produtoId);
-            ResultSet rs = pst.executeQuery();
-            while (rs.next()) {
-                observadores.add(new Doador(rs.getString("DOA_NOME")));
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
-        return observadores;
-    }
-
-    // MÉTODO 1: BUSCA POR ID (RETORNA UM PRODUTO)
     public Produto get(int id, Conexao conexao) {
         String sql = "SELECT p.*, c.cat_nome_prod AS categoria_nome FROM produto p " +
                 "LEFT JOIN categoria c ON p.cat_id = c.cat_id WHERE p.prod_id=?";
@@ -78,7 +62,6 @@ public class ProdutoDAO {
         return null;
     }
 
-    // MÉTODO 2: BUSCA POR FILTRO (RETORNA UMA LISTA) - ESTE É O QUE RESOLVE O ERRO
     public List<Produto> get(String filtro, Conexao conexao) {
         String sql = "SELECT p.*, c.cat_nome_prod AS categoria_nome FROM produto p " +
                 "LEFT JOIN categoria c ON p.cat_id = c.cat_id";
@@ -114,5 +97,48 @@ public class ProdutoDAO {
             e.printStackTrace();
             return false;
         }
+    }
+    public boolean vincularObservador(int prodId, int doaId, Conexao conexao) {
+        String sql = "INSERT INTO Produto_Observador (PROD_ID, DOA_ID) VALUES (?, ?)";
+        try (PreparedStatement pst = conexao.getConnect().prepareStatement(sql)) {
+            pst.setInt(1, prodId);
+            pst.setInt(2, doaId);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean desvincularObservador(int prodId, int doaId, Conexao conexao) {
+        String sql = "DELETE FROM Produto_Observador WHERE PROD_ID = ? AND DOA_ID = ?";
+        try (PreparedStatement pst = conexao.getConnect().prepareStatement(sql)) {
+            pst.setInt(1, prodId);
+            pst.setInt(2, doaId);
+            return pst.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Doador> buscarObservadoresDoProduto(int prodId, Conexao conexao) {
+        List<Doador> lista = new ArrayList<>();
+        String sql = "SELECT d.DOA_ID, d.DOA_NOME, d.DOA_EMAIL FROM Doadores d " +
+                "JOIN Produto_Observador po ON d.DOA_ID = po.DOA_ID " +
+                "WHERE po.PROD_ID = ?";
+        try (PreparedStatement pst = conexao.getConnect().prepareStatement(sql)) {
+            pst.setInt(1, prodId);
+            ResultSet rs = pst.executeQuery();
+            while (rs.next()) {
+                Doador d = new Doador();
+                d.setId(rs.getInt("DOA_ID"));
+                d.setNome(rs.getString("DOA_NOME"));
+                d.setEmail(rs.getString("DOA_EMAIL"));
+                lista.add(d);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
     }
 }
