@@ -1,13 +1,13 @@
 package DOARC.mvc.model;
 
 import DOARC.mvc.dao.ProdutoDAO;
-import DOARC.mvc.observer.SujeitoProduto;
-import DOARC.mvc.observer.ObservadorDonatario;
+import DOARC.mvc.observer.Sujeito;
+import DOARC.mvc.observer.Observador;
 import DOARC.mvc.util.Conexao;
 import DOARC.mvc.util.SingletonDB;
 import java.util.List;
 
-public class Produto implements SujeitoProduto {
+public class Produto implements Sujeito {
     private int prodId;
     private String prodNome;
     private String prodDescricao;
@@ -30,7 +30,7 @@ public class Produto implements SujeitoProduto {
     }
 
     @Override
-    public void anexar(ObservadorDonatario observador) {
+    public void anexar(Observador observador) {
         if (observador instanceof Doador) {
             Doador d = (Doador) observador;
             Conexao conexao = SingletonDB.conectar();
@@ -40,7 +40,7 @@ public class Produto implements SujeitoProduto {
     }
 
     @Override
-    public void desanexar(ObservadorDonatario observador) {
+    public void desanexar(Observador observador) {
         if (observador instanceof Doador) {
             Doador d = (Doador) observador;
             Conexao conexao = SingletonDB.conectar();
@@ -52,9 +52,9 @@ public class Produto implements SujeitoProduto {
     public void notificarObservadores() {
         Conexao conexao = SingletonDB.conectar();
         // Busca a lista de doadores interessados neste produto específico
-        List<Doador> doadores = dao.buscarObservadoresDoProduto(this.prodId, conexao);
+        List<Observador> observadores = dao.buscarObservadoresDoProduto(this.prodId, conexao);
 
-        for (Doador d : doadores) {
+        for (Observador d : observadores) {
             d.update("ALERTA DE ESTOQUE: O produto '" + this.prodNome +
                     "' atingiu o nível crítico (" + this.prodQuant + " unidades).");
         }

@@ -1,8 +1,8 @@
 package DOARC.mvc.model;
 
-import DOARC.mvc.observer.ObservadorDonatario;
+import DOARC.mvc.observer.Observador;
 
-public class Doador implements ObservadorDonatario {
+public class Doador implements Observador {
     private int id;
     private String nome;
     private String email;
