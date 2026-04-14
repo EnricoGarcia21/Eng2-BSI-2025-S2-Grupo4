@@ -2,6 +2,7 @@ package DOARC.mvc.dao;
 
 import DOARC.mvc.model.Doador;
 import DOARC.mvc.model.Produto;
+import DOARC.mvc.observer.Observador;
 import DOARC.mvc.util.Conexao;
 import org.springframework.stereotype.Repository;
 
@@ -121,8 +122,8 @@ public class ProdutoDAO {
         }
     }
 
-    public List<Doador> buscarObservadoresDoProduto(int prodId, Conexao conexao) {
-        List<Doador> lista = new ArrayList<>();
+    public List<Observador> buscarObservadoresDoProduto(int prodId, Conexao conexao) {
+        List<Observador> lista = new ArrayList<>();
         String sql = "SELECT d.DOA_ID, d.DOA_NOME, d.DOA_EMAIL FROM Doadores d " +
                 "JOIN Produto_Observador po ON d.DOA_ID = po.DOA_ID " +
                 "WHERE po.PROD_ID = ?";
